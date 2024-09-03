@@ -64,6 +64,11 @@ export default {
           title: 'Inspire',
           to: '/inspire',
         },
+        {
+          icon: 'mdi-account-multiple',
+          title: 'Usuarios',
+          to: 'usuarios',
+        }
       ],
       miniVariant: false,
       right: true,
