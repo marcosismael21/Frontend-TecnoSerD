@@ -6,12 +6,27 @@
                     <v-card-title class="d-flex align-center pe-2">
                         <v-icon icon="mdi-account-circle"></v-icon> &nbsp;
                         Lista de Usuarios
-
                         <v-spacer></v-spacer>
-
-                        <v-text-field v-model="search" density="compact" label="Buscar" prepend-inner-icon="mdi-magnify"
-                            variant="solo-filled" flat hide-details single-line></v-text-field>
                     </v-card-title>
+                    <v-spacer></v-spacer>
+                    <v-divider></v-divider>
+                    <v-card-subtitle>
+                        <v-row>
+                            <v-col cols="3">
+                                <v-btn color="primary" @click="nuevoCliente">
+                                    <v-icon left>mdi-plus</v-icon>
+                                    Añadir Cliente
+                                </v-btn>
+                            </v-col>
+
+                            <v-col cols="6">
+                                <v-text-field v-model="search" density="compact" label="Buscar"
+                                    prepend-inner-icon="mdi-magnify" variant="solo-filled" flat hide-details
+                                    single-line>
+                                </v-text-field>
+                            </v-col>
+                        </v-row>
+                    </v-card-subtitle>
 
                     <v-divider></v-divider>
 
@@ -53,6 +68,24 @@ export default {
         } catch (error) {
             console.error('Error fetching usuarios:', error);
             return { usuario: [] };
+        }
+    },
+    watch: {
+        $route(to, from) {
+            if (to.fullPath !== from.fullPath) {
+                this.loadUsuarios();
+            }
+        }
+    },
+    methods: {
+        async loadUsuarios() {
+            try {
+                const { data } = await this.$axios.get('/usuario');
+                this.usuario = data;
+            } catch (error) {
+                console.error('Error fetching usuarios:', error);
+                this.usuario = [];
+            }
         }
     },
     data() {
