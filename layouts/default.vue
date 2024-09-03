@@ -1,5 +1,5 @@
 <template>
-  <v-app dark>
+  <v-app >
     <v-navigation-drawer v-model="drawer" :mini-variant="miniVariant" :clipped="clipped" fixed app>
       <!-- botones del nav-->
       <v-list>
@@ -51,7 +51,7 @@ export default {
   data() {
     return {
       clipped: true,
-      drawer: false,
+      drawer: true,
       fixed: true,
       items: [
         {
