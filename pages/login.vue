@@ -34,6 +34,9 @@
 
 
 <script>
+import axios from 'axios';
+import Cookies from 'js-cookie';
+
 export default {
     layout: 'loginLayout',
     data: () => ({
@@ -47,10 +50,10 @@ export default {
         }
     }),
     methods: {
-        login() {
+        async login() {
             this.validateFields();
             if (this.nombreErrors.length === 0 && this.passErrors.length === 0) {
-                this.$axios.post('/usuario/login', this.logg)
+                this.$axios.post('/usuario/login', this.logg, { withCredentials: true })
                     .then((response) => {
                         const {
                             ok,
@@ -59,10 +62,12 @@ export default {
                         } = response.data;
 
                         if (ok) {
-                            console.log(ok, " a")
+                            /*console.log(ok, " a")
                             console.log('Login exitoso:', userData.nombre);
                             this.errorMessage = ''; // Limpia el mensaje de error si es exitoso
-                            this.$router.push('inspire');
+                            this.$router.push('inspire');*/
+                            Cookies.set('token', response.data.token, { expires: response.data.expiresIn / (24 * 60 * 60) });
+                            this.$router.push('inspire')
                         } else {
                             console.log(ok, " b")
                             this.errorMessage = mensage;
