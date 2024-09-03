@@ -13,16 +13,15 @@
                     <v-card-subtitle>
                         <v-row>
                             <v-col cols="3">
-                                <v-btn color="primary" @click="nuevoCliente">
+                                <v-btn color="primary" @click="nuevoUsuario">
                                     <v-icon left>mdi-plus</v-icon>
-                                    Añadir Cliente
+                                    Añadir Usuarios
                                 </v-btn>
                             </v-col>
 
                             <v-col cols="6">
                                 <v-text-field v-model="search" density="compact" label="Buscar"
-                                    prepend-inner-icon="mdi-magnify" variant="solo-filled" flat hide-details
-                                    single-line>
+                                    prepend-inner-icon="mdi-magnify" variant="outlined" flat hide-details single-line>
                                 </v-text-field>
                             </v-col>
                         </v-row>
@@ -52,14 +51,20 @@
                             </v-btn>
                         </template>
                     </v-data-table>
-
                 </v-card>
             </v-col>
         </v-row>
+        <!-- Dialogos-->
+        <v-dialog v-model="dialogNuevoUsuario" max-width="600px">
+            <nuevo-usuario @close="dialogNuevoUsuario = false" @saved="fetchUsuarios"></nuevo-usuario>
+        </v-dialog>
     </v-container>
 </template>
 
 <script>
+
+import NuevoUsuario from '~/pages/usuarios/crearUsuario.vue';
+
 export default {
     async asyncData({ $axios }) {
         try {
@@ -86,7 +91,23 @@ export default {
                 console.error('Error fetching usuarios:', error);
                 this.usuario = [];
             }
-        }
+        },
+        nuevoUsuario() {
+            //this.$router.push({ name: 'usuarios-crearUsuario' })
+            this.dialogNuevoUsuario = true
+        },
+        fetchUsuarios() {
+            this.$axios.get('/usuario')
+                .then(response => {
+                    this.usuario = response.data;
+                })
+                .catch(error => {
+                    console.error('Error fetching empleados:', error);
+                });
+        },
+    },
+    components: {
+        NuevoUsuario,
     },
     data() {
         return {
@@ -98,6 +119,7 @@ export default {
                 { text: 'Rol', value: 'idrol' },
                 { text: 'Acciones', value: 'acciones', sortable: false },
             ],
+            dialogNuevoUsuario: false,
         };
     },
 }
