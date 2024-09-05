@@ -40,13 +40,13 @@
                             {{ item.idrol }}
                         </template>
                         <template v-slot:item.acciones="{ item }">
-                            <v-btn icon @click="verCliente(item.id)">
+                            <v-btn icon @click="verUsuario(item.id)">
                                 <v-icon>mdi-eye</v-icon>
                             </v-btn>
-                            <v-btn icon @click="editarCliente(item.id)">
+                            <v-btn icon @click="editarUsuario(item.id)">
                                 <v-icon>mdi-pencil</v-icon>
                             </v-btn>
-                            <v-btn icon @click="eliminarCliente(item.id)">
+                            <v-btn icon @click="eliminarUsuario(item.id)">
                                 <v-icon>mdi-delete</v-icon>
                             </v-btn>
                         </template>
@@ -54,16 +54,27 @@
                 </v-card>
             </v-col>
         </v-row>
-        <!-- Dialogos-->
+        <!-- Dialogos para crear usuario-->
         <v-dialog v-model="dialogNuevoUsuario" max-width="600px">
             <nuevo-usuario @close="dialogNuevoUsuario = false" @saved="fetchUsuarios"></nuevo-usuario>
+        </v-dialog>
+        <!-- Dialogos para ver usuario-->
+        <v-dialog v-model="dialogDetalleUsuario" max-width="600px">
+            <detalle-usuario :id="usuarioSeleccionado.id" @close="dialogDetalleUsuario = false"></detalle-usuario>
+        </v-dialog>
+        <!-- Dialogos para editar usuario-->
+        <v-dialog v-model="dialogEditarUsuario" max-width="600px">
+            <editar-usuario :id="usuarioSeleccionado.id" @close="dialogEditarUsuario = false"
+                @saved="fetchUsuarios"></editar-usuario>
         </v-dialog>
     </v-container>
 </template>
 
 <script>
 
-import NuevoUsuario from '~/pages/usuarios/crearUsuario.vue';
+import NuevoUsuario from '~/pages/usuarios/crearUsuario.vue'
+import DetalleUsuario from '~/pages/usuarios/show/[id].vue'
+import EditarUsuario from '~/pages/usuarios/editarUsuario.vue'
 
 export default {
     async asyncData({ $axios }) {
@@ -82,6 +93,23 @@ export default {
             }
         }
     },
+    data() {
+        return {
+            search: '',
+            usuario: [],
+            headers: [
+                { text: 'ID', value: 'id' },
+                { text: 'Nombre', value: 'nombres' },
+                { text: 'Rol', value: 'idrol' },
+                { text: 'Acciones', value: 'acciones', sortable: false },
+            ],
+            //variables para activar los modales
+            dialogNuevoUsuario: false,
+            dialogEditarUsuario: false,
+            dialogDetalleUsuario: false,
+            usuarioSeleccionado: false,
+        };
+    },
     methods: {
         async loadUsuarios() {
             try {
@@ -93,8 +121,26 @@ export default {
             }
         },
         nuevoUsuario() {
-            //this.$router.push({ name: 'usuarios-crearUsuario' })
             this.dialogNuevoUsuario = true
+        },
+        verUsuario(id) {
+            this.usuarioSeleccionado = this.usuario.find(e => e.id === id) || {};
+            this.dialogDetalleUsuario = true
+        },
+        editarUsuario(id) {
+            this.usuarioSeleccionado = this.usuario.find(e => e.id === id) || {};
+            this.dialogEditarUsuario = true
+        },
+        eliminarUsuario(id) {
+            if (confirm("¿Estás seguro de que quieres eliminar este Usuario?")) {
+                this.$axios.delete(`/usuario/${id}`)
+                    .then(() => {
+                        this.usuario = this.usuario.filter(usuarios => usuarios.id !== id);
+                    })
+                    .catch(error => {
+                        console.error('Error eliminando al Usuario:', error);
+                    });
+            }
         },
         fetchUsuarios() {
             this.$axios.get('/usuario')
@@ -108,19 +154,8 @@ export default {
     },
     components: {
         NuevoUsuario,
-    },
-    data() {
-        return {
-            search: '',
-            usuario: [],
-            headers: [
-                { text: 'ID', value: 'id' },
-                { text: 'Nombre', value: 'nombres' },
-                { text: 'Rol', value: 'idrol' },
-                { text: 'Acciones', value: 'acciones', sortable: false },
-            ],
-            dialogNuevoUsuario: false,
-        };
+        DetalleUsuario,
+        EditarUsuario,
     },
 }
 </script>
