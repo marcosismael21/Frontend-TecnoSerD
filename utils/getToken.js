@@ -12,5 +12,6 @@
 export const asyncData = async (context) => {
     return context.$axios.get('http://localhost:3010/api/v1/auth/login').then(response => {
         return response.token
+        console.log(response.token)
     })
-}
+} 
