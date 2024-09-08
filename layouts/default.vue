@@ -1,5 +1,5 @@
 <template>
-  <v-app >
+  <v-app>
     <v-navigation-drawer v-model="drawer" :mini-variant="miniVariant" :clipped="clipped" fixed app>
       <!-- botones del nav-->
       <v-list>
@@ -18,11 +18,11 @@
       <v-btn icon @click.stop="miniVariant = !miniVariant">
         <v-icon>mdi-{{ `chevron-${miniVariant ? 'right' : 'left'}` }}</v-icon>
       </v-btn>
-      <!-- donde ira el boton de cambio de tema-->
+      <!-- Botones de cambio de tema -->
       <v-spacer />
-      <v-btn icon @click.stop="rightDrawer = !rightDrawer">
-        <v-icon>mdi-menu</v-icon>
-      </v-btn>
+      <v-btn @click="toggleTheme":color="isDark ? 'white' : 'black'" icon>
+      <v-icon>{{ isDark ? 'mdi-white-balance-sunny' : 'mdi-weather-night' }}</v-icon>
+    </v-btn>
     </v-app-bar>
     <v-main>
       <v-container>
@@ -50,6 +50,7 @@ export default {
   name: 'DefaultLayout',
   data() {
     return {
+      isDark:this.$vuetify.theme.dark,
       clipped: true,
       drawer: true,
       fixed: true,
@@ -120,10 +121,14 @@ export default {
         to: 'canal',
     },*/
 ],
-      miniVariant: false,
-      right: true,
-      rightDrawer: false,
-      title: 'Vuetify.js',
+miniVariant: false,
+right: true,
+rightDrawer: false,
+title: 'Vuetify.js',   
+  methods: {
+    toggleTheme() {
+      this.isDark = !this.isDark;
+      this.$vuetify.theme.dark = this.isDark;
     }
   },
 }
