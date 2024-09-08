@@ -72,6 +72,11 @@ export default {
           icon: 'mdi-account-multiple',
           title: 'Usuarios',
           to: 'usuarios',
+        },
+        {
+          icon: 'mdi-store',
+          title: 'Comercios',
+          to: 'comercio',
         }
       ],
     }
