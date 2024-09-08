@@ -54,33 +54,77 @@ export default {
       clipped: true,
       drawer: true,
       fixed: true,
-      miniVariant: false,
-      right: true,
-      rightDrawer: false,
-      items: [
-        {
-          icon: 'mdi-apps',
-          title: 'Welcome',
-          to: '/',
-        },
-        {
-          icon: 'mdi-chart-bubble',
-          title: 'Inspire',
-          to: '/inspire',
-        },
-        {
-          icon: 'mdi-account-multiple',
-          title: 'Usuarios',
-          to: 'usuarios',
-        },
-        {
-          icon: 'mdi-store',
-          title: 'Comercios',
-          to: 'comercio',
-        }
-      ],
-    }
-  },
+      items: [ 
+    {
+        icon: 'mdi-home',
+        title: 'Welcome',
+        to: '/',
+    },
+    {
+        icon: 'mdi-lightbulb',
+        title: 'Inspire',
+        to: '/inspire',
+    },
+    {
+        icon: 'mdi-account-multiple',
+        title: 'Usuarios',
+        to: 'usuarios',
+    },
+    {
+        icon: 'mdi-map-marker',
+        title: 'Ciudades',
+        to: 'ciudad',
+    },
+    {
+        icon: 'mdi-truck',
+        title: 'Proveedores',
+        to: 'proveedores',
+    },  
+    {
+        icon: 'mdi-laptop',
+        title: 'Tipos de Equipo',
+        to: 'tipoEquipo',
+    }, 
+    /*{
+        icon: 'mdi-clipboard-check',
+        title: 'Asignación de Equipo',
+        to: 'asignacion-equipo',
+    },
+    {
+        icon: 'mdi-wrench',
+        title: 'Asignación de Técnico',
+        to: 'asignacion-tecnico',
+    },
+    {
+        icon: 'mdi-store',
+        title: 'Comercio',
+        to: 'comercio',
+    }, 
+    {
+        icon: 'mdi-billboard',
+        title: 'Publicidad',
+        to: 'publicidad',
+    },
+    {
+        icon: 'mdi-crown',
+        title: 'Regalías',
+        to: 'regalias',
+    },
+    {
+        icon: 'mdi-wrench-outline',
+        title: 'Servicios',
+        to: 'servicios',
+    },
+    {
+        icon: 'mdi-cast',
+        title: 'Canal',
+        to: 'canal',
+    },*/
+],
+miniVariant: false,
+right: true,
+rightDrawer: false,
+title: 'Vuetify.js',   
   methods: {
     toggleTheme() {
       this.isDark = !this.isDark;
@@ -89,4 +133,3 @@ export default {
   },
 }
 </script>
-
