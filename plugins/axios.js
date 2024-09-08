@@ -1,14 +1,14 @@
 import Cookies from 'js-cookie';
 
 export default function ({ $axios }) {
-  $axios.onRequest(config => {
-    if (process.client) {
-      const token = Cookies.get('token');
+  if (process.client) {
+    $axios.defaults.withCredentials = true;
+    $axios.onRequest(config => {
+      const token = document.cookie.split('; ').find(row => row.startsWith('token='));
       if (token) {
-        config.headers.common['Authorization'] = `Bearer ${token}`;
+        const tokenValue = token.split('=')[1];
+        config.headers.common['Authorization'] = `Bearer ${tokenValue}`;
       }
-    }
-  });
+    });
+  }
 }
-
-  
