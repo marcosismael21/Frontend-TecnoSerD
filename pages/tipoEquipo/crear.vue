@@ -7,13 +7,16 @@
             <v-form ref="form" lazy-validation>
                 <v-row>
                     <v-col cols="12">
-                        <v-text-field v-model="nuevoTipoEquipo.nombre" label="Nombre del Tipo de Equipo" :rules="[rules.required]" required></v-text-field>
+                        <v-text-field v-model="nuevoTipoEquipo.nombre" label="Nombre del Tipo de Equipo"
+                            :rules="[rules.required]" required></v-text-field>
                     </v-col>
                     <v-col cols="12">
-                        <v-select v-model="nuevoTipoEquipo.idProveedor" :items="proveedores" item-text="nombre" item-value="id" label="Proveedor" required></v-select>
+                        <v-select v-model="nuevoTipoEquipo.idProveedor" :items="proveedores" item-text="nombre"
+                            item-value="id" label="Proveedor" required></v-select>
                     </v-col>
                     <v-col cols="12">
-                        <v-select v-model="nuevoTipoEquipo.estado" :items="estadoOptions" item-text="text" item-value="value" label="Estado" required></v-select>
+                        <v-select v-model="nuevoTipoEquipo.estado" :items="estadoOptions" item-text="text"
+                            item-value="value" label="Estado" required></v-select>
                     </v-col>
                 </v-row>
             </v-form>
@@ -32,7 +35,7 @@ export default {
         return {
             nuevoTipoEquipo: {
                 nombre: '',
-                idProveedor: null,
+                idProveedor: '',
                 estado: ''
             },
             proveedores: [],
@@ -52,7 +55,7 @@ export default {
         resetForm() {
             this.nuevoTipoEquipo = {
                 nombre: '',
-                idProveedor: null,
+                idProveedor: '',
                 estado: ''
             }
             this.$refs.form.resetValidation();
@@ -63,7 +66,7 @@ export default {
         },
         saveTipoEquipo() {
             if (this.$refs.form.validate()) {
-                this.$axios.post('/tipoEquipo', this.nuevoTipoEquipo)
+                this.$axios.post('/tipoequipo', this.nuevoTipoEquipo)
                     .then(response => {
                         this.$emit('saved');
                         this.closeDialog();

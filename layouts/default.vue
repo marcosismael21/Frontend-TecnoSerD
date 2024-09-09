@@ -23,7 +23,7 @@
       </v-list>
     </v-navigation-drawer>
     <!-- v-dialog de cierre de sesión -->
-    <v-dialog v-model="logoutDialog" max-width="290">
+    <v-dialog v-model="logoutDialog" max-width="350">
       <v-card>
         <v-card-title class="headline">Confirmar cierre de sesión</v-card-title>
         <v-card-text>¿Estás seguro de que deseas cerrar sesión?</v-card-text>
@@ -93,9 +93,9 @@ export default {
           to: 'comercio',
         },
         {
-          icon: 'mdi-laptop',
-          title: 'Tipos de Equipo',
-          to: 'tipoEquipo',
+          icon: 'mdi-package',
+          title: 'Registro de Equipos',
+          to: 'equipos',
         },
         {
           icon: 'mdi-account-multiple',

@@ -16,6 +16,10 @@
                                     <v-icon left>mdi-plus</v-icon>
                                     Añadir Usuarios
                                 </v-btn>
+                                <v-btn color="primary" @click="listRoles">
+                                    <v-icon left>mdi-account-key</v-icon>
+                                    Roles
+                                </v-btn>
                             </v-col>
 
                             <v-col cols="3">
@@ -200,6 +204,9 @@ export default {
         },
         nuevoUsuario() {
             this.dialogNuevoUsuario = true;
+        },
+        listRoles() {
+            this.$router.push('rol')
         },
         verUsuario(id) {
             this.usuarioSeleccionado = this.usuario.find(e => e.id === id) || {};
