@@ -37,7 +37,7 @@
     <v-app-bar :clipped-left="clipped" fixed app :color="isDark ? 'primary' : 'secondary'">
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
       <v-btn icon @click.stop="miniVariant = !miniVariant">
-        <v-icon>mdi-{{ `chevron-${miniVariant ? 'right' : 'left'}` }}</v-icon>
+        <v-icon>mdi-{{ `chevron - ${miniVariant ? 'right' : 'left'}` }}</v-icon>
       </v-btn>
       <v-spacer />
       <v-btn @click="toggleTheme" :color="isDark ? 'white' : 'black'" icon>
