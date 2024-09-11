@@ -11,6 +11,25 @@
             <v-list-item-title>{{ item.title }}</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
+        <!-- Botón desplegable de Parámetros -->
+        <v-list-group prepend-icon="mdi-cog" no-action>
+          <template v-slot:activator>
+            <v-list-item>
+              <v-list-item-content>
+                <v-list-item-title>Parámetros</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </template>
+          <!-- Botones anidados en Parámetros -->
+          <v-list-item v-for="(submenu, i) in parametrosItems" :key="i" :to="submenu.to" router exact>
+            <v-list-item-action>
+              <v-icon>{{ submenu.icon }}</v-icon>
+            </v-list-item-action>
+            <v-list-item-content>
+              <v-list-item-title>{{ submenu.title }}</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+        </v-list-group>
         <!-- Botón de salir -->
         <v-list-item @click="openLogoutDialog">
           <v-list-item-action>
@@ -92,6 +111,23 @@ export default {
           icon: 'mdi-account-multiple',
           title: 'Colaboradores',
           to: 'usuarios',
+        },
+      ],
+      parametrosItems: [
+        {
+          icon: 'mdi-satellite-uplink',
+          title: 'Canal',
+          to: 'canal',
+        },
+        {
+          icon: 'mdi-truck',
+          title: 'Proveedor',
+          to: 'proveedores',
+        },
+        {
+          icon: 'mdi-crown',
+          title: 'Regalía',
+          to: 'regalia',
         },
       ],
     };
