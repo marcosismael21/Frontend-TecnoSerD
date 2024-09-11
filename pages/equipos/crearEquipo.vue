@@ -48,8 +48,8 @@
         </v-card-text>
         <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="yellow" text @click="closeDialog">Cancelar</v-btn>
-            <v-btn color="green" text @click="guardarRegistro">Guardar</v-btn>
+            <v-btn color="red darken-1" text @click="closeDialog">Cancelar</v-btn>
+            <v-btn color="green darken-1" text @click="guardarRegistro">Guardar</v-btn>
         </v-card-actions>
     </v-card>
 </template>
