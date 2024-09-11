@@ -10,15 +10,19 @@
           <v-spacer></v-spacer>
           <v-divider></v-divider>
           <v-card-subtitle>
-            <v-row>
-              <v-col cols="3">
+            <v-row align="center">
+              <v-col cols="9">
+                <v-btn color="primary" @click="regresar">
+                  <v-icon left>mdi-arrow-collapse-left</v-icon>
+                 Regresar
+                </v-btn>
                 <v-btn color="primary" @click="nuevoRol">
                   <v-icon left>mdi-plus</v-icon>
                   Añadir Rol
                 </v-btn>
               </v-col>
 
-              <v-col cols="6">
+              <v-col cols="3">
                 <v-text-field
                   v-model="search"
                   density="compact"
@@ -166,6 +170,9 @@ export default {
         .catch((error) => {
           console.error('Error fetching rol:', error)
         })
+    },
+    regresar() {
+      this.$router.push('usuarios')
     },
   },
   components: {
