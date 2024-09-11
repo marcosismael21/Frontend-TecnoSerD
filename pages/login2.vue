@@ -1,18 +1,15 @@
 <template>
-    <v-row no-gutters class="auth-wrapper" align="center" justify="space-between" style="height: 100vh;">
-      <!-- División izquierda con la imagen centrada -->
-      <div class="left-pane d-none d-md-flex" style="flex: 1; background-color: #f0f0f0; align-items: center; justify-content: center; display: flex;">
-        <v-img max-width="865" src="/login-bg-BprgzFH_.png" class="auth-illustration mt-16 mb-2" />
-      </div>
+    <v-row no-gutters class="auth-wrapper" align="center" justify="center" style="height: 100vh; background: rgb(184, 233, 255);">
+      <!-- División con la tarjeta de inicio de sesión centrada -->
+      <div class="login-pane" style="display: flex; align-items: center; justify-content: center; width: 100%;">
+        <v-card flat max-width="400" class="pa-4 elevation-12" style="border-radius: 16px;">
+          <!-- Logo en la parte superior izquierda -->
+          <v-card-text class="d-flex align-start mb-4">
+            <v-img src="/Logo.jpg" max-width="150" />
+          </v-card-text>
   
-      <!-- Logo en la esquina superior derecha -->
-      <v-img src="/Logo.jpg" max-width="150" style="position: absolute; top: 20px; right: 20px;" />
-  
-      <!-- Columna derecha con la tarjeta de inicio de sesión -->
-      <v-col cols="12" md="4" class="d-flex align-center justify-center">
-        <v-card flat max-width="500" class="mt-12 mt-sm-0 pa-4">
-            <v-card-text class="text-center">
-            <h4 class="text-h4 mb-1">
+          <v-card-text class="text-center">
+            <h4 class="text-h4 mb-3">
               BIENVENIDO
             </h4>
           </v-card-text>
@@ -23,18 +20,18 @@
                 <!-- Campo de correo electrónico -->
                 <v-col cols="12">
                   <v-text-field v-model="logg.usuario" label="Nombre de Usuario" density="compact"
-                    placeholder="Ingrese su nombre de usuario" prepend-inner-icon="mdi-account"
-                    variant="outlined" :error-messages="nombreErrors" required>
+                                placeholder="Ingrese su nombre de usuario" prepend-inner-icon="mdi-account"
+                                variant="outlined" :error-messages="nombreErrors" required>
                   </v-text-field>
                 </v-col>
   
                 <!-- Campo de contraseña -->
                 <v-col cols="12">
                   <v-text-field v-model="logg.pass" label="Contraseña"
-                    :append-inner-icon="visible ? 'mdi-eye-off' : 'mdi-eye'"
-                    :type="visible ? 'text' : 'password'" density="compact" placeholder="Contraseña"
-                    prepend-inner-icon="mdi-lock-outline" variant="outlined"
-                    @click:append-inner="visible = !visible" :error-messages="passErrors" required>
+                                :append-inner-icon="visible ? 'mdi-eye-off' : 'mdi-eye'"
+                                :type="visible ? 'text' : 'password'" density="compact" placeholder="Contraseña"
+                                prepend-inner-icon="mdi-lock-outline" variant="outlined"
+                                @click:append-inner="visible = !visible" :error-messages="passErrors" required>
                   </v-text-field>
                 </v-col>
   
@@ -51,33 +48,30 @@
             </v-form>
           </v-card-text>
         </v-card>
-      </v-col>
+      </div>
     </v-row>
   </template>
   
   <style scoped>
   .auth-wrapper {
     display: flex;
-    position: relative;
   }
   
-  .left-pane {
+  .login-pane {
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 100%;
   }
   
-  .right-pane {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 16px;
+  .text-center {
+    text-align: center;
   }
-  
   </style>
   
-  </style>
   
+
+
 
 
 <script>
