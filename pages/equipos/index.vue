@@ -77,7 +77,7 @@
         <v-dialog v-model="dialogEliminarConfirm" max-width="400" persistent>
             <v-card>
                 <v-card-title class="text-h6">Confirmar Eliminación</v-card-title>
-                <v-card-text>¿Estás seguro de que deseas eliminar este equipo?</v-card-text>
+                <v-card-text>¿Estás seguro de que deseas eliminar este registro de equipo?</v-card-text>
                 <v-spacer></v-spacer>
                 <v-card-actions>
                     <v-btn color="red darken-1" text @click="dialogEliminarConfirm = false">Cancelar</v-btn>
