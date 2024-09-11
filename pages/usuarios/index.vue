@@ -203,7 +203,7 @@ export default {
 
         } catch (error) {
             console.error('Error fetching usuarios:', error);
-            return { usuario: [] };
+            return { usuario: [], usuarioFalse: [] };
         }
     },
     watch: {
