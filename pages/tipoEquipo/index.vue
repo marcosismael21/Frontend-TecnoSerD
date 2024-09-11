@@ -64,6 +64,35 @@
       </editar>
     </v-dialog>
 
+     <!-- Diálogos eliminar -->
+
+    <v-dialog v-model="dialogEliminarConfirm" max-width="400" persistent>
+      <v-card>
+        <v-card-title class="text-h6">Confirmar Eliminación</v-card-title>
+        <v-card-text>¿Estás seguro de que deseas eliminar este equipo?</v-card-text>
+        <v-spacer></v-spacer>
+        <v-card-actions>
+          <v-btn color="red darken-1" text @click="dialogEliminarConfirm = false">Cancelar</v-btn>
+          <v-btn color="green darken-1" text @click="confirmarEliminacion">Eliminar</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog v-model="dialogEliminar" max-width="400" persistent>
+      <v-card>
+        <v-card-title class="text-h6">Eliminando equipo...</v-card-title>
+        <v-card-subtitle>
+          <v-row align="center" class="ma-0 pa-0">
+            <v-col cols="12" class="d-flex align-center">
+              <span>Por favor, espere...</span>
+              <v-spacer></v-spacer>
+              <v-progress-circular indeterminate color="primary" size="64" width="4" class="mr-4"></v-progress-circular>
+            </v-col>
+          </v-row>
+        </v-card-subtitle>
+      </v-card>
+    </v-dialog>
+
 
   </v-container>
 </template>
@@ -99,6 +128,8 @@ export default {
       ],
       dialogNuevoTipoEquipo: false,
       dialogEditarTipoEquipo: false,
+      dialogEliminar: false,
+      dialogEliminarConfirm: false,
       tipoEquipoSeleccionado: false,
     };
   },
@@ -111,16 +142,26 @@ export default {
       this.dialogEditarTipoEquipo = true;
     },
     eliminarTipoEquipo(id) {
-      if (confirm('¿Estás seguro de que quieres eliminar este tipo de equipo?')) {
-        this.$axios
-          .delete(`/tipoequipo/${id}`)
-          .then(() => {
-            this.tiposEquipo = this.tiposEquipo.filter((tipo) => tipo.id !== id);
-          })
-          .catch((error) => {
-            console.error('Error eliminando tipo de equipo:', error);
-          });
-      }
+      this.tipoEquipoSeleccionado = this.tiposEquipo.find((e) => e.id === id) || {};
+      this.dialogEliminarConfirm = true;
+    },
+    confirmarEliminacion() {
+      this.dialogEliminarConfirm = false;
+      this.dialogEliminar = true;  // Mostrar el modal de carga
+
+      this.$axios
+        .delete(`/tipoequipo/${this.tipoEquipoSeleccionado.id}`)
+        .then(() => {
+          this.tiposEquipo = this.tiposEquipo.filter((tiposEquipo) => tiposEquipo.id !== this.tipoEquipoSeleccionado.id);
+        })
+        .catch((error) => {
+          console.error("Error eliminando el tipos de equipo:", error);
+        })
+        .finally(() => {
+          setTimeout(() => {
+            this.dialogEliminar = false;  // Cerrar el modal de carga después de 3 segundos
+          }, 2000);
+        });
     },
     getEstadoText(estado) {
       const estadoOption = this.estadoOptions.find(option => option.value === estado);
