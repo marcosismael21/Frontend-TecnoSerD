@@ -1,7 +1,7 @@
 <template>
     <v-card>
         <v-card-title>
-             Registro de Equipo
+            Registro de Equipo
         </v-card-title>
         <v-card-text>
             <v-form ref="form" v-model="valid" lazy-validation>
@@ -27,14 +27,10 @@
                             required></v-text-field>
                     </v-col>
                     <v-col cols="6">
-                        <v-select v-model="nuevoRegistro.comodin" :items="comodinOptions" item-text="text"
-                            item-value="value" label="Comodín" required></v-select>
-                    </v-col>
-                    <v-col cols="6">
                         <v-select v-model="nuevoRegistro.estado" :items="estadoOptions" item-text="text"
                             item-value="value" label="Estado" required></v-select>
                     </v-col>
-                    <v-col cols="12">
+                    <v-col cols="6">
                         <v-menu ref="menu" v-model="menu" :close-on-content-click="false" :nudge-right="40"
                             transition="scale-transition" offset-y min-width="auto">
                             <template v-slot:activator="{ on, attrs }">
@@ -42,7 +38,8 @@
                                     prepend-icon="mdi-calendar" readonly v-bind="attrs" v-on="on"></v-text-field>
                             </template>
                             <v-date-picker v-model="nuevoRegistro.fechaLlegada" @input="menu = false"></v-date-picker>
-                        </v-menu> </v-col>
+                        </v-menu>
+                    </v-col>
                 </v-row>
             </v-form>
         </v-card-text>
@@ -67,17 +64,13 @@ export default {
                 pin: '',
                 puk: '',
                 fechaLlegada: '',
-                comodin: '',
+                comodin: false,
                 estado: '',
             },
             tipoEquipo: [],
             estadoOptions: [
                 { text: "Equipo Bueno", value: true },
                 { text: "Equipo Dañado", value: false },
-            ],
-            comodinOptions: [
-                { text: "Sí", value: true },
-                { text: "No", value: false },
             ],
             rules: {
                 required: value => !!value || 'Requerido.',
@@ -96,7 +89,7 @@ export default {
                 pin: '',
                 puk: '',
                 fechaLlegada: '',
-                comodin: '',
+                comodin: false,
                 estado: '',
             }
             this.$refs.form.resetValidation();
