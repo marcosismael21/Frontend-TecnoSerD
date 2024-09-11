@@ -118,13 +118,13 @@ export default {
       headers: [
         { text: 'ID', value: 'id' },
         { text: 'Nombre', value: 'nombre' },
-        { text: 'ID Proveedor', value: 'idProveedor' },
+        { text: 'Proveedor', value: 'idProveedor' },
         { text: 'Estado', value: 'estado' },
         { text: 'Acciones', value: 'acciones' },
       ],
       estadoOptions: [
-        { text: 'Activo', value: true },
-        { text: 'Inactivo', value: false },
+        { text: 'Activo', value: 1 },
+        { text: 'Inactivo', value: 0 },
       ],
       dialogNuevoTipoEquipo: false,
       dialogEditarTipoEquipo: false,
