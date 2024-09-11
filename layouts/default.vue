@@ -108,6 +108,11 @@ export default {
           to: 'equipos',
         },
         {
+          icon: 'mdi-archive',
+          title: 'Comodin',
+          to: 'comodin',
+        },
+        {
           icon: 'mdi-account-multiple',
           title: 'Colaboradores',
           to: 'usuarios',
