@@ -31,8 +31,11 @@ export default {
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   plugins: [
-    '~/plugins/axios.js',
-    { src: '~/plugins/apexcharts.js', mode: 'client' }
+    /*'~/plugins/axios.js',
+    { src: '~/plugins/apexcharts.js', mode: 'client' },
+    { src: '~/plugins/apexcharts.js', mode: 'client' }*/
+     '~/plugins/axios.js',
+     { src: '~/plugins/apexcharts.client.js', mode: 'client' }
   ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
