@@ -26,11 +26,7 @@
                         <v-text-field v-model="nuevoRegistro.puk" label="N° de PUK" :rules="[rules.required]"
                             required></v-text-field>
                     </v-col>
-                    <v-col cols="6">
-                        <v-select v-model="nuevoRegistro.estado" :items="estadoOptions" item-text="text"
-                            item-value="value" label="Estado" required></v-select>
-                    </v-col>
-                    <v-col cols="6">
+                    <v-col cols="12">
                         <v-menu ref="menu" v-model="menu" :close-on-content-click="false" :nudge-right="40"
                             transition="scale-transition" offset-y min-width="auto">
                             <template v-slot:activator="{ on, attrs }">
@@ -57,6 +53,7 @@ export default {
         return {
             valid: false,
             menu: false,
+            tipoEquipo: [],
             nuevoRegistro: {
                 idTipoEquipo: '',
                 noserie: '',
@@ -64,14 +61,9 @@ export default {
                 pin: '',
                 puk: '',
                 fechaLlegada: '',
-                comodin: false,
-                estado: '',
+                comodin: true,
+                estado: true,
             },
-            tipoEquipo: [],
-            estadoOptions: [
-                { text: "Equipo Bueno", value: true },
-                { text: "Equipo Dañado", value: false },
-            ],
             rules: {
                 required: value => !!value || 'Requerido.',
             }
@@ -89,8 +81,8 @@ export default {
                 pin: '',
                 puk: '',
                 fechaLlegada: '',
-                comodin: false,
-                estado: '',
+                comodin: true,
+                estado: true,
             }
             this.$refs.form.resetValidation();
         },

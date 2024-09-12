@@ -14,7 +14,7 @@
               <v-col cols="9">
                 <v-btn color="primary" @click="regresar">
                   <v-icon left>mdi-arrow-collapse-left</v-icon>
-                 Regresar
+                  Regresar
                 </v-btn>
                 <v-btn color="primary" @click="nuevoRol">
                   <v-icon left>mdi-plus</v-icon>
@@ -23,16 +23,8 @@
               </v-col>
 
               <v-col cols="3">
-                <v-text-field
-                  v-model="search"
-                  density="compact"
-                  label="Buscar"
-                  prepend-inner-icon="mdi-magnify"
-                  variant="outlined"
-                  flat
-                  hide-details
-                  single-line
-                >
+                <v-text-field v-model="search" density="compact" label="Buscar" prepend-inner-icon="mdi-magnify"
+                  variant="outlined" flat hide-details single-line>
                 </v-text-field>
               </v-col>
             </v-row>
@@ -65,22 +57,42 @@
     <!-- Dialogos para crear Ciudad-->
 
     <v-dialog v-model="dialogNuevoRol" max-width="600px">
-      <nuevo-rol
-        @close="dialogNuevoRol = false"
-        @saved="fetchRoles"
-      ></nuevo-rol>
+      <nuevo-rol @close="dialogNuevoRol = false" @saved="fetchRoles"></nuevo-rol>
     </v-dialog>
 
-    
-    
     <v-dialog v-model="dialogEditarRol" max-width="600px">
-      <editar-rol
-        :id="rolSeleccionada.id"
-        @close="dialogEditarRol = false"
-        @saved="fetchRoles"
-      ></editar-rol>
+      <editar-rol :id="rolSeleccionada.id" @close="dialogEditarRol = false" @saved="fetchRoles"></editar-rol>
     </v-dialog>
-    
+
+    <!--Dialos de eliminar-->
+
+    <v-dialog v-model="dialogEliminarConfirm" max-width="400" persistent>
+      <v-card>
+        <v-card-title class="text-h6">Confirmar Eliminación</v-card-title>
+        <v-card-text>¿Estás seguro de que deseas eliminar este rol?</v-card-text>
+        <v-spacer></v-spacer>
+        <v-card-actions>
+          <v-btn color="red darken-1" text @click="dialogEliminarConfirm = false">Cancelar</v-btn>
+          <v-btn color="green darken-1" text @click="confirmarEliminacion">Eliminar</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog v-model="dialogEliminar" max-width="400" persistent>
+      <v-card>
+        <v-card-title class="text-h6">Eliminando rol...</v-card-title>
+        <v-card-subtitle>
+          <v-row align="center" class="ma-0 pa-0">
+            <v-col cols="12" class="d-flex align-center">
+              <span>Por favor, espere...</span>
+              <v-spacer></v-spacer>
+              <v-progress-circular indeterminate color="primary" size="64" width="4" class="mr-4"></v-progress-circular>
+            </v-col>
+          </v-row>
+        </v-card-subtitle>
+      </v-card>
+    </v-dialog>
+
   </v-container>
 </template>
 
@@ -123,6 +135,8 @@ export default {
       //variables para activar los modales
       dialogNuevoRol: false,
       dialogEditarRol: false,
+      dialogEliminar: false,
+      dialogEliminarConfirm: false,
       rolSeleccionada: false,
     }
   },
@@ -150,16 +164,26 @@ export default {
       this.dialogEditarRol = true
     },
     eliminarRol(id) {
-      if (confirm('¿Estás seguro de que quieres eliminar este Rol?')) {
-        this.$axios
-          .delete(`/rol/${id}`)
-          .then(() => {
-            this.rol = this.rol.filter((roles) => roles.id !== id)
-          })
-          .catch((error) => {
-            console.error('Error eliminando Rol:', error)
-          })
-      }
+      this.rolSeleccionada = this.rol.find((e) => e.id === id) || {};
+      this.dialogEliminarConfirm = true;
+    },
+    confirmarEliminacion() {
+      this.dialogEliminarConfirm = false;
+      this.dialogEliminar = true;  // Mostrar el modal de carga
+
+      this.$axios
+        .delete(`/rol/${this.rolSeleccionada.id}`)
+        .then(() => {
+          this.rol = this.rol.filter((roles) => roles.id !== this.rolSeleccionada.id);
+        })
+        .catch((error) => {
+          console.error("Error eliminando el rol:", error);
+        })
+        .finally(() => {
+          setTimeout(() => {
+            this.dialogEliminar = false;  // Cerrar el modal de carga después de 3 segundos
+          }, 2000);
+        });
     },
     fetchRoles() {
       this.$axios

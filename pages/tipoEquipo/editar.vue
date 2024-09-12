@@ -23,8 +23,8 @@
         </v-card-text>
         <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="yellow" text @click="closeDialog">Cancelar</v-btn>
-            <v-btn color="green" text @click="updateEquipo">Guardar</v-btn>
+            <v-btn color="red darken-1" text @click="closeDialog">Cancelar</v-btn>
+            <v-btn color="green darken-1" text @click="updateEquipo">Guardar</v-btn>
         </v-card-actions>
     </v-card>
     <v-alert v-else type="error">No se pudo cargar la información del equipo.</v-alert>
@@ -61,7 +61,7 @@ export default {
     methods: {
         async fetchEquipo() {
             try {
-                const { data } = await this.$axios.get(`/tipoequipo/${ this.id }`);
+                const { data } = await this.$axios.get(`/tipoequipo/${this.id}`);
                 this.equipo = data;
             } catch (error) {
                 console.error('Error fetching equipo by ID:', error);
