@@ -36,7 +36,7 @@
                             {{ item.noserie }}
                         </template>
                         <template v-slot:item.fechaLlegada="{ item }">
-                            {{ item.fechaLlegada }}
+                            {{ formatDate(item.fechaLlegada) }}
                         </template>
                         <template v-slot:item.estado="{ item }">
                             {{ getEstadoText(item.estado) }}
@@ -197,6 +197,9 @@ export default {
                         this.dialogEliminar = false;  // Cerrar el modal de carga después de 3 segundos
                     }, 2000);
                 });
+        },
+        formatDate(fechaLlegada) {
+            return fechaLlegada ? new Date(fechaLlegada).toISOString().slice(0, 10) : '';
         },
         fetchComodin() {
             this.$axios
