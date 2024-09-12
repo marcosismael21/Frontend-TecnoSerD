@@ -5,7 +5,7 @@
                 <v-card>
                     <v-card-title class="d-flex align-center pe-2">
                         <v-icon icon="mdi-account-circle"></v-icon> &nbsp;
-                        Lista de Coalaboradores
+                        Lista de Colaboradores
                     </v-card-title>
                     <v-spacer></v-spacer>
                     <v-divider></v-divider>
