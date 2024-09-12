@@ -95,7 +95,7 @@ export default {
         {
           icon: 'mdi-home',
           title: 'Tablero',
-          to: '/',
+          to: 'tablero',
         },
         {
           icon: 'mdi-store',
