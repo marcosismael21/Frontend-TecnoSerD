@@ -5,7 +5,7 @@ export default {
     extendRoutes(routes, resolve) {
       routes.push({
         path: '',
-        redirect: '/login',
+        redirect: '/login2',
       })
     },
   },

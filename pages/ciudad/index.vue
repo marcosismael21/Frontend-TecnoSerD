@@ -11,14 +11,14 @@
           <v-divider></v-divider>
           <v-card-subtitle>
             <v-row>
-              <v-col cols="3">
+              <v-col cols="9">
                 <v-btn color="primary" @click="nuevoCiudad">
                   <v-icon left>mdi-plus</v-icon>
                   Añadir Ciudad
                 </v-btn>
               </v-col>
 
-              <v-col cols="6">
+              <v-col cols="3">
                 <v-text-field v-model="search" density="compact" label="Buscar" prepend-inner-icon="mdi-magnify"
                   variant="outlined" flat hide-details single-line>
                 </v-text-field>
@@ -29,8 +29,8 @@
           <v-divider></v-divider>
 
           <v-data-table :headers="headers" :items="ciudad" :search="search">
-            <template v-slot:item.id="{ item }">
-              {{ item.id }}
+            <template v-slot:item.nro="{ index }">
+              {{ index + 1 }}
             </template>
             <template v-slot:item.nombre="{ item }">
               {{ item.nombre }}
@@ -60,6 +60,35 @@
       <editar-ciudad :id="ciudadSeleccionada.id" @close="dialogEditarCiudad = false"
         @saved="fetchCiudads"></editar-ciudad>
     </v-dialog>
+
+    <v-dialog v-model="dialogEliminarConfirm" max-width="400" persistent>
+            <v-card>
+                <v-card-title class="text-h6">Confirmar Eliminación</v-card-title>
+                <v-card-text>¿Estás seguro de que deseas eliminar esta ciudad?</v-card-text>
+                <v-spacer></v-spacer>
+                <v-card-actions>
+                    <v-btn color="red darken-1" text @click="dialogEliminarConfirm = false">Cancelar</v-btn>
+                    <v-btn color="green darken-1" text @click="confirmarEliminacion">Eliminar</v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+
+        <v-dialog v-model="dialogEliminar" max-width="400" persistent>
+            <v-card>
+                <v-card-title class="text-h6">Eliminando ciudad...</v-card-title>
+                <v-card-subtitle>
+                    <v-row align="center" class="ma-0 pa-0">
+                        <v-col cols="12" class="d-flex align-center">
+                            <span>Por favor, espere...</span>
+                            <v-spacer></v-spacer>
+                            <v-progress-circular indeterminate color="primary" size="64" width="4"
+                                class="mr-4"></v-progress-circular>
+                        </v-col>
+                    </v-row>
+                </v-card-subtitle>
+            </v-card>
+        </v-dialog>
+
   </v-container>
 </template>
 
@@ -89,7 +118,7 @@ export default {
       search: '',
       ciudad: [],
       headers: [
-        { text: 'ID', value: 'id' },
+        { text: 'N°', value: 'nro' },
         { text: 'Nombre', value: 'nombre' },
         { text: 'Estado', value: 'estado' },
         { text: 'Acciones', value: 'acciones' },
@@ -102,6 +131,8 @@ export default {
       dialogNuevoCiudad: false,
       dialogEditarCiudad: false,
       ciudadSeleccionada: false,
+      dialogEliminar: false,
+      dialogEliminarConfirm: false,
     }
   },
   methods: {
@@ -128,17 +159,27 @@ export default {
       this.dialogEditarCiudad = true
     },
     eliminarCiudad(id) {
-      if (confirm('¿Estás seguro de que quieres eliminar este Ciudad?')) {
-        this.$axios
-          .delete(`/ciudad/${id}`)
-          .then(() => {
-            this.ciudad = this.ciudad.filter((ciudads) => ciudads.id !== id)
-          })
-          .catch((error) => {
-            console.error('Error eliminando al Ciudad:', error)
-          })
-      }
+            this.ciudadSeleccionada = this.ciudad.find((e) => e.id === id) || {};
+            this.dialogEliminarConfirm = true;  // Mostrar el modal de confirmación
     },
+    confirmarEliminacion() {
+      this.dialogEliminarConfirm = false;
+      this.dialogEliminar = true;  // Mostrar el modal de carga
+
+      this.$axios
+        .delete(`/ciudad/${this.ciudadSeleccionada.id}`)
+        .then(() => {
+          this.ciudad = this.ciudad.filter((ciudad) => ciudad.id !== this.ciudadSeleccionada.id);
+        })
+        .catch((error) => {
+          console.error("Error eliminando la ciudad:", error);
+        })
+        .finally(() => {
+          setTimeout(() => {
+            this.dialogEliminar = false;  // Cerrar el modal de carga después de 3 segundos
+          }, 2000);
+        });
+        },
     fetchCiudads() {
       this.$axios
         .get('/ciudad')
