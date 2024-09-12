@@ -7,7 +7,7 @@
             <v-form ref="form" lazy-validation>
                 <v-row>
                     <v-col cols="12">
-                        <v-text-field v-model="equipo.nombre" label="Nombre del Equipo" :rules="[rules.required]"
+                        <v-text-field v-model="equipo.nombre" label="Nombre del Equipo" placeholder="Ej. D2Mini" :rules="[rules.required]"
                             required></v-text-field>
                     </v-col>
                     <v-col cols="12">
