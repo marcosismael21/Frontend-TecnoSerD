@@ -7,7 +7,7 @@
             <v-form ref="form" lazy-validation>
                 <v-row>
                     <v-col cols="6">
-                        <v-text-field v-model="nuevaRegalia.nombre" label="Nombre" :rules="[rules.required]"
+                        <v-text-field v-model="nuevaRegalia.nombre" label="Nombre" placeholder="Ej. Sombrilla":rules="[rules.required]"
                             required></v-text-field>
                     </v-col>
                     <v-col cols="6">
@@ -15,7 +15,7 @@
                             label="Tipo Comercio" required></v-select>
                     </v-col>
                     <v-col cols="6">
-                        <v-text-field v-model="nuevaRegalia.cantidad" label="Cantidad" :rules="[rules.required]"
+                        <v-text-field v-model="nuevaRegalia.cantidad" label="Cantidad" placeholder="Ej. 1":rules="[rules.required]"
                             required></v-text-field>
                     </v-col>
                     <v-col cols="12">
@@ -27,8 +27,8 @@
         </v-card-text>
         <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="yellow" text @click="closeDialog">Cancelar</v-btn>
-            <v-btn color="green" text @click="saveRegalia">Guardar</v-btn>
+            <v-btn color="red darken-1" text @click="closeDialog">Cancelar</v-btn>
+            <v-btn color="green darken-1" text @click="saveRegalia">Guardar</v-btn>
         </v-card-actions>
     </v-card>
 </template>
