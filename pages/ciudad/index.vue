@@ -19,16 +19,8 @@
               </v-col>
 
               <v-col cols="6">
-                <v-text-field
-                  v-model="search"
-                  density="compact"
-                  label="Buscar"
-                  prepend-inner-icon="mdi-magnify"
-                  variant="outlined"
-                  flat
-                  hide-details
-                  single-line
-                >
+                <v-text-field v-model="search" density="compact" label="Buscar" prepend-inner-icon="mdi-magnify"
+                  variant="outlined" flat hide-details single-line>
                 </v-text-field>
               </v-col>
             </v-row>
@@ -61,18 +53,12 @@
     <!-- Dialogos para crear Ciudad-->
 
     <v-dialog v-model="dialogNuevoCiudad" max-width="600px">
-      <nuevo-ciudad
-        @close="dialogNuevoCiudad = false"
-        @saved="fetchCiudads"
-      ></nuevo-ciudad>
+      <nuevo-ciudad @close="dialogNuevoCiudad = false" @saved="fetchCiudads"></nuevo-ciudad>
     </v-dialog>
 
     <v-dialog v-model="dialogEditarCiudad" max-width="600px">
-      <editar-ciudad
-        :id="ciudadSeleccionada.id"
-        @close="dialogEditarCiudad = false"
-        @saved="fetchCiudads"
-      ></editar-ciudad>
+      <editar-ciudad :id="ciudadSeleccionada.id" @close="dialogEditarCiudad = false"
+        @saved="fetchCiudads"></editar-ciudad>
     </v-dialog>
   </v-container>
 </template>

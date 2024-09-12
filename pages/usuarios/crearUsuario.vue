@@ -33,8 +33,8 @@
         </v-card-text>
         <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="yellow" text @click="closeDialog">Cancelar</v-btn>
-            <v-btn color="green" text @click="saveUsuario">Guardar</v-btn>
+            <v-btn color="red darken-1" text @click="closeDialog">Cancelar</v-btn>
+            <v-btn color="green darken-1" text @click="saveUsuario">Guardar</v-btn>
         </v-card-actions>
     </v-card>
 </template>
@@ -54,8 +54,8 @@ export default {
             },
             roles: [],
             estadoOptions: [
-                { text: 'Activo', value: true },
-                { text: 'Inactivo', value: false },
+                { text: 'Habilitado', value: true },
+                { text: 'Deshabilitado', value: false },
             ],
             rules: {
                 required: value => !!value || 'Requerido.',

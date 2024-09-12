@@ -26,11 +26,7 @@
                         <v-text-field v-model="equipo.puk" label="N° de PUK" :rules="[rules.required]"
                             required></v-text-field>
                     </v-col>
-                    <v-col cols="6">
-                        <v-select v-model="equipo.comodin" :items="comodinOptions" item-text="text" item-value="value"
-                            label="Comodín" required></v-select>
-                    </v-col>
-                    <v-col cols="6">
+                    <v-col cols="12">
                         <v-menu ref="menu" v-model="menu" :close-on-content-click="false" :nudge-right="40"
                             transition="scale-transition" offset-y min-width="auto">
                             <template v-slot:activator="{ on, attrs }">
@@ -38,8 +34,8 @@
                                     prepend-icon="mdi-calendar" readonly v-bind="attrs" v-on="on"></v-text-field>
                             </template>
                             <v-date-picker v-model="equipo.fechaLlegada" @input="menu = false"></v-date-picker>
-                        </v-menu>
-                    </v-col>
+                        </v-menu> 
+                        </v-col>
                 </v-row>
             </v-form>
         </v-card-text>
@@ -66,6 +62,10 @@ export default {
             menu: false,
             Tipoequipo: [],
             valid: false,
+            estadoOptions: [
+                { text: "Equipo Bueno", value: true },
+                { text: "Equipo Dañado", value: false },
+            ],
             comodinOptions: [
                 { text: "Sí", value: true },
                 { text: "No", value: false },
