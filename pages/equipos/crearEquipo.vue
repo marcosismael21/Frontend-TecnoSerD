@@ -11,19 +11,19 @@
                             item-value="id" label="Equipos" required></v-select>
                     </v-col>
                     <v-col cols="6">
-                        <v-text-field v-model="nuevoRegistro.noserie" label="N° de SERIE" :rules="[rules.required]"
+                        <v-text-field v-model="nuevoRegistro.noserie" label="N° de SERIE" placeholder="Ej. 12345678" :rules="[rules.required]"
                             required></v-text-field>
                     </v-col>
                     <v-col cols="6">
-                        <v-text-field v-model="nuevoRegistro.noimei" label="N° de IMEI" :rules="[rules.required]"
+                        <v-text-field v-model="nuevoRegistro.noimei" label="N° de IMEI" placeholder="Ej. 12345678" :rules="[rules.required]"
                             required></v-text-field>
                     </v-col>
                     <v-col cols="6">
-                        <v-text-field v-model="nuevoRegistro.pin" label="N° de PIN" :rules="[rules.required]"
+                        <v-text-field v-model="nuevoRegistro.pin" label="N° de PIN" placeholder="Ej. 18919159" :rules="[rules.required]"
                             required></v-text-field>
                     </v-col>
                     <v-col cols="6">
-                        <v-text-field v-model="nuevoRegistro.puk" label="N° de PUK" :rules="[rules.required]"
+                        <v-text-field v-model="nuevoRegistro.puk" label="N° de PUK" placeholder="Ej. 1234" :rules="[rules.required]"
                             required></v-text-field>
                     </v-col>
                     <v-col cols="6">

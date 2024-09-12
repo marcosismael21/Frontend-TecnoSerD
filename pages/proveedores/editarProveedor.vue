@@ -7,7 +7,7 @@
             <v-form ref="form" lazy-validation>
                 <v-row>
                     <v-col cols="12">
-                        <v-text-field v-model="proveedor.nombre" label="Nombre del Proveedor" :rules="[rules.required]" required></v-text-field>
+                        <v-text-field v-model="proveedor.nombre" label="Nombre del Proveedor" placeholder="Ej. ABA" :rules="[rules.required]" required></v-text-field>
                     </v-col>
                     <v-col cols="12">
                         <v-select v-model="proveedor.estado" :items="estadoOptions" item-text="text" item-value="value" label="Estado" required></v-select>
@@ -17,8 +17,8 @@
         </v-card-text>
         <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="blue darken-1" text @click="closeDialog">Volver</v-btn>
-            <v-btn color="blue darken-1" text @click="actualizarProveedor">Guardar</v-btn>
+            <v-btn color="red darken-1" text @click="closeDialog">Volver</v-btn>
+            <v-btn color="green darken-1" text @click="actualizarProveedor">Guardar</v-btn>
         </v-card-actions>
     </v-card>
     <v-alert v-else type="error">No se pudo cargar la información del proveedor.</v-alert>

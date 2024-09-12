@@ -76,6 +76,34 @@
             <detalle-regalia :id="regaliaSeleccionada.id" @close="dialogDetalleRegalia = false"></detalle-regalia>
         </v-dialog>
 
+        <v-dialog v-model="dialogEliminarConfirm" max-width="400" persistent>
+            <v-card>
+                <v-card-title class="text-h6">Confirmar Eliminación</v-card-title>
+                <v-card-text>¿Estás seguro de que deseas eliminar esta regalia?</v-card-text>
+                <v-spacer></v-spacer>
+                <v-card-actions>
+                    <v-btn color="red darken-1" text @click="dialogEliminarConfirm = false">Cancelar</v-btn>
+                    <v-btn color="green darken-1" text @click="confirmarEliminacion">Eliminar</v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+
+        <v-dialog v-model="dialogEliminar" max-width="400" persistent>
+            <v-card>
+                <v-card-title class="text-h6">Eliminando regalia...</v-card-title>
+                <v-card-subtitle>
+                    <v-row align="center" class="ma-0 pa-0">
+                        <v-col cols="12" class="d-flex align-center">
+                            <span>Por favor, espere...</span>
+                            <v-spacer></v-spacer>
+                            <v-progress-circular indeterminate color="primary" size="64" width="4"
+                                class="mr-4"></v-progress-circular>
+                        </v-col>
+                    </v-row>
+                </v-card-subtitle>
+            </v-card>
+        </v-dialog>
+
     </v-container>
 </template>
 
@@ -116,14 +144,16 @@ export default {
                 { text: "Acciones", value: "acciones" },
             ],
             estadoOptions: [
-                { text: "Activo", value: true },
-                { text: "Inactivo", value: false },
+                { text: "Activo", value: 1 },
+                { text: "Inactivo", value: 0 },
             ],
             //variables para activar los modales
             dialogNuevaRegalia: false,
             dialogEditarRegalia: false,
             dialogDetalleRegalia: false,
             regaliaSeleccionada: false,
+            dialogEliminar: false,
+            dialogEliminarConfirm: false,
         };
     },
     methods: {
@@ -152,16 +182,26 @@ export default {
             this.dialogDetalleRegalia = true
         },
         eliminarRegalia(id) {
-            if (confirm("¿Estás seguro de que quieres eliminar esta Regalia?")) {
-                this.$axios
-                    .delete(`/pubreg/${id}`)
-                    .then(() => {
-                        this.regalia = this.ciudad.filter((regalias) => regalias.id !== id);
-                    })
-                    .catch((error) => {
-                        console.error("Error eliminando la regalia:", error);
-                    });
-            }
+            this.regaliaSeleccionada = this.regalia.find((e) => e.id === id) || {};
+            this.dialogEliminarConfirm = true;  // Mostrar el modal de confirmación
+        },
+        confirmarEliminacion() {
+            this.dialogEliminarConfirm = false;
+            this.dialogEliminar = true;  // Mostrar el modal de carga
+
+            this.$axios
+                .delete(`/pubreg/${this.regaliaSeleccionada.id}`)
+                .then(() => {
+                    this.regalia = this.regalia.filter((regalias) => regalias.id !== this.regaliaSeleccionada.id);
+                })
+                .catch((error) => {
+                    console.error("Error eliminando las regalias:", error);
+                })
+                .finally(() => {
+                    setTimeout(() => {
+                        this.dialogEliminar = false;  // Cerrar el modal de carga después de 3 segundos
+                    }, 2000);
+                });
         },
         fetchRegalias() {
             this.$axios

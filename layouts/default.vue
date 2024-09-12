@@ -55,8 +55,8 @@
     </v-dialog>
     <v-app-bar :clipped-left="clipped" fixed app :color="isDark ? 'primary' : 'secondary'">
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
-      <v-btn icon @click.stop="miniVariant = !miniVariant">
-        <v-icon>mdi-{{ `chevron - ${miniVariant ? 'right' : 'left'}` }}</v-icon>
+      <v-btn icon @click.stop="miniVariant = !miniVariant" :color="buttonColor">
+        <v-icon>{{ `mdi-chevron-${miniVariant ? 'right' : 'left'}` }}</v-icon>
       </v-btn>
       <v-spacer />
       <v-btn @click="toggleTheme" :color="isDark ? 'white' : 'black'" icon>
@@ -104,7 +104,7 @@ export default {
         },
         {
           icon: 'mdi-package',
-          title: 'Registro de Equipos',
+          title: 'Equipos',
           to: 'equipos',
         },
         {
@@ -119,6 +119,11 @@ export default {
         },
       ],
       parametrosItems: [
+        {
+          icon: 'mdi-city',
+          title: 'Ciudades',
+          to: 'ciudad',
+        },
         {
           icon: 'mdi-satellite-uplink',
           title: 'Canal',
@@ -153,6 +158,10 @@ export default {
     appBackgroundClass() {
       return this.isDark ? 'dark-background' : 'light-background';
     },
+    // Cambio de color del botón segun tema
+    buttonColor() {
+      return this.isDark ? 'white' : 'black';
+    }
   },
   methods: {
     toggleTheme() {

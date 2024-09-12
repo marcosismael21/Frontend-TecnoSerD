@@ -14,7 +14,7 @@
                             <v-col cols="9">
                                 <v-btn color="primary" @click="nuevoRegistro">
                                     <v-icon left>mdi-plus</v-icon>
-                                    Registrar Rquipo
+                                    Registrar Equipo
                                 </v-btn>
                                 <v-btn color="primary" @click="nuevoEquipo">
                                     <v-icon left>mdi-file-find</v-icon>

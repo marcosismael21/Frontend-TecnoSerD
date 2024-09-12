@@ -7,7 +7,7 @@
             <v-form ref="form" lazy-validation>
                 <v-row>
                     <v-col cols="12">
-                        <v-text-field v-model="nuevoProveedor.nombre" label="Nombre del Proveedor" :rules="[rules.required]" required></v-text-field>
+                        <v-text-field v-model="nuevoProveedor.nombre" label="Nombre del Proveedor" placeholder="Ej. ABA":rules="[rules.required]" required></v-text-field>
                     </v-col>
                     <v-col cols="12">
                         <v-select v-model="nuevoProveedor.estado" :items="estadoOptions" item-text="text" item-value="value" label="Estado" required></v-select>
@@ -17,8 +17,8 @@
         </v-card-text>
         <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="yellow" text @click="closeDialog">Cancelar</v-btn>
-            <v-btn color="green" text @click="saveProveedor">Guardar</v-btn>
+            <v-btn color="red darken-1" text @click="closeDialog">Cancelar</v-btn>
+            <v-btn color="green darken-1" text @click="saveProveedor">Guardar</v-btn>
         </v-card-actions>
     </v-card>
 </template>

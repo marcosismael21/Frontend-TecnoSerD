@@ -7,7 +7,7 @@
             <v-form ref="form" lazy-validation>
                 <v-row>
                     <v-col cols="12">
-                        <v-text-field v-model="nuevoCiudad.nombre" label="Ciudad" :rules="[rules.required]"
+                        <v-text-field v-model="nuevoCiudad.nombre" label="Ciudad" placeholder="Ej. Olanchito":rules="[rules.required]"
                             required></v-text-field>
                     </v-col> 
                     <v-col cols="12">
@@ -19,8 +19,8 @@
         </v-card-text>
         <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="yellow" text @click="closeDialog">Cancelar</v-btn>
-            <v-btn color="green" text @click="saveCiudad">Guardar</v-btn>
+            <v-btn color="red darken-1" text @click="closeDialog">Cancelar</v-btn>
+            <v-btn color="green darken-1" text @click="saveCiudad">Guardar</v-btn>
         </v-card-actions>
     </v-card>
 </template>

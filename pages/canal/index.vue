@@ -4,7 +4,7 @@
             <v-col cols="12">
                 <v-card>
                     <v-card-title class="d-flex align-center pe-2">
-                        <v-icon icon="mdi-account-circle"></v-icon> &nbsp; Lista de Equipos Comodín
+                        <v-icon icon="mdi-account-circle"></v-icon> &nbsp; Lista de Canales
                         <v-spacer></v-spacer>
                     </v-card-title>
                     <v-spacer></v-spacer>
@@ -12,43 +12,43 @@
                     <v-card-subtitle>
                         <v-row align="center">
                             <v-col cols="9">
-                                <v-btn color="primary" @click="nuevoComodin">
+                                <v-btn color="primary" @click="nuevoCanal">
                                     <v-icon left>mdi-plus</v-icon>
-                                    Añadir Comodín
+                                    Añadir Canal
                                 </v-btn>
                             </v-col>
+
                             <v-col cols="3">
                                 <v-text-field v-model="search" density="compact" label="Buscar"
-                                    prepend-inner-icon="mdi-magnify" variant="outlined" flat hide-details single-line>
+                                    prepend-inner-icon="mdi-magnify" variant="outlined" hide-details single-line>
                                 </v-text-field>
                             </v-col>
                         </v-row>
                     </v-card-subtitle>
+
                     <v-divider></v-divider>
-                    <v-data-table :headers="headers" :items="comodin" :search="search">
+
+                    <v-data-table :headers="headers" :items="canal" :search="search">
                         <template v-slot:item.nro="{ index }">
                             {{ index + 1 }}
                         </template>
-                        <template v-slot:item.idTipoEquipo="{ item }">
-                            {{ item.idTipoEquipo }}
+                        <template v-slot:item.nombre="{ item }">
+                            {{ item.nombre }}
                         </template>
-                        <template v-slot:item.noserie="{ item }">
-                            {{ item.noserie }}
-                        </template>
-                        <template v-slot:item.fechaLlegada="{ item }">
-                            {{ formatDate(item.fechaLlegada) }}
+                        <template v-slot:item.idTipoComercio="{ item }">
+                            {{ item.idTipoComercio }}
                         </template>
                         <template v-slot:item.estado="{ item }">
                             {{ getEstadoText(item.estado) }}
                         </template>
                         <template v-slot:item.acciones="{ item }">
-                            <v-btn icon @click="detalleComodin(item.id)">
+                            <v-btn icon @click="detalleCanal(item.id)">
                                 <v-icon>mdi-eye</v-icon>
                             </v-btn>
-                            <v-btn icon @click="editarComodin(item.id)">
+                            <v-btn icon @click="editarCanal(item.id)">
                                 <v-icon>mdi-pencil</v-icon>
                             </v-btn>
-                            <v-btn icon @click="eliminarComodin(item.id)">
+                            <v-btn icon @click="eliminarCanal(item.id)">
                                 <v-icon>mdi-delete</v-icon>
                             </v-btn>
                         </template>
@@ -56,25 +56,27 @@
                 </v-card>
             </v-col>
         </v-row>
+        <!-- Dialogos para crear Ciudad-->
 
 
-        <v-dialog v-model="dialogNuevoComodin" max-width="600px">
-            <crear-comodin @close="dialogNuevoComodin = false" @saved="fetchComodin"></crear-comodin>
+
+        <v-dialog v-model="dialogNuevoCanal" max-width="600px">
+            <nuevo-canal @close="dialogNuevoCanal = false" @saved="fetchCanal"></nuevo-canal>
         </v-dialog>
 
-        <v-dialog v-model="dialogEditarComodin" max-width="600px">
-            <editar-comodines :id="comodinSeleccionado.id" @close="dialogEditarComodin = false"
-                @saved="fetchComodin"></editar-comodines>
+        <v-dialog v-model="dialogEditarCanal" max-width="600px">
+            <editar-canal :id="canalSeleccionada.id" @close="dialogEditarCanal = false"
+                @saved="fetchCanal"></editar-canal>
         </v-dialog>
 
-        <v-dialog v-model="dialogDetalleComodin" max-width="600px">
-            <ver-detalles-comodin :id="comodinSeleccionado.id" @close="dialogDetalleComodin = false"></ver-detalles-comodin>
+        <v-dialog v-model="dialogDetalleCanal" max-width="600px">
+            <detalle-canal :id="canalSeleccionada.id" @close="dialogDetalleCanal = false"></detalle-canal>
         </v-dialog>
 
         <v-dialog v-model="dialogEliminarConfirm" max-width="400" persistent>
             <v-card>
                 <v-card-title class="text-h6">Confirmar Eliminación</v-card-title>
-                <v-card-text>¿Estás seguro de que deseas eliminar este equipo comodín?</v-card-text>
+                <v-card-text>¿Estás seguro de que deseas eliminar este canal?</v-card-text>
                 <v-spacer></v-spacer>
                 <v-card-actions>
                     <v-btn color="red darken-1" text @click="dialogEliminarConfirm = false">Cancelar</v-btn>
@@ -85,7 +87,7 @@
 
         <v-dialog v-model="dialogEliminar" max-width="400" persistent>
             <v-card>
-                <v-card-title class="text-h6">Eliminando comodín...</v-card-title>
+                <v-card-title class="text-h6">Eliminando canal...</v-card-title>
                 <v-card-subtitle>
                     <v-row align="center" class="ma-0 pa-0">
                         <v-col cols="12" class="d-flex align-center">
@@ -103,94 +105,93 @@
 </template>
 
 <script>
-import CrearComodin from '~/pages/comodin/crearComodin.vue'
-import EditarComodines from '~/pages/comodin/editarComodin.vue'
-import VerDetallesComodin from '~/pages/comodin/detalleComodin.vue'
+
+import NuevoCanal from "~/pages/canal/crearCanal.vue"
+import EditarCanal from "~/pages/canal/editarCanal.vue"
+import DetalleCanal from "~/pages/canal/detalleCanal.vue"
 
 export default {
     async asyncData({ $axios }) {
         try {
-            const { data } = await $axios.get('/equipo/comodin/1')
-            return { comodin: data }
+            const { data } = await $axios.get("/canal")
+            return { canal: data }
         } catch (error) {
-            console.error('Error fetching comodin:', error)
-            return { comodin: [] }
+            console.error("Error fetching canal:", error)
+            return { canal: [] }
         }
     },
     watch: {
         $route(to, from) {
             if (to.fullPath !== from.fullPath) {
-                this.loadComodin()
+                this.loadCanal();
             }
         },
     },
     data() {
         return {
-            search: '',
-            comodin: [],
+            tab: 0, // inicializamos el tab en 0
+            search: "",
+            canal: [],
             headers: [
                 { text: 'N°', value: 'nro' },
-                { text: "Nombre", value: "idTipoEquipo" },
-                { text: "N° SERIE", value: "noserie" },
-                { text: "Fecha de Ingreso", value: "fechaLlegada" },
+                { text: "Nombre", value: "nombre" },
+                { text: "Tipo de Comercio", value: "idTipoComercio" },
                 { text: "Estado", value: "estado" },
                 { text: "Acciones", value: "acciones" },
             ],
             estadoOptions: [
-                { text: 'Activo', value: true },
-                { text: 'Inactivo', value: false },
+                { text: "Activo", value: 1 },
+                { text: "Inactivo", value: 0 },
             ],
             //variables para activar los modales
-            dialogNuevoComodin: false,
-            dialogEditarComodin: false,
-            dialogDetalleComodin: false,
+            dialogNuevoCanal: false,
+            dialogEditarCanal: false,
+            dialogDetalleCanal: false,
+            canalSeleccionada: false,
             dialogEliminar: false,
             dialogEliminarConfirm: false,
-            comodinSeleccionado: false,
-        }
+        };
     },
     methods: {
-        async loadComodin() {
+        async loadCanal() {
             try {
-                const { data } = await this.$axios.get('/equipo/comodin/1')
-                this.comodin = data
+                const { data } = await this.$axios.get("/canal");
+                this.canal = data;
             } catch (error) {
-                console.error('Error fetching comodin:', error)
-                this.comodin = []
+                console.error("Error fetching canal:", error);
+                this.canal = [];
             }
         },
         getEstadoText(estado) {
-            const estadoOption = this.estadoOptions.find(
-                (option) => option.value === estado
-            )
-            return estadoOption ? estadoOption.text : ''
+            const estadoOption = this.estadoOptions.find((option) => option.value === estado)
+            return estadoOption ? estadoOption.text : ""
         },
-        nuevoComodin() {
-            this.dialogNuevoComodin = true
+        nuevoCanal() {
+            this.dialogNuevoCanal = true
         },
-        editarComodin(id) {
-            this.comodinSeleccionado = this.comodin.find((e) => e.id === id) || {}
-            this.dialogEditarComodin = true
+        editarCanal(id) {
+            this.canalSeleccionada = this.canal.find((e) => e.id === id) || {}
+            this.dialogEditarCanal = true
         },
-        detalleComodin(id) {
-            this.comodinSeleccionado = this.comodin.find((e) => e.id === id) || {}
-            this.dialogDetalleComodin = true
+        detalleCanal(id) {
+            this.canalSeleccionada = this.canal.find((e) => e.id === id) || {}
+            this.dialogDetalleCanal = true
         },
-        eliminarComodin(id) {
-            this.comodinSeleccionado = this.comodin.find((e) => e.id === id) || {};
-            this.dialogEliminarConfirm = true;
+        eliminarCanal(id) {
+            this.canalSeleccionada = this.canal.find((e) => e.id === id) || {};
+            this.dialogEliminarConfirm = true;  // Mostrar el modal de confirmación
         },
         confirmarEliminacion() {
             this.dialogEliminarConfirm = false;
             this.dialogEliminar = true;  // Mostrar el modal de carga
 
             this.$axios
-                .delete(`/equipo/${this.comodinSeleccionado.id}`)
+                .delete(`/canal/${this.canalSeleccionada.id}`)
                 .then(() => {
-                    this.comodin = this.rol.filter((comodines) => comodines.id !== this.comodinSeleccionado.id);
+                    this.canal = this.canal.filter((canal) => canal.id !== this.canalSeleccionada.id);
                 })
                 .catch((error) => {
-                    console.error("Error eliminando el comodín:", error);
+                    console.error("Error eliminando el canal:", error);
                 })
                 .finally(() => {
                     setTimeout(() => {
@@ -198,24 +199,28 @@ export default {
                     }, 2000);
                 });
         },
-        formatDate(fechaLlegada) {
-            return fechaLlegada ? new Date(fechaLlegada).toISOString().slice(0, 10) : '';
-        },
-        fetchComodin() {
+        fetchCanal() {
             this.$axios
-                .get('/equipo/comodin/1')
+                .get("/canal")
                 .then((response) => {
-                    this.comodin = response.data
+                    this.canal = response.data;
                 })
                 .catch((error) => {
-                    console.error('Error fetching comodin:', error)
-                })
+                    console.error("Error fetching canal:", error);
+                });
         },
     },
     components: {
-        CrearComodin,
-        EditarComodines,
-        VerDetallesComodin
+        NuevoCanal,
+        EditarCanal,
+        DetalleCanal
     },
-}
+};
 </script>
+
+<style scoped>
+.justify-center {
+    display: flex;
+    justify-content: center;
+}
+</style>
