@@ -10,21 +10,21 @@
                         <v-row>
                             <v-col cols="12">
                                 <v-text-field v-model="nuevoComercio.nombreComercio" label="Nombre del Comercio"
-                                    placeholder="Bodega Los 3 Hermanos" :rules="[rules.required]"
+                                    placeholder="Ej. Bodega Los 3 Hermanos" :rules="[rules.required]"
                                     required></v-text-field>
                             </v-col>
                             <v-col cols="6">
-                                <v-text-field v-model="nuevoComercio.numUsuario" label="N° Usuario" placeholder="123456"
+                                <v-text-field v-model="nuevoComercio.numUsuario" label="N° Usuario" placeholder="Ej. 99901234"
                                     :rules="[rules.required]" required></v-text-field>
                             </v-col>
                             <v-col cols="6">
-                                <v-text-field v-model="nuevoComercio.numTienda" label="N° Tienda" placeholder="123456"
+                                <v-text-field v-model="nuevoComercio.numTienda" label="N° Tienda" placeholder="Ej. 12345"
                                     :rules="[rules.required]" required></v-text-field>
                             </v-col>
 
                             <v-col cols="12">
                                 <v-textarea v-model="nuevoComercio.direccion" label="Direccion"
-                                    placeholder="La Ceiba, Atlántida, cololonia EL Toronjal" :rules="[rules.required]"
+                                    placeholder="Ej. Colonia El Sauce al lado de Little Caesars" :rules="[rules.required]"
                                     required></v-textarea>
                             </v-col>
                         </v-row>
@@ -33,14 +33,14 @@
                         <v-row>
                             <v-col cols="12">
                                 <v-text-field v-model="nuevoComercio.nombreContacto" label="Nombres del Contacto"
-                                    placeholder="Juan Ramon Padilla" :rules="[rules.required]" required></v-text-field>
+                                    placeholder="Ej. Juan Ramon Padilla" :rules="[rules.required]" required></v-text-field>
                             </v-col>
                             <v-col cols="6">
                                 <v-text-field v-model="nuevoComercio.rtn" label="RTN" :rules="[rules.required]"
-                                    placeholder="1234567891011121314" required></v-text-field>
+                                    placeholder="Ej. 01012000123456" required></v-text-field>
                             </v-col>
                             <v-col cols="6">
-                                <v-text-field v-model="nuevoComercio.telefono" label="Telefono" placeholder="123456789"
+                                <v-text-field v-model="nuevoComercio.telefono" label="Telefono" placeholder="Ej. 12345678"
                                     :rules="[rules.required]" required></v-text-field>
                             </v-col>
                             <v-col cols="6">
@@ -53,10 +53,10 @@
                             </v-col>
                             <v-col cols="6">
                                 <v-text-field v-model="nuevoComercio.latitud" label="Latitud" :rules="[rules.required]"
-                                    placeholder="15°46'25.7" required></v-text-field>
+                                    placeholder="Ej. 15°46'25.7" required></v-text-field>
                             </v-col>
                             <v-col cols="6">
-                                <v-text-field v-model="nuevoComercio.longitud" label="Longitud" placeholder="15°46'25.7"
+                                <v-text-field v-model="nuevoComercio.longitud" label="Longitud" placeholder="Ej. 15°46'25.7"
                                     :rules="[rules.required]" required></v-text-field>
                             </v-col>
                         </v-row>

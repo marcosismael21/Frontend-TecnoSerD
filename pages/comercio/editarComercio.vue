@@ -7,48 +7,59 @@
             <v-form ref="form" lazy-validation>
                 <v-row>
                     <v-col cols="6">
-                        <v-text-field v-model="comercio.nombreComercio" label="Comercio" :rules="[rules.required]"
-                            required></v-text-field>
+                        <v-row>
+                            <v-col cols="12">
+                                <v-text-field v-model="comercio.nombreComercio" label="Nombre del Comercio"
+                                    placeholder="Ej. Bodega Los 3 Hermanos" :rules="[rules.required]"
+                                    required></v-text-field>
+                            </v-col>
+                            <v-col cols="6">
+                                <v-text-field v-model="comercio.numUsuario" label="N° Usuario" placeholder="Ej. 99901234"
+                                    :rules="[rules.required]" required></v-text-field>
+                            </v-col>
+                            <v-col cols="6">
+                                <v-text-field v-model="comercio.numTienda" label="N° Tienda" placeholder="Ej. 12345"
+                                    :rules="[rules.required]" required></v-text-field>
+                            </v-col>
+
+                            <v-col cols="12">
+                                <v-textarea v-model="comercio.direccion" label="Direccion"
+                                    placeholder="Ej. Colonia El Sauce al lado de Little Caesars" :rules="[rules.required]"
+                                    required></v-textarea>
+                            </v-col>
+                        </v-row>
                     </v-col>
                     <v-col cols="6">
-                        <v-text-field v-model="comercio.rtn" label="RTN" :rules="[rules.required]"
-                            required></v-text-field>
-                    </v-col>
-                    <v-col cols="6">
-                        <v-text-field v-model="comercio.nombreContacto" label="Nombres" :rules="[rules.required]"
-                            required></v-text-field>
-                    </v-col>
-                    <v-col cols="6">
-                        <v-text-field v-model="comercio.telefono" label="Telefono" :rules="[rules.required]"
-                            required></v-text-field>
-                    </v-col>
-                    <v-col cols="6">
-                        <v-text-field v-model="comercio.numUsuario" label="N° Usuario" :rules="[rules.required]"
-                            required></v-text-field>
-                    </v-col>
-                    <v-col cols="6">
-                        <v-text-field v-model="comercio.numTienda" label="N° Tienda" :rules="[rules.required]"
-                            required></v-text-field>
-                    </v-col>
-                    <v-col cols="6">
-                        <v-select v-model="comercio.idCiudad" :items="ciudad" item-text="nombre" item-value="id"
-                            label="Ciudad" required></v-select>
-                    </v-col>
-                    <v-col cols="6">
-                        <v-select v-model="comercio.idTipoComercio" :items="tipoComercio" item-text="nombre" item-value="id"
-                            label="Tipo Comercio" required></v-select>
-                    </v-col>
-                    <v-col cols="12">
-                        <v-textarea v-model="comercio.direccion" label="Direccion" :rules="[rules.required]"
-                            required></v-textarea>
-                    </v-col>
-                    <v-col cols="6">
-                        <v-text-field v-model="comercio.latitud" label="Latitud" :rules="[rules.required]"
-                            required></v-text-field>
-                    </v-col>
-                    <v-col cols="6">
-                        <v-text-field v-model="comercio.longitud" label="Longitud" :rules="[rules.required]"
-                            required></v-text-field>
+                        <v-row>
+                            <v-col cols="12">
+                                <v-text-field v-model="comercio.nombreContacto" label="Nombres del Contacto"
+                                    placeholder="Ej. Juan Ramon Padilla" :rules="[rules.required]" required></v-text-field>
+                            </v-col>
+                            <v-col cols="6">
+                                <v-text-field v-model="comercio.rtn" label="RTN" :rules="[rules.required]"
+                                    placeholder="Ej. 01012000123456" required></v-text-field>
+                            </v-col>
+                            <v-col cols="6">
+                                <v-text-field v-model="comercio.telefono" label="Telefono" placeholder="Ej. 12345678"
+                                    :rules="[rules.required]" required></v-text-field>
+                            </v-col>
+                            <v-col cols="6">
+                                <v-select v-model="comercio.idCiudad" :items="ciudad" item-text="nombre"
+                                    item-value="id" label="Ciudad" required></v-select>
+                            </v-col>
+                            <v-col cols="6">
+                                <v-select v-model="comercio.idTipoComercio" :items="tipoComercio"
+                                    item-text="nombre" item-value="id" label="Tipo Comercio" required></v-select>
+                            </v-col>
+                            <v-col cols="6">
+                                <v-text-field v-model="comercio.latitud" label="Latitud" :rules="[rules.required]"
+                                    placeholder="Ej. 15°46'25.7" required></v-text-field>
+                            </v-col>
+                            <v-col cols="6">
+                                <v-text-field v-model="comercio.longitud" label="Longitud" placeholder="Ej. 15°46'25.7"
+                                    :rules="[rules.required]" required></v-text-field>
+                            </v-col>
+                        </v-row>
                     </v-col>
                 </v-row>
             </v-form>
