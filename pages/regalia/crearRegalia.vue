@@ -18,7 +18,7 @@
                         <v-text-field v-model="nuevaRegalia.cantidad" label="Cantidad" placeholder="Ej. 1":rules="[rules.required]"
                             required></v-text-field>
                     </v-col>
-                    <v-col cols="12">
+                    <v-col cols="6">
                         <v-select v-model="nuevaRegalia.estado" :items="estadoOptions" item-text="text"
                             item-value="value" label="Estado" required></v-select>
                     </v-col>
