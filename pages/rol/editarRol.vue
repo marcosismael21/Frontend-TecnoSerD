@@ -7,7 +7,7 @@
             <v-form ref="form" lazy-validation>
                 <v-row>
                     <v-col cols="12">
-                        <v-text-field v-model="rol.nombre" label="Rol" :rules="[rules.required]"
+                        <v-text-field v-model="rol.nombre" label="Rol" placeholder="Ej. Administrador" :rules="[rules.required]"
                             required></v-text-field>
                     </v-col> 
                     <v-col cols="12">
