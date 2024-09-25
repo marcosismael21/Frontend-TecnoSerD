@@ -61,16 +61,16 @@
     </v-row>
     <!-- Dialogos para crear Ciudad-->
 
-    <v-dialog v-model="dialogNuevoComercio" max-width="600px">
+    <v-dialog v-model="dialogNuevoComercio" max-width="700px">
       <nuevo-comercio @close="dialogNuevoComercio = false" @saved="fetchComercios"></nuevo-comercio>
     </v-dialog>
 
-    <v-dialog v-model="dialogEditarComercio" max-width="600px">
+    <v-dialog v-model="dialogEditarComercio" max-width="700px">
       <editar-comercio :id="comercioSeleccionada.id" @close="dialogEditarComercio = false"
         @saved="fetchComercios"></editar-comercio>
     </v-dialog>
 
-    <v-dialog v-model="dialogDetalleComercio" max-width="600px">
+    <v-dialog v-model="dialogDetalleComercio" max-width="700px">
       <detalle-comercio :id="comercioSeleccionada.id" @close="dialogDetalleComercio = false"></detalle-comercio>
     </v-dialog>
 
