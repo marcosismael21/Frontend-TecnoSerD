@@ -169,7 +169,7 @@ export default {
                 })
         },
         importarArchivo() {
-            // Implementación para importar archivo
+            this.$router.push('excel')
         },
     },
     components: {
