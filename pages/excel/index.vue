@@ -1,39 +1,43 @@
 <template>
-    <v-container>
-        <v-row>
-            <v-col cols="12">
-                <v-card>
-                    <v-col cols="12">
-                        <v-card-title class="d-flex align-center pe-2">
-                            Archivo Excel
-                            <v-spacer></v-spacer>
-                        </v-card-title>
-                        <v-divider></v-divider>
-                        <v-card-subtitle>
-                            Seleccione un archivo Excel (.xlsx) para cargar la información.
-                        </v-card-subtitle>
-                        <v-spacer></v-spacer>
-                        <v-card-text>
-                            <v-file-input v-model="file" accept=".csv, .xlsx, .xls" label="Archivo"
-                                placeholder="Seleccione un archivo" prepend-icon="mdi-file" show-size
-                                @change="handleFileUpload"></v-file-input>
+    <v-card>
+        <v-col cols="12">
+            <v-card-title>
+                Archivo Excel
+                <v-spacer></v-spacer>
+            </v-card-title>
+            <v-divider></v-divider>
+            <v-card-subtitle>
+                Seleccione un archivo Excel (.xlsx) para cargar la información.
+            </v-card-subtitle>
+            <v-spacer></v-spacer>
+            <v-divider></v-divider>
+            <v-card-text>
+                <v-file-input v-model="file" accept=".csv, .xlsx, .xls" label="Archivo"
+                    placeholder="Seleccione un archivo" prepend-icon="mdi-file" show-size @change="handleFileUpload">
+                </v-file-input>
+                <v-alert v-if="alertMessage" :type="alertType" dismissible>
+                    {{ alertMessage }}
+                </v-alert>
+                <v-divider></v-divider>
+                <div class="table-scroll">
+                    <v-data-table :headers="headers" :items="items"></v-data-table>
+                </div>
+            </v-card-text>
+            <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn color="red darken-1" @click="regresar">
+                    <v-icon left>mdi-arrow-collapse-left</v-icon>
+                    Regresar
+                </v-btn>    
+                <v-btn color="green darken-1" @click="uploadExcel">Cargar</v-btn>
+            </v-card-actions>
+        </v-col>
 
-                            <v-data-table :headers="headers" :items="items"></v-data-table>
-                        </v-card-text>
-                    </v-col>
-                    <v-card-actions>
-                        <v-spacer></v-spacer>
-                        <v-btn color="primary" @click="uploadExcel">Cargar</v-btn>
-                    </v-card-actions>
-                </v-card>
-            </v-col>
-        </v-row>
-    </v-container>
+    </v-card>
 </template>
 
 <script>
 import * as XLSX from 'xlsx';
-import axios from 'axios';
 
 export default {
     data: () => ({
@@ -43,22 +47,13 @@ export default {
         selectedColumns: [
             "CANAL",
             "Nombre de Comercio",
-            "DIRECCIÓN",
             "CIUDAD",
-            "DEPARTAMENTO",
-            "TELÉFONO",
+            "DIRECCIÓN",
+            "NOMBRE DE CONTACTO",
             "Tipo de Gestion",
-            "Tipo de Problema",
-            "EQUIPOS"
         ],
-        rules: [
-            value => {
-                return !value
-                    || !value.length
-                    || value.size < 2000000
-                    || 'El archivo debe ser menor a 2 MB!'
-            },
-        ],
+        alertMessage: '',
+        alertType: '',
     }),
     methods: {
         handleFileUpload(file) {
@@ -85,7 +80,11 @@ export default {
         generateTable(data) {
             const allHeaders = data[0];
             const selectedHeaders = this.selectedColumns.filter(col => allHeaders.includes(col));
-            this.headers = [{ text: 'N°', value: 'N°' }, ...selectedHeaders.map(header => ({ text: header, value: header })), { text: 'Equipos', value: 'Equipos' }];
+            this.headers = [
+                { text: 'N°', value: 'N°' },
+                ...selectedHeaders.map(header => ({ text: header, value: header })),
+                { text: 'Equipos', value: 'Equipos' }
+            ];
 
             this.items = data.slice(1).map((row, rowIndex) => {
                 const item = { 'N°': rowIndex + 1 };
@@ -116,11 +115,6 @@ export default {
                     if (header === 'QPOS' && cell) {
                         equipos.push('QPOS');
                     }
-
-                    // Condición para "Tipo de Problema"
-                    if (header === 'Tipo de Problema' && !cell) {
-                        item[header] = 'sin descripcion';
-                    }
                 });
 
                 item['Equipos'] = equipos.join(', ');
@@ -129,7 +123,7 @@ export default {
         },
         uploadExcel() {
             if (!this.file) {
-                console.error("No se ha seleccionado ningún archivo.");
+                this.setAlert("No se ha seleccionado ningún archivo.", "error");
                 return;
             }
 
@@ -138,13 +132,39 @@ export default {
 
             this.$axios.post('/excel/importar', formData)
                 .then(response => {
-                    console.log("Archivo cargado exitosamente:", response.data);
-                    // Aquí puedes manejar la respuesta después de cargar el archivo
+                    const message = response.data.message || "Archivo cargado exitosamente.";
+                    this.setAlert(message, "success");
                 })
                 .catch(error => {
-                    console.error("Error al cargar el archivo:", error);
+                    if (error.response) {
+                        if (error.response.status === 500) {
+                            const errorMessage = error.response?.data?.message + ' ' + error.response?.data?.error || "Error al cargar el archivo.";
+                            this.setAlert(errorMessage, "error")
+                        } else {
+                            const errorMessage = error.response.data.message || "Error al cargar el archivo.";
+                            this.setAlert(errorMessage, "error");
+                        }
+                    } else {
+                        this.setAlert("Error al cargar el archivo.", "error");
+                    }
                 });
+        },
+        setAlert(message, type) {
+            this.alertMessage = message;
+            this.alertType = type;
+        },
+        regresar() {
+            this.$router.push('asignacion');
         }
     }
 }
 </script>
+
+<style scoped>
+.table-scroll {
+    max-height: 400px;
+    /* Fija la altura de la tabla */
+    overflow-y: auto;
+    /* Permite el scroll vertical */
+}
+</style>
