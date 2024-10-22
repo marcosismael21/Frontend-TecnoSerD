@@ -86,12 +86,17 @@
       </v-card>
     </v-dialog>
 
+
+
     <v-dialog v-model="dialogEliminar" max-width="400" persistent>
       <v-card>
         <v-card-title class="text-h6">Eliminando comercio...</v-card-title>
         <v-card-subtitle>
           <v-row align="center" class="ma-0 pa-0">
             <v-col cols="12" class="d-flex align-center">
+              <v-alert v-if="alertMessage" :type="alertType" dismissible>
+                {{ alertMessage }}
+              </v-alert>
               <span>Por favor, espere...</span>
               <v-spacer></v-spacer>
               <v-progress-circular indeterminate color="primary" size="64" width="4" class="mr-4"></v-progress-circular>
@@ -146,6 +151,8 @@ export default {
       dialogEliminar: false,
       dialogEliminarConfirm: false,
       comercioSeleccionada: false,
+      alertMessage: '',
+      alertType: '',
     }
   },
   methods: {
@@ -179,11 +186,15 @@ export default {
 
       this.$axios
         .delete(`/comercio/${this.comercioSeleccionada.id}`)
-        .then(() => {
+        .then(response => {
+          const message = response.data.message || 'Error al eliminar este comercio'
+          this.setAlert(message, "error");
           this.comercio = this.comercio.filter((comercio) => comercio.id !== this.comercioSeleccionada.id);
         })
         .catch((error) => {
           console.error("Error eliminando el comercio:", error);
+          const message =  'Error al eliminar este comercio'
+          this.setAlert(message, "error");
         })
         .finally(() => {
           setTimeout(() => {
@@ -200,6 +211,10 @@ export default {
         .catch((error) => {
           console.error('Error fetching comercios:', error)
         })
+    },
+    setAlert(message, type) {
+      this.alertMessage = message;
+      this.alertType = type;
     },
   },
   components: {
