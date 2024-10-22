@@ -44,8 +44,8 @@
                                     :rules="[rules.required]" required></v-text-field>
                             </v-col>
                             <v-col cols="6">
-                                <v-select v-model="nuevoComercio.idCiudad" :items="ciudad" item-text="nombre"
-                                    item-value="id" label="Ciudad" required></v-select>
+                                <v-autocomplete v-model="nuevoComercio.idCiudad" :items="ciudad" item-text="nombre"
+                                    item-value="id" label="Ciudad" required></v-autocomplete>
                             </v-col>
                             <v-col cols="6">
                                 <v-select v-model="nuevoComercio.idTipoComercio" :items="tipoComercio"

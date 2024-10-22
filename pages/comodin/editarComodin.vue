@@ -7,8 +7,8 @@
             <v-form ref="form" v-model="valid" lazy-validation>
                 <v-row>
                     <v-col cols="12">
-                        <v-select v-model="equipo.idTipoEquipo" :items="Tipoequipo" item-text="nombre" item-value="id"
-                            label="Equipos" required></v-select>
+                        <v-autocomplete v-model="equipo.idTipoEquipo" :items="Tipoequipo" item-text="nombre" item-value="id"
+                            label="Equipos" required></v-autocomplete>
                     </v-col>
                     <v-col cols="6">
                         <v-text-field v-model="equipo.noserie" label="N° de SERIE" placeholder="Ej. 12345678" :rules="[rules.required]"
