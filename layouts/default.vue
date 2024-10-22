@@ -93,9 +93,14 @@ export default {
       logoutDialog: false, // Controla la visibilidad del diálogo de logout
       items: [
         {
-          icon: 'mdi-home',
-          title: 'Tablero',
-          to: '/',
+          icon: 'mdi-chart-bar',
+          title: 'Métricas',
+          to: 'tablero',
+        },
+        {
+          icon: 'mdi-clipboard-outline',
+          title: 'Asignaciones',
+          to: 'asignacion',
         },
         {
           icon: 'mdi-store',

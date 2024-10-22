@@ -137,8 +137,8 @@ export default {
                 { text: "Acciones", value: "acciones" },
             ],
             estadoOptions: [
-                { text: 'Activo', value: true },
-                { text: 'Inactivo', value: false },
+                { text: 'Activo', value: 1 },
+                { text: 'Inactivo', value: 0 },
             ],
             //variables para activar los modales
             dialogNuevoComodin: false,

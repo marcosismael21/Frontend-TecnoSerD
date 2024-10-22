@@ -6,7 +6,7 @@
         <v-card-text>
             <v-form ref="form" lazy-validation>
                 <v-row>
-                    <v-col cols="6">
+                    <v-col cols="12">
                         <v-text-field v-model="ciudad.nombre" label="Cuidad" placeholder="Ej. Olanchito" :rules="[rules.required]"
                             required></v-text-field>
                     </v-col>                 

@@ -16,7 +16,7 @@
                     <v-col cols="6">
                         <v-text-field v-model="regalia.cantidad" label="Cantidad" readonly></v-text-field>
                     </v-col>
-                    <v-col cols="12">
+                    <v-col cols="6">
                         <v-select v-model="regalia.estado" :items="estadoOptions" item-text="text"
                             item-value="value" label="Estado" readonly></v-select>
                     </v-col>

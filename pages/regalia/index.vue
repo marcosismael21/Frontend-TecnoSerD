@@ -61,15 +61,14 @@
         </v-row>
         <!-- Dialogos para crear Ciudad-->
 
-
-
         <v-dialog v-model="dialogNuevaRegalia" max-width="600px">
-            <nueva-regalia @close="dialogNuevaRegalia = false" @saved="fetchRegalias"></nueva-regalia>
+            <nueva-regalia @close="dialogNuevaRegalia = false" @saved="onSuccessRegalia" @error="onErrorRegalia">
+            </nueva-regalia>
         </v-dialog>
 
         <v-dialog v-model="dialogEditarRegalia" max-width="600px">
-            <editar-regalia :id="regaliaSeleccionada.id" @close="dialogEditarRegalia = false"
-                @saved="fetchRegalias"></editar-regalia>
+            <editar-regalia :id="regaliaSeleccionada.id" @close="dialogEditarRegalia = false" @saved="onSuccessRegalia"
+                @error="onErrorRegalia"></editar-regalia>
         </v-dialog>
 
         <v-dialog v-model="dialogDetalleRegalia" max-width="600px">
@@ -103,6 +102,10 @@
                 </v-card-subtitle>
             </v-card>
         </v-dialog>
+
+        <v-snackbar v-model="snackbar" :color="snackbarColor" timeout="3000" top>
+            {{ snackbarMessage }}
+        </v-snackbar>
 
     </v-container>
 </template>
@@ -154,6 +157,10 @@ export default {
             regaliaSeleccionada: false,
             dialogEliminar: false,
             dialogEliminarConfirm: false,
+            // Añadimos estos campos para el snackbar
+            snackbar: false,
+            snackbarMessage: '',
+            snackbarColor: '',  // 'success' o 'error' para diferenciar el tipo de mensaje
         };
     },
     methods: {
@@ -191,17 +198,40 @@ export default {
 
             this.$axios
                 .delete(`/pubreg/${this.regaliaSeleccionada.id}`)
-                .then(() => {
+                .then((response) => {
+                    // Filtrar las regalías eliminadas
                     this.regalia = this.regalia.filter((regalias) => regalias.id !== this.regaliaSeleccionada.id);
+
+                    // Mostrar el mensaje que viene del backend en el snackbar
+                    this.showSnackbar(response.data.message, "success");
                 })
                 .catch((error) => {
-                    console.error("Error eliminando las regalias:", error);
+                    // Mostrar el mensaje de error del backend o un mensaje genérico si no está disponible
+                    const errorMessage = error.response && error.response.data && error.response.data.message
+                        ? error.response.data.message
+                        : "Error eliminando la regalia";
+                    this.showSnackbar(errorMessage, "error");
                 })
                 .finally(() => {
                     setTimeout(() => {
-                        this.dialogEliminar = false;  // Cerrar el modal de carga después de 3 segundos
+                        this.dialogEliminar = false;  // Cerrar el modal de carga después de 2 segundos
                     }, 2000);
                 });
+        },
+        showSnackbar(message, color) {
+            this.snackbarMessage = message;
+            this.snackbarColor = color;
+            this.snackbar = true;
+        },
+        onSuccessRegalia(message) {
+            // Mostrar el snackbar con un mensaje de éxito
+            this.showSnackbar(message, 'success');
+            this.fetchRegalias(); // Recargar las regalías
+            this.dialogNuevaRegalia = false; // Cerrar el diálogo
+        },
+        onErrorRegalia(message) {
+            // Mostrar el snackbar con un mensaje de error
+            this.showSnackbar(message, 'error');
         },
         fetchRegalias() {
             this.$axios

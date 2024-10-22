@@ -7,18 +7,18 @@
             <v-form ref="form" lazy-validation>
                 <v-row>
                     <v-col cols="6">
-                        <v-text-field v-model="nuevaRegalia.nombre" label="Nombre" placeholder="Ej. Sombrilla":rules="[rules.required]"
-                            required></v-text-field>
+                        <v-text-field v-model="nuevaRegalia.nombre" label="Nombre" placeholder="Ej. Sombrilla"
+                            :rules="[rules.required]" required></v-text-field>
                     </v-col>
                     <v-col cols="6">
-                        <v-select v-model="nuevaRegalia.idTipoComercio" :items="tipoComercio" item-text="nombre" item-value="id"
-                            label="Tipo Comercio" required></v-select>
+                        <v-select v-model="nuevaRegalia.idTipoComercio" :items="tipoComercio" item-text="nombre"
+                            item-value="id" label="Tipo Comercio" required></v-select>
                     </v-col>
                     <v-col cols="6">
-                        <v-text-field v-model="nuevaRegalia.cantidad" label="Cantidad" placeholder="Ej. 1":rules="[rules.required]"
-                            required></v-text-field>
+                        <v-text-field v-model="nuevaRegalia.cantidad" label="Cantidad" placeholder="Ej. 1"
+                            :rules="[rules.required]" required></v-text-field>
                     </v-col>
-                    <v-col cols="12">
+                    <v-col cols="6">
                         <v-select v-model="nuevaRegalia.estado" :items="estadoOptions" item-text="text"
                             item-value="value" label="Estado" required></v-select>
                     </v-col>
@@ -85,11 +85,15 @@ export default {
                 this.$axios
                     .post("/pubreg", this.nuevaRegalia)
                     .then((response) => {
-                        this.$emit("saved");
+                        this.$emit('saved', response.data.message);
                         this.closeDialog();
                     })
                     .catch((error) => {
-                        console.error("Error guardando la regalia:", error);
+                        const errorMessage = error.response && error.response.data && error.response.data.message
+                            ? error.response.data.message
+                            : 'Error creando la regalia';
+                        // Emitimos un evento para informar al padre que ocurrió un error
+                        this.$emit('error', errorMessage);
                     });
             }
         },

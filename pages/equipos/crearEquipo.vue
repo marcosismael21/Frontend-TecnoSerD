@@ -7,23 +7,23 @@
             <v-form ref="form" v-model="valid" lazy-validation>
                 <v-row>
                     <v-col cols="12">
-                        <v-select v-model="nuevoRegistro.idTipoEquipo" :items="tipoEquipo" item-text="nombre"
-                            item-value="id" label="Equipos" required></v-select>
+                        <v-autocomplete v-model="nuevoRegistro.idTipoEquipo" :items="tipoEquipo" item-text="nombre"
+                            item-value="id" label="Equipos" required></v-autocomplete>
                     </v-col>
                     <v-col cols="6">
-                        <v-text-field v-model="nuevoRegistro.noserie" label="N° de SERIE" placeholder="Ej. 12345678" :rules="[rules.required]"
+                        <v-text-field v-model="nuevoRegistro.noserie" label="N° de SERIE" placeholder="Ej. 12345678"
                             required></v-text-field>
                     </v-col>
                     <v-col cols="6">
-                        <v-text-field v-model="nuevoRegistro.noimei" label="N° de IMEI" placeholder="Ej. 12345678" :rules="[rules.required]"
+                        <v-text-field v-model="nuevoRegistro.noimei" label="N° de IMEI" placeholder="Ej. 12345678"
                             required></v-text-field>
                     </v-col>
                     <v-col cols="6">
-                        <v-text-field v-model="nuevoRegistro.pin" label="N° de PIN" placeholder="Ej. 18919159" :rules="[rules.required]"
+                        <v-text-field v-model="nuevoRegistro.pin" label="N° de PIN" placeholder="Ej. 18919159"
                             required></v-text-field>
                     </v-col>
                     <v-col cols="6">
-                        <v-text-field v-model="nuevoRegistro.puk" label="N° de PUK" placeholder="Ej. 1234" :rules="[rules.required]"
+                        <v-text-field v-model="nuevoRegistro.puk" label="N° de PUK" placeholder="Ej. 1234"
                             required></v-text-field>
                     </v-col>
                     <v-col cols="6">
@@ -108,8 +108,17 @@ export default {
             this.$emit('close');
         },
         guardarRegistro() {
+            
             if (this.$refs.form.validate()) {
-                this.$axios.post('/equipo', this.nuevoRegistro)
+                const registro = {
+                    ...this.nuevoRegistro,
+                    noserie: this.nuevoRegistro.noserie || '0',
+                    noimei: this.nuevoRegistro.noimei || '0',
+                    pin: this.nuevoRegistro.pin || '0',
+                    puk: this.nuevoRegistro.puk || '0'
+                }
+
+                this.$axios.post('/equipo', registro)
                     .then(response => {
                         this.$emit('saved');
                         this.closeDialog();
