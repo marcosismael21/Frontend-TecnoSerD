@@ -11,6 +11,25 @@
             <v-list-item-title>{{ item.title }}</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
+        <!-- Botón desplegable de Parámetros -->
+        <v-list-group prepend-icon="mdi-cog" no-action>
+          <template v-slot:activator>
+            <v-list-item>
+              <v-list-item-content>
+                <v-list-item-title>Parámetros</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </template>
+          <!-- Botones anidados en Parámetros -->
+          <v-list-item v-for="(submenu, i) in parametrosItems" :key="i" :to="submenu.to" router exact>
+            <v-list-item-action>
+              <v-icon>{{ submenu.icon }}</v-icon>
+            </v-list-item-action>
+            <v-list-item-content>
+              <v-list-item-title>{{ submenu.title }}</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+        </v-list-group>
         <!-- Botón de salir -->
         <v-list-item @click="openLogoutDialog">
           <v-list-item-action>
@@ -36,8 +55,8 @@
     </v-dialog>
     <v-app-bar :clipped-left="clipped" fixed app :color="isDark ? 'primary' : 'secondary'">
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
-      <v-btn icon @click.stop="miniVariant = !miniVariant">
-        <v-icon>mdi-{{ `chevron - ${miniVariant ? 'right' : 'left'}` }}</v-icon>
+      <v-btn icon @click.stop="miniVariant = !miniVariant" :color="buttonColor">
+        <v-icon>{{ `mdi-chevron-${miniVariant ? 'right' : 'left'}` }}</v-icon>
       </v-btn>
       <v-spacer />
       <v-btn @click="toggleTheme" :color="isDark ? 'white' : 'black'" icon>
@@ -74,9 +93,14 @@ export default {
       logoutDialog: false, // Controla la visibilidad del diálogo de logout
       items: [
         {
-          icon: 'mdi-home',
-          title: 'Tablero',
-          to: '/',
+          icon: 'mdi-chart-bar',
+          title: 'Métricas',
+          to: 'tablero',
+        },
+        {
+          icon: 'mdi-clipboard-outline',
+          title: 'Asignaciones',
+          to: 'asignacion',
         },
         {
           icon: 'mdi-store',
@@ -85,13 +109,40 @@ export default {
         },
         {
           icon: 'mdi-package',
-          title: 'Registro de Equipos',
+          title: 'Equipos',
           to: 'equipos',
+        },
+        {
+          icon: 'mdi-archive',
+          title: 'Comodin',
+          to: 'comodin',
         },
         {
           icon: 'mdi-account-multiple',
           title: 'Colaboradores',
           to: 'usuarios',
+        },
+      ],
+      parametrosItems: [
+        {
+          icon: 'mdi-city',
+          title: 'Ciudades',
+          to: 'ciudad',
+        },
+        {
+          icon: 'mdi-satellite-uplink',
+          title: 'Canal',
+          to: 'canal',
+        },
+        {
+          icon: 'mdi-truck',
+          title: 'Proveedor',
+          to: 'proveedores',
+        },
+        {
+          icon: 'mdi-crown',
+          title: 'Regalía',
+          to: 'regalia',
         },
       ],
     };
@@ -112,6 +163,10 @@ export default {
     appBackgroundClass() {
       return this.isDark ? 'dark-background' : 'light-background';
     },
+    // Cambio de color del botón segun tema
+    buttonColor() {
+      return this.isDark ? 'white' : 'black';
+    }
   },
   methods: {
     toggleTheme() {

@@ -7,47 +7,57 @@
             <v-form>
                 <v-row>
                     <v-col cols="6">
-                        <v-text-field v-model="comercio.nombreComercio" label="Comercio" readonly></v-text-field>
+                        <v-row>
+                            <v-col cols="12">
+                                <v-text-field v-model="comercio.nombreComercio" label="Nombre del Comercio"
+                                    readonly></v-text-field>
+                            </v-col>
+                            <v-col cols="6">
+                                <v-text-field v-model="comercio.numUsuario" label="N° Usuario" readonly></v-text-field>
+                            </v-col>
+                            <v-col cols="6">
+                                <v-text-field v-model="comercio.numTienda" label="N° Tienda" readonly></v-text-field>
+                            </v-col>
+
+                            <v-col cols="12">
+                                <v-textarea v-model="comercio.direccion" label="Direccion" readonly></v-textarea>
+                            </v-col>
+                        </v-row>
                     </v-col>
                     <v-col cols="6">
-                        <v-text-field v-model="comercio.rtn" label="RTN" readonly></v-text-field>
-                    </v-col>
-                    <v-col cols="6">
-                        <v-text-field v-model="comercio.nombreContacto" label="Nombres" readonly></v-text-field>
-                    </v-col>
-                    <v-col cols="6">
-                        <v-text-field v-model="comercio.telefono" label="Telefono" readonly></v-text-field>
-                    </v-col>
-                    <v-col cols="6">
-                        <v-text-field v-model="comercio.numUsuario" label="N° Usuario" readonly></v-text-field>
-                    </v-col>
-                    <v-col cols="6">
-                        <v-text-field v-model="comercio.numTienda" label="N° Tienda" readonly></v-text-field>
-                    </v-col>
-                    <v-col cols="6">
-                        <v-select v-model="comercio.idCiudad" :items="ciudad" item-text="nombre" item-value="id"
-                            label="Ciudad" readonly></v-select>
-                    </v-col>
-                    
-                    <v-col cols="6">
-                        <v-select v-model="comercio.idTipoComercio" :items="tipoComercio" item-text="nombre" item-value="id"
-                            label="Tipo Comercio" readonly></v-select>
-                    </v-col>
-                    <v-col cols="12">
-                        <v-textarea v-model="comercio.direccion" label="Direccion" readonly></v-textarea>
-                    </v-col>
-                    <v-col cols="6">
-                        <v-text-field v-model="comercio.latitud" label="Latitud" readonly></v-text-field>
-                    </v-col>
-                    <v-col cols="6">
-                        <v-text-field v-model="comercio.longitud" label="Longitud" readonly></v-text-field>
+                        <v-row>
+                            <v-col cols="12">
+                                <v-text-field v-model="comercio.nombreContacto" label="Nombres del Contacto"
+                                    readonly></v-text-field>
+                            </v-col>
+                            <v-col cols="6">
+                                <v-text-field v-model="comercio.rtn" label="RTN" readonly></v-text-field>
+                            </v-col>
+                            <v-col cols="6">
+                                <v-text-field v-model="comercio.telefono" label="Telefono" readonly></v-text-field>
+                            </v-col>
+                            <v-col cols="6">
+                                <v-autocomplete v-model="comercio.idCiudad" :items="ciudad" item-text="nombre" item-value="id"
+                                    label="Ciudad" readonly></v-autocomplete>
+                            </v-col>
+                            <v-col cols="6">
+                                <v-select v-model="comercio.idTipoComercio" :items="tipoComercio" item-text="nombre"
+                                    item-value="id" label="Tipo Comercio" readonly></v-select>
+                            </v-col>
+                            <v-col cols="6">
+                                <v-text-field v-model="comercio.latitud" label="Latitud" readonly></v-text-field>
+                            </v-col>
+                            <v-col cols="6">
+                                <v-text-field v-model="comercio.longitud" label="Longitud" readonly></v-text-field>
+                            </v-col>
+                        </v-row>
                     </v-col>
                 </v-row>
             </v-form>
         </v-card-text>
         <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="blue darken-1" text @click="closeDialog">Volver</v-btn>
+            <v-btn color="red darken-1" text @click="closeDialog">Volver</v-btn>
         </v-card-actions>
     </v-card>
     <v-alert v-else type="error">No se pudo cargar la información del comercio.</v-alert>

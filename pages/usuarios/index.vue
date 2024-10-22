@@ -5,7 +5,7 @@
                 <v-card>
                     <v-card-title class="d-flex align-center pe-2">
                         <v-icon icon="mdi-account-circle"></v-icon> &nbsp;
-                        Lista de Usuarios
+                        Lista de Colaboradores
                     </v-card-title>
                     <v-spacer></v-spacer>
                     <v-divider></v-divider>
@@ -14,7 +14,7 @@
                             <v-col cols="9">
                                 <v-btn color="primary" @click="nuevoUsuario">
                                     <v-icon left>mdi-plus</v-icon>
-                                    Añadir Usuarios
+                                    Añadir Colaborador
                                 </v-btn>
                                 <v-btn color="primary" @click="listRoles">
                                     <v-icon left>mdi-account-key</v-icon>
@@ -33,8 +33,8 @@
                     <v-divider></v-divider>
 
                     <v-tabs v-model="tab" align-tabs="center" class="justify-center" color="deep-purple-accent-4">
-                        <v-tab :key="1">Empleados Habilitados</v-tab>
-                        <v-tab :key="2">Empleados Deshabilitados</v-tab>
+                        <v-tab :key="1">Colaboradores Habilitados</v-tab>
+                        <v-tab :key="2">Colaboradores Deshabilitados</v-tab>
                     </v-tabs>
 
                     <v-tabs-items v-model="tab">
@@ -123,6 +123,67 @@
             <editar-usuario :id="usuarioSeleccionado.id" @close="dialogEditarUsuario = false"
                 @saved="fetchUsuarios(); fetchUsuariosFalse();"></editar-usuario>
         </v-dialog>
+
+        <!-- Dialog para cambiar el estado a deshabilitados-->
+
+        <v-dialog v-model="dialogEliminarConfirm" max-width="400" persistent>
+            <v-card>
+                <v-card-title class="text-h6">Confirmar Deshabilitación</v-card-title>
+                <v-card-text>¿Estás seguro de que deseas deshabilitar a este colaborador?</v-card-text>
+                <v-spacer></v-spacer>
+                <v-card-actions>
+                    <v-btn color="red darken-1" text @click="dialogEliminarConfirm = false">Cancelar</v-btn>
+                    <v-btn color="green darken-1" text @click="confirmarEliminacion">Confirmar</v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+
+        <v-dialog v-model="dialogEliminar" max-width="400" persistent>
+            <v-card>
+                <v-card-title class="text-h6">Deshabilitando colaborador...</v-card-title>
+                <v-card-subtitle>
+                    <v-row align="center" class="ma-0 pa-0">
+                        <v-col cols="12" class="d-flex align-center">
+                            <span>Por favor, espere...</span>
+                            <v-spacer></v-spacer>
+                            <v-progress-circular indeterminate color="primary" size="64" width="4"
+                                class="mr-4"></v-progress-circular>
+                        </v-col>
+                    </v-row>
+                </v-card-subtitle>
+            </v-card>
+        </v-dialog>
+
+        <!-- Dialog para cambiar el estado a habilitados-->
+
+        <v-dialog v-model="dialogFalseConfirm" max-width="425" persistent>
+            <v-card>
+                <v-card-title class="text-h6">Confirmar Habilitación</v-card-title>
+                <v-card-text>¿Estás seguro de que deseas habilitar a este colaborador?</v-card-text>
+                <v-spacer></v-spacer>
+                <v-card-actions>
+                    <v-btn color="red darken-1" text @click="dialogFalseConfirm = false">Cancelar</v-btn>
+                    <v-btn color="green darken-1" text @click="confirmarCambioTrue">Confirmar</v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+
+        <v-dialog v-model="dialogFalse" max-width="400" persistent>
+            <v-card>
+                <v-card-title class="text-h6">Habilitando colaborador...</v-card-title>
+                <v-card-subtitle>
+                    <v-row align="center" class="ma-0 pa-0">
+                        <v-col cols="12" class="d-flex align-center">
+                            <span>Por favor, espere...</span>
+                            <v-spacer></v-spacer>
+                            <v-progress-circular indeterminate color="primary" size="64" width="4"
+                                class="mr-4"></v-progress-circular>
+                        </v-col>
+                    </v-row>
+                </v-card-subtitle>
+            </v-card>
+        </v-dialog>
+
     </v-container>
 </template>
 
@@ -142,7 +203,7 @@ export default {
 
         } catch (error) {
             console.error('Error fetching usuarios:', error);
-            return { usuario: [] };
+            return { usuario: [], usuarioFalse: [] };
         }
     },
     watch: {
@@ -168,13 +229,17 @@ export default {
                 { text: 'Acciones', value: 'acciones', sortable: false },
             ],
             estadoOptions: [
-                { text: 'Activo', value: true },
-                { text: 'Inactivo', value: false },
+                { text: 'Habilitado', value: 1 },
+                { text: 'Deshabilitado', value: 0 },
             ],
             //variables para activar los modales
             dialogNuevoUsuario: false,
             dialogEditarUsuario: false,
             dialogDetalleUsuario: false,
+            dialogEliminar: false,
+            dialogFalse: false,
+            dialogEliminarConfirm: false,
+            dialogFalseConfirm: false,
             usuarioSeleccionado: false,
         };
     },
@@ -225,38 +290,66 @@ export default {
             this.dialogEditarUsuario = true;
         },
         cambiarEstadoTrue(id) {
-            if (confirm("¿Estás seguro de que quieres deshabilitar a este Usuario?")) {
-                this.$axios.patch(`/usuario/${id}`, { estado: false })
-                    .then(() => {
-                        // Buscar el usuario en la lista de usuarios activos
-                        const usuario = this.usuario.find(usuario => usuario.id === id)
-                        if (usuario) {
-                            usuario.estado = false // Cambiar el estado a inactivo
-                            this.usuario = this.usuario.filter(usuarios => usuarios.id !== id) // Eliminar de la lista de activos
-                            this.usuarioFalse.push(usuario) // Agregar a la lista de inactivos
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error al cambiar el estado del Usuario:', error)
-                    });
-            }
+            this.usuarioSeleccionado = this.usuario.find((e) => e.id === id) || {}
+            this.dialogEliminarConfirm = true  // Mostrar el modal de confirmación
+        },
+        // Función para deshabilitar un colaborador (cambiar el estado a false)
+        confirmarEliminacion() {
+            this.dialogEliminarConfirm = false;
+            this.dialogEliminar = true;  // Mostrar el modal de carga
+
+            // Usamos this.usuarioSeleccionado.id para obtener el ID del usuario
+            this.$axios.patch(`/usuario/${this.usuarioSeleccionado.id}`, { estado: false })
+                .then(() => {
+                    // Buscar el usuario en la lista de usuarios activos
+                    const usuario = this.usuario.find(usuario => usuario.id === this.usuarioSeleccionado.id);
+                    if (usuario) {
+                        usuario.estado = false;  // Cambiar el estado a inactivo
+                        // Eliminar el usuario de la lista de habilitados
+                        this.usuario = this.usuario.filter(usuarios => usuarios.id !== this.usuarioSeleccionado.id);
+                        // Agregar el usuario a la lista de inhabilitados
+                        this.usuarioFalse.push(usuario);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al cambiar el estado del Usuario:', error);
+                })
+                .finally(() => {
+                    setTimeout(() => {
+                        this.dialogEliminar = false;  // Cerrar el modal de carga después de 2 segundos
+                    }, 2000);
+                });
         },
         cambiarEstadoFalse(id) {
-            if (confirm("¿Estás seguro de que quieres habilitar a este Usuario?")) {
-                this.$axios.patch(`/usuario/${id}`, { estado: true })
-                    .then(() => {
-                        // Buscar el usuario en la lista de usuarios inactivos
-                        const usuario = this.usuarioFalse.find(usuario => usuario.id === id)
-                        if (usuario) {
-                            usuario.estado = true // Cambiar el estado a activo
-                            this.usuarioFalse = this.usuarioFalse.filter(usuarios => usuarios.id !== id) // Eliminar de la lista de inactivos
-                            this.usuario.push(usuario) // Agregar a la lista de activos
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error al cambiar el estado del Usuario:', error)
-                    });
-            }
+            this.usuarioSeleccionado = this.usuarioFalse.find((e) => e.id === id) || {}
+            this.dialogFalseConfirm = true  // Mostrar el modal de confirmación
+        },
+        // Función para habilitar un colaborador (cambiar el estado a true)
+        confirmarCambioTrue() {
+            this.dialogFalseConfirm = false;
+            this.dialogFalse = true;  // Mostrar el modal de carga
+
+            // Usamos this.usuarioSeleccionado.id para obtener el ID del usuario
+            this.$axios.patch(`/usuario/${this.usuarioSeleccionado.id}`, { estado: true })
+                .then(() => {
+                    // Buscar el usuario en la lista de usuarios inactivos
+                    const usuario = this.usuarioFalse.find(usuario => usuario.id === this.usuarioSeleccionado.id);
+                    if (usuario) {
+                        usuario.estado = true;  // Cambiar el estado a activo
+                        // Eliminar el usuario de la lista de inhabilitados
+                        this.usuarioFalse = this.usuarioFalse.filter(usuarios => usuarios.id !== this.usuarioSeleccionado.id);
+                        // Agregar el usuario a la lista de habilitados
+                        this.usuario.push(usuario);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al cambiar el estado del Usuario:', error);
+                })
+                .finally(() => {
+                    setTimeout(() => {
+                        this.dialogFalse = false;  // Cerrar el modal de carga después de 2 segundos
+                    }, 2000);
+                });
         },
         fetchUsuarios() {
             this.$axios.get('/usuario/uf/1')

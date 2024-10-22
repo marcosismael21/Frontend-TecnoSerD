@@ -5,7 +5,7 @@ export default {
     extendRoutes(routes, resolve) {
       routes.push({
         path: '',
-        redirect: '/login',
+        redirect: '/login2',
       })
     },
   },
@@ -30,7 +30,13 @@ export default {
   css: [],
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
-  plugins: ['~/plugins/axios.js'],
+  plugins: [
+    /*'~/plugins/axios.js',
+    { src: '~/plugins/apexcharts.js', mode: 'client' },
+    { src: '~/plugins/apexcharts.js', mode: 'client' }*/
+     '~/plugins/axios.js',
+     { src: '~/plugins/apexcharts.client.js', mode: 'client' }
+  ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
   components: true,

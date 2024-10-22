@@ -7,7 +7,7 @@
             <v-form ref="form" lazy-validation>
                 <v-row>
                     <v-col cols="12">
-                        <v-text-field v-model="nuevoTipoEquipo.nombre" label="Nombre del Tipo de Equipo"
+                        <v-text-field v-model="nuevoTipoEquipo.nombre" label="Nombre del Tipo de Equipo" placeholder="Ej. D2Mini"
                             :rules="[rules.required]" required></v-text-field>
                     </v-col>
                     <v-col cols="12">
@@ -23,8 +23,8 @@
         </v-card-text>
         <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="yellow" text @click="closeDialog">Cancelar</v-btn>
-            <v-btn color="green" text @click="saveTipoEquipo">Guardar</v-btn>
+            <v-btn color="red darken-1" text @click="closeDialog">Cancelar</v-btn>
+            <v-btn color="green darken-1" text @click="saveTipoEquipo">Guardar</v-btn>
         </v-card-actions>
     </v-card>
 </template>

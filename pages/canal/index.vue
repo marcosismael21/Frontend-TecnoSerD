@@ -4,7 +4,7 @@
             <v-col cols="12">
                 <v-card>
                     <v-card-title class="d-flex align-center pe-2">
-                        <v-icon icon="mdi-account-circle"></v-icon> &nbsp; Lista de Regalias
+                        <v-icon icon="mdi-account-circle"></v-icon> &nbsp; Lista de Canales
                         <v-spacer></v-spacer>
                     </v-card-title>
                     <v-spacer></v-spacer>
@@ -12,9 +12,9 @@
                     <v-card-subtitle>
                         <v-row align="center">
                             <v-col cols="9">
-                                <v-btn color="primary" @click="nuevaRegalia">
+                                <v-btn color="primary" @click="nuevoCanal">
                                     <v-icon left>mdi-plus</v-icon>
-                                    Añadir Regalia
+                                    Añadir Canal
                                 </v-btn>
                             </v-col>
 
@@ -28,7 +28,7 @@
 
                     <v-divider></v-divider>
 
-                    <v-data-table :headers="headers" :items="regalia" :search="search">
+                    <v-data-table :headers="headers" :items="canal" :search="search">
                         <template v-slot:item.nro="{ index }">
                             {{ index + 1 }}
                         </template>
@@ -38,20 +38,17 @@
                         <template v-slot:item.idTipoComercio="{ item }">
                             {{ item.idTipoComercio }}
                         </template>
-                        <template v-slot:item.cantidad="{ item }">
-                            {{ item.cantidad }}
-                        </template>
                         <template v-slot:item.estado="{ item }">
                             {{ getEstadoText(item.estado) }}
                         </template>
                         <template v-slot:item.acciones="{ item }">
-                            <v-btn icon @click="detalleRegalia(item.id)">
+                            <v-btn icon @click="detalleCanal(item.id)">
                                 <v-icon>mdi-eye</v-icon>
                             </v-btn>
-                            <v-btn icon @click="editarRegalia(item.id)">
+                            <v-btn icon @click="editarCanal(item.id)">
                                 <v-icon>mdi-pencil</v-icon>
                             </v-btn>
-                            <v-btn icon @click="eliminarRegalia(item.id)">
+                            <v-btn icon @click="eliminarCanal(item.id)">
                                 <v-icon>mdi-delete</v-icon>
                             </v-btn>
                         </template>
@@ -61,24 +58,25 @@
         </v-row>
         <!-- Dialogos para crear Ciudad-->
 
-        <v-dialog v-model="dialogNuevaRegalia" max-width="600px">
-            <nueva-regalia @close="dialogNuevaRegalia = false" @saved="onSuccessRegalia" @error="onErrorRegalia">
-            </nueva-regalia>
+
+
+        <v-dialog v-model="dialogNuevoCanal" max-width="600px">
+            <nuevo-canal @close="dialogNuevoCanal = false" @saved="fetchCanal"></nuevo-canal>
         </v-dialog>
 
-        <v-dialog v-model="dialogEditarRegalia" max-width="600px">
-            <editar-regalia :id="regaliaSeleccionada.id" @close="dialogEditarRegalia = false" @saved="onSuccessRegalia"
-                @error="onErrorRegalia"></editar-regalia>
+        <v-dialog v-model="dialogEditarCanal" max-width="600px">
+            <editar-canal :id="canalSeleccionada.id" @close="dialogEditarCanal = false"
+                @saved="fetchCanal"></editar-canal>
         </v-dialog>
 
-        <v-dialog v-model="dialogDetalleRegalia" max-width="600px">
-            <detalle-regalia :id="regaliaSeleccionada.id" @close="dialogDetalleRegalia = false"></detalle-regalia>
+        <v-dialog v-model="dialogDetalleCanal" max-width="600px">
+            <detalle-canal :id="canalSeleccionada.id" @close="dialogDetalleCanal = false"></detalle-canal>
         </v-dialog>
 
         <v-dialog v-model="dialogEliminarConfirm" max-width="400" persistent>
             <v-card>
                 <v-card-title class="text-h6">Confirmar Eliminación</v-card-title>
-                <v-card-text>¿Estás seguro de que deseas eliminar esta regalia?</v-card-text>
+                <v-card-text>¿Estás seguro de que deseas eliminar este canal?</v-card-text>
                 <v-spacer></v-spacer>
                 <v-card-actions>
                     <v-btn color="red darken-1" text @click="dialogEliminarConfirm = false">Cancelar</v-btn>
@@ -89,7 +87,7 @@
 
         <v-dialog v-model="dialogEliminar" max-width="400" persistent>
             <v-card>
-                <v-card-title class="text-h6">Eliminando regalia...</v-card-title>
+                <v-card-title class="text-h6">Eliminando canal...</v-card-title>
                 <v-card-subtitle>
                     <v-row align="center" class="ma-0 pa-0">
                         <v-col cols="12" class="d-flex align-center">
@@ -103,33 +101,29 @@
             </v-card>
         </v-dialog>
 
-        <v-snackbar v-model="snackbar" :color="snackbarColor" timeout="3000" top>
-            {{ snackbarMessage }}
-        </v-snackbar>
-
     </v-container>
 </template>
 
 <script>
 
-import NuevaRegalia from "~/pages/regalia/crearRegalia.vue"
-import EditarRegalia from "~/pages/regalia/editarRegalia.vue"
-import DetalleRegalia from "~/pages/regalia/detalleRegalia.vue"
+import NuevoCanal from "~/pages/canal/crearCanal.vue"
+import EditarCanal from "~/pages/canal/editarCanal.vue"
+import DetalleCanal from "~/pages/canal/detalleCanal.vue"
 
 export default {
     async asyncData({ $axios }) {
         try {
-            const { data } = await $axios.get("/pubreg")
-            return { regalia: data }
+            const { data } = await $axios.get("/canal")
+            return { canal: data }
         } catch (error) {
-            console.error("Error fetching regalia:", error)
-            return { regalia: [] }
+            console.error("Error fetching canal:", error)
+            return { canal: [] }
         }
     },
     watch: {
         $route(to, from) {
             if (to.fullPath !== from.fullPath) {
-                this.loadRegalia();
+                this.loadCanal();
             }
         },
     },
@@ -137,12 +131,11 @@ export default {
         return {
             tab: 0, // inicializamos el tab en 0
             search: "",
-            regalia: [],
+            canal: [],
             headers: [
                 { text: 'N°', value: 'nro' },
                 { text: "Nombre", value: "nombre" },
                 { text: "Tipo de Comercio", value: "idTipoComercio" },
-                { text: "Cantidad", value: "cantidad" },
                 { text: "Estado", value: "estado" },
                 { text: "Acciones", value: "acciones" },
             ],
@@ -151,45 +144,41 @@ export default {
                 { text: "Inactivo", value: 0 },
             ],
             //variables para activar los modales
-            dialogNuevaRegalia: false,
-            dialogEditarRegalia: false,
-            dialogDetalleRegalia: false,
-            regaliaSeleccionada: false,
+            dialogNuevoCanal: false,
+            dialogEditarCanal: false,
+            dialogDetalleCanal: false,
+            canalSeleccionada: false,
             dialogEliminar: false,
             dialogEliminarConfirm: false,
-            // Añadimos estos campos para el snackbar
-            snackbar: false,
-            snackbarMessage: '',
-            snackbarColor: '',  // 'success' o 'error' para diferenciar el tipo de mensaje
         };
     },
     methods: {
-        async loadRegalia() {
+        async loadCanal() {
             try {
-                const { data } = await this.$axios.get("/pubreg");
-                this.regalia = data;
+                const { data } = await this.$axios.get("/canal");
+                this.canal = data;
             } catch (error) {
-                console.error("Error fetching regalia:", error);
-                this.regalia = [];
+                console.error("Error fetching canal:", error);
+                this.canal = [];
             }
         },
         getEstadoText(estado) {
             const estadoOption = this.estadoOptions.find((option) => option.value === estado)
             return estadoOption ? estadoOption.text : ""
         },
-        nuevaRegalia() {
-            this.dialogNuevaRegalia = true
+        nuevoCanal() {
+            this.dialogNuevoCanal = true
         },
-        editarRegalia(id) {
-            this.regaliaSeleccionada = this.regalia.find((e) => e.id === id) || {}
-            this.dialogEditarRegalia = true
+        editarCanal(id) {
+            this.canalSeleccionada = this.canal.find((e) => e.id === id) || {}
+            this.dialogEditarCanal = true
         },
-        detalleRegalia(id) {
-            this.regaliaSeleccionada = this.regalia.find((e) => e.id === id) || {}
-            this.dialogDetalleRegalia = true
+        detalleCanal(id) {
+            this.canalSeleccionada = this.canal.find((e) => e.id === id) || {}
+            this.dialogDetalleCanal = true
         },
-        eliminarRegalia(id) {
-            this.regaliaSeleccionada = this.regalia.find((e) => e.id === id) || {};
+        eliminarCanal(id) {
+            this.canalSeleccionada = this.canal.find((e) => e.id === id) || {};
             this.dialogEliminarConfirm = true;  // Mostrar el modal de confirmación
         },
         confirmarEliminacion() {
@@ -197,57 +186,34 @@ export default {
             this.dialogEliminar = true;  // Mostrar el modal de carga
 
             this.$axios
-                .delete(`/pubreg/${this.regaliaSeleccionada.id}`)
-                .then((response) => {
-                    // Filtrar las regalías eliminadas
-                    this.regalia = this.regalia.filter((regalias) => regalias.id !== this.regaliaSeleccionada.id);
-
-                    // Mostrar el mensaje que viene del backend en el snackbar
-                    this.showSnackbar(response.data.message, "success");
+                .delete(`/canal/${this.canalSeleccionada.id}`)
+                .then(() => {
+                    this.canal = this.canal.filter((canal) => canal.id !== this.canalSeleccionada.id);
                 })
                 .catch((error) => {
-                    // Mostrar el mensaje de error del backend o un mensaje genérico si no está disponible
-                    const errorMessage = error.response && error.response.data && error.response.data.message
-                        ? error.response.data.message
-                        : "Error eliminando la regalia";
-                    this.showSnackbar(errorMessage, "error");
+                    console.error("Error eliminando el canal:", error);
                 })
                 .finally(() => {
                     setTimeout(() => {
-                        this.dialogEliminar = false;  // Cerrar el modal de carga después de 2 segundos
+                        this.dialogEliminar = false;  // Cerrar el modal de carga después de 3 segundos
                     }, 2000);
                 });
         },
-        showSnackbar(message, color) {
-            this.snackbarMessage = message;
-            this.snackbarColor = color;
-            this.snackbar = true;
-        },
-        onSuccessRegalia(message) {
-            // Mostrar el snackbar con un mensaje de éxito
-            this.showSnackbar(message, 'success');
-            this.fetchRegalias(); // Recargar las regalías
-            this.dialogNuevaRegalia = false; // Cerrar el diálogo
-        },
-        onErrorRegalia(message) {
-            // Mostrar el snackbar con un mensaje de error
-            this.showSnackbar(message, 'error');
-        },
-        fetchRegalias() {
+        fetchCanal() {
             this.$axios
-                .get("/pubreg")
+                .get("/canal")
                 .then((response) => {
-                    this.regalia = response.data;
+                    this.canal = response.data;
                 })
                 .catch((error) => {
-                    console.error("Error fetching regalia:", error);
+                    console.error("Error fetching canal:", error);
                 });
         },
     },
     components: {
-        NuevaRegalia,
-        EditarRegalia,
-        DetalleRegalia
+        NuevoCanal,
+        EditarCanal,
+        DetalleCanal
     },
 };
 </script>
