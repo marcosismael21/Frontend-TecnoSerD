@@ -7,7 +7,7 @@
             <v-form ref="form" lazy-validation>
                 <v-row>
                     <v-col cols="12">
-                        <v-text-field v-model="rol.nombre" label="Rol" :rules="[rules.required]"
+                        <v-text-field v-model="rol.nombre" label="Rol" placeholder="Ej. Administrador" :rules="[rules.required]"
                             required></v-text-field>
                     </v-col> 
                     <v-col cols="12">
@@ -19,8 +19,8 @@
         </v-card-text>
         <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="blue darken-1" text @click="closeDialog">Volver</v-btn>
-            <v-btn color="blue darken-1" text @click="actualizarRol">Guardar</v-btn>
+            <v-btn color="red darken-1" text @click="closeDialog">Volver</v-btn>
+            <v-btn color="green darken-1" text @click="actualizarRol">Guardar</v-btn>
         </v-card-actions>
     </v-card>
     <v-alert v-else type="error">No se pudo cargar la información de la cuidad.</v-alert>

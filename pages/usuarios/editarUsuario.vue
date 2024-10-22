@@ -1,17 +1,17 @@
 <template>
     <v-card v-if="usuario">
         <v-card-title>
-            <span class="headline">Actualizar Género</span>
+            <span class="headline">Actualizar Datos del Colaborador</span>
         </v-card-title>
         <v-card-text>
             <v-form ref="form" v-model="valid" lazy-validation>
                 <v-row>
                     <v-col cols="6">
-                        <v-text-field v-model="usuario.nombres" label="Nombres" :rules="[rules.required]"
+                        <v-text-field v-model="usuario.nombres" label="Nombres" placeholder="Ej. Jose Roberto Mejia" :rules="[rules.required]"
                             required></v-text-field>
                     </v-col>
                     <v-col cols="6">
-                        <v-text-field v-model="usuario.usuario" label="Nombre de usuario" :rules="[rules.required]"
+                        <v-text-field v-model="usuario.usuario" label="Nombre de usuario" placeholder="Ej. jorome" :rules="[rules.required]"
                             required></v-text-field>
                     </v-col>
                     <v-col cols="6">
@@ -33,8 +33,8 @@
         </v-card-text>
         <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="blue darken-1" text @click="closeDialog">Volver</v-btn>
-            <v-btn color="blue darken-1" text @click="actualizarUsuario">Guardar</v-btn>
+            <v-btn color="red darken-1" text @click="closeDialog">Volver</v-btn>
+            <v-btn color="green darken-1" text @click="actualizarUsuario">Guardar</v-btn>
         </v-card-actions>
     </v-card>
     <v-alert v-else type="error">No se pudo cargar la información del usuario.</v-alert>
@@ -55,8 +55,8 @@ export default {
             roles: [],
             valid: false,
             estadoOptions: [
-                { text: 'Activo', value: true },
-                { text: 'Inactivo', value: false },
+                { text: 'Habilitado', value: true },
+                { text: 'Deshabilitado', value: false },
             ],
             rules: {
                 required: value => !!value || 'Requerido.',

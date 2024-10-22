@@ -4,49 +4,47 @@
       <v-col cols="12">
         <v-card>
           <v-card-title class="d-flex align-center pe-2">
-            <v-icon icon="mdi-account-circle"></v-icon> &nbsp; Lista de Roles
+            <v-icon icon="mdi-laptop"></v-icon> &nbsp; Lista de Tipo de Equipos
             <v-spacer></v-spacer>
           </v-card-title>
-          <v-spacer></v-spacer>
           <v-divider></v-divider>
           <v-card-subtitle>
-            <v-row align="center">
+            <v-row>
               <v-col cols="9">
                 <v-btn color="primary" @click="regresar">
                   <v-icon left>mdi-arrow-collapse-left</v-icon>
                   Regresar
                 </v-btn>
-                <v-btn color="primary" @click="nuevoRol">
+                <v-btn color="primary" @click="nuevoTipoEquipo">
                   <v-icon left>mdi-plus</v-icon>
-                  Añadir Rol
+                  Añadir Tipo de Equipo
                 </v-btn>
               </v-col>
-
               <v-col cols="3">
                 <v-text-field v-model="search" density="compact" label="Buscar" prepend-inner-icon="mdi-magnify"
-                  variant="outlined" flat hide-details single-line>
-                </v-text-field>
+                  variant="outlined" flat hide-details single-line></v-text-field>
               </v-col>
             </v-row>
           </v-card-subtitle>
-
           <v-divider></v-divider>
-
-          <v-data-table :headers="headers" :items="rol" :search="search">
-            <template v-slot:item.nro="{ index }">
-              {{ index + 1 }}
+          <v-data-table :headers="headers" :items="tiposEquipo" :search="search">
+            <template v-slot:item.id="{ item }">
+              {{ item.id }}
             </template>
             <template v-slot:item.nombre="{ item }">
               {{ item.nombre }}
+            </template>
+            <template v-slot:item.idProveedor="{ item }">
+              {{ item.idProveedor }}
             </template>
             <template v-slot:item.estado="{ item }">
               {{ getEstadoText(item.estado) }}
             </template>
             <template v-slot:item.acciones="{ item }">
-              <v-btn icon @click="editarRol(item.id)">
+              <v-btn icon @click="editarTipoEquipo(item.id)">
                 <v-icon>mdi-pencil</v-icon>
               </v-btn>
-              <v-btn icon @click="eliminarRol(item.id)">
+              <v-btn icon @click="eliminarTipoEquipo(item.id)">
                 <v-icon>mdi-delete</v-icon>
               </v-btn>
             </template>
@@ -54,22 +52,24 @@
         </v-card>
       </v-col>
     </v-row>
-    <!-- Dialogos para crear Ciudad-->
 
-    <v-dialog v-model="dialogNuevoRol" max-width="600px">
-      <nuevo-rol @close="dialogNuevoRol = false" @saved="fetchRoles"></nuevo-rol>
+    <!-- Diálogos para crear y editar Tipo de Equipo -->
+
+    <v-dialog v-model="dialogNuevoTipoEquipo" max-width="600px">
+      <nuevo @close="dialogNuevoTipoEquipo = false" @saved="fetchTiposEquipo"></nuevo>
     </v-dialog>
 
-    <v-dialog v-model="dialogEditarRol" max-width="600px">
-      <editar-rol :id="rolSeleccionada.id" @close="dialogEditarRol = false" @saved="fetchRoles"></editar-rol>
+    <v-dialog v-model="dialogEditarTipoEquipo" max-width="600px">
+      <editar :id="tipoEquipoSeleccionado.id" @close="dialogEditarTipoEquipo = false" @saved="fetchTiposEquipo">
+      </editar>
     </v-dialog>
 
-    <!--Dialos de eliminar-->
+     <!-- Diálogos eliminar -->
 
     <v-dialog v-model="dialogEliminarConfirm" max-width="400" persistent>
       <v-card>
         <v-card-title class="text-h6">Confirmar Eliminación</v-card-title>
-        <v-card-text>¿Estás seguro de que deseas eliminar este rol?</v-card-text>
+        <v-card-text>¿Estás seguro de que deseas eliminar este equipo?</v-card-text>
         <v-spacer></v-spacer>
         <v-card-actions>
           <v-btn color="red darken-1" text @click="dialogEliminarConfirm = false">Cancelar</v-btn>
@@ -80,7 +80,7 @@
 
     <v-dialog v-model="dialogEliminar" max-width="400" persistent>
       <v-card>
-        <v-card-title class="text-h6">Eliminando rol...</v-card-title>
+        <v-card-title class="text-h6">Eliminando equipo...</v-card-title>
         <v-card-subtitle>
           <v-row align="center" class="ma-0 pa-0">
             <v-col cols="12" class="d-flex align-center">
@@ -93,78 +93,56 @@
       </v-card>
     </v-dialog>
 
+
   </v-container>
 </template>
 
 <script>
-import NuevoRol from '~/pages/rol/crearRol.vue'
-import EditarRol from '~/pages/rol/editarRol.vue'
+import Nuevo from '~/pages/tipoEquipo/crear.vue';
+import Editar from '~/pages/tipoEquipo/editar.vue';
 
 export default {
   async asyncData({ $axios }) {
     try {
-      const { data } = await $axios.get('/rol')
-      return { rol: data }
+      const { data } = await $axios.get('/tipoequipo');
+      return { tiposEquipo: data };
     } catch (error) {
-      console.error('Error fetching rol:', error)
-      return { rol: [] }
+      console.error('Error fetching tipos de equipo:', error);
+      return { tiposEquipo: [] };
     }
-  },
-  watch: {
-    $route(to, from) {
-      if (to.fullPath !== from.fullPath) {
-        this.loadRol()
-      }
-    },
   },
   data() {
     return {
-      tab: 0, // inicializamos el tab en 0
       search: '',
-      rol: [],
+      tiposEquipo: [],
       headers: [
-        { text: 'N°', value: 'nro' },
+        { text: 'ID', value: 'id' },
         { text: 'Nombre', value: 'nombre' },
+        { text: 'Proveedor', value: 'idProveedor' },
         { text: 'Estado', value: 'estado' },
         { text: 'Acciones', value: 'acciones' },
       ],
       estadoOptions: [
-        { text: 'Activo', value: true },
-        { text: 'Inactivo', value: false },
+        { text: 'Activo', value: 1 },
+        { text: 'Inactivo', value: 0 },
       ],
-      //variables para activar los modales
-      dialogNuevoRol: false,
-      dialogEditarRol: false,
+      dialogNuevoTipoEquipo: false,
+      dialogEditarTipoEquipo: false,
       dialogEliminar: false,
       dialogEliminarConfirm: false,
-      rolSeleccionada: false,
-    }
+      tipoEquipoSeleccionado: false,
+    };
   },
   methods: {
-    async loadRol() {
-      try {
-        const { data } = await this.$axios.get('/rol')
-        this.rol = data
-      } catch (error) {
-        console.error('Error fetching rol:', error)
-        this.rol = []
-      }
+    nuevoTipoEquipo() {
+      this.dialogNuevoTipoEquipo = true;
     },
-    getEstadoText(estado) {
-      const estadoOption = this.estadoOptions.find(
-        (option) => option.value === estado
-      )
-      return estadoOption ? estadoOption.text : ''
+    editarTipoEquipo(id) {
+      this.tipoEquipoSeleccionado = this.tiposEquipo.find((e) => e.id === id) || {};
+      this.dialogEditarTipoEquipo = true;
     },
-    nuevoRol() {
-      this.dialogNuevoRol = true
-    },
-    editarRol(id) {
-      this.rolSeleccionada = this.rol.find((e) => e.id === id) || {}
-      this.dialogEditarRol = true
-    },
-    eliminarRol(id) {
-      this.rolSeleccionada = this.rol.find((e) => e.id === id) || {};
+    eliminarTipoEquipo(id) {
+      this.tipoEquipoSeleccionado = this.tiposEquipo.find((e) => e.id === id) || {};
       this.dialogEliminarConfirm = true;
     },
     confirmarEliminacion() {
@@ -172,12 +150,12 @@ export default {
       this.dialogEliminar = true;  // Mostrar el modal de carga
 
       this.$axios
-        .delete(`/rol/${this.rolSeleccionada.id}`)
+        .delete(`/tipoequipo/${this.tipoEquipoSeleccionado.id}`)
         .then(() => {
-          this.rol = this.rol.filter((roles) => roles.id !== this.rolSeleccionada.id);
+          this.tiposEquipo = this.tiposEquipo.filter((tiposEquipo) => tiposEquipo.id !== this.tipoEquipoSeleccionado.id);
         })
         .catch((error) => {
-          console.error("Error eliminando el rol:", error);
+          console.error("Error eliminando el tipos de equipo:", error);
         })
         .finally(() => {
           setTimeout(() => {
@@ -185,23 +163,27 @@ export default {
           }, 2000);
         });
     },
-    fetchRoles() {
+    getEstadoText(estado) {
+      const estadoOption = this.estadoOptions.find(option => option.value === estado);
+      return estadoOption ? estadoOption.text : '';
+    },
+    fetchTiposEquipo() {
       this.$axios
-        .get('/rol')
+        .get('/tipoequipo')
         .then((response) => {
-          this.rol = response.data
+          this.tiposEquipo = response.data;
         })
         .catch((error) => {
-          console.error('Error fetching rol:', error)
-        })
+          console.error('Error fetching tipos de equipo:', error);
+        });
     },
     regresar() {
-      this.$router.push('usuarios')
-    },
+      this.$router.push('equipos');
+    }
   },
   components: {
-    NuevoRol,
-    EditarRol,
+    Nuevo,
+    Editar
   },
-}
+};
 </script>

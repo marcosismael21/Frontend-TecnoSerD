@@ -2,23 +2,19 @@
   <v-container>
     <v-row>
       <v-col cols="12">
-        <v-card>
+        <v-card flat>
           <v-card-title class="d-flex align-center pe-2">
-            <v-icon icon="mdi-account-circle"></v-icon> &nbsp; Lista de Roles
+            <v-icon icon="mdi-account-circle"></v-icon> &nbsp; Lista de Proveedores
             <v-spacer></v-spacer>
           </v-card-title>
           <v-spacer></v-spacer>
           <v-divider></v-divider>
           <v-card-subtitle>
-            <v-row align="center">
+            <v-row>
               <v-col cols="9">
-                <v-btn color="primary" @click="regresar">
-                  <v-icon left>mdi-arrow-collapse-left</v-icon>
-                  Regresar
-                </v-btn>
-                <v-btn color="primary" @click="nuevoRol">
+                <v-btn color="primary" @click="nuevoProveedor">
                   <v-icon left>mdi-plus</v-icon>
-                  Añadir Rol
+                  Añadir Proveedor
                 </v-btn>
               </v-col>
 
@@ -32,7 +28,7 @@
 
           <v-divider></v-divider>
 
-          <v-data-table :headers="headers" :items="rol" :search="search">
+          <v-data-table :headers="headers" :items="proveedores" :search="search">
             <template v-slot:item.nro="{ index }">
               {{ index + 1 }}
             </template>
@@ -43,10 +39,10 @@
               {{ getEstadoText(item.estado) }}
             </template>
             <template v-slot:item.acciones="{ item }">
-              <v-btn icon @click="editarRol(item.id)">
+              <v-btn icon @click="editarProveedor(item.id)">
                 <v-icon>mdi-pencil</v-icon>
               </v-btn>
-              <v-btn icon @click="eliminarRol(item.id)">
+              <v-btn icon @click="eliminarProveedor(item.id)">
                 <v-icon>mdi-delete</v-icon>
               </v-btn>
             </template>
@@ -54,22 +50,21 @@
         </v-card>
       </v-col>
     </v-row>
-    <!-- Dialogos para crear Ciudad-->
+    <!-- Diálogos para crear Proveedor -->
 
-    <v-dialog v-model="dialogNuevoRol" max-width="600px">
-      <nuevo-rol @close="dialogNuevoRol = false" @saved="fetchRoles"></nuevo-rol>
+    <v-dialog v-model="dialogNuevoProveedor" max-width="600px">
+      <nuevo-proveedor @close="dialogNuevoProveedor = false" @saved="fetchProveedores"></nuevo-proveedor>
     </v-dialog>
 
-    <v-dialog v-model="dialogEditarRol" max-width="600px">
-      <editar-rol :id="rolSeleccionada.id" @close="dialogEditarRol = false" @saved="fetchRoles"></editar-rol>
+    <v-dialog v-model="dialogEditarProveedor" max-width="600px">
+      <editar-proveedor :id="proveedorSeleccionado.id" @close="dialogEditarProveedor = false"
+        @saved="fetchProveedores"></editar-proveedor>
     </v-dialog>
-
-    <!--Dialos de eliminar-->
 
     <v-dialog v-model="dialogEliminarConfirm" max-width="400" persistent>
       <v-card>
         <v-card-title class="text-h6">Confirmar Eliminación</v-card-title>
-        <v-card-text>¿Estás seguro de que deseas eliminar este rol?</v-card-text>
+        <v-card-text>¿Estás seguro de que deseas eliminar este proovedor?</v-card-text>
         <v-spacer></v-spacer>
         <v-card-actions>
           <v-btn color="red darken-1" text @click="dialogEliminarConfirm = false">Cancelar</v-btn>
@@ -80,7 +75,7 @@
 
     <v-dialog v-model="dialogEliminar" max-width="400" persistent>
       <v-card>
-        <v-card-title class="text-h6">Eliminando rol...</v-card-title>
+        <v-card-title class="text-h6">Eliminando proovedor...</v-card-title>
         <v-card-subtitle>
           <v-row align="center" class="ma-0 pa-0">
             <v-col cols="12" class="d-flex align-center">
@@ -97,31 +92,30 @@
 </template>
 
 <script>
-import NuevoRol from '~/pages/rol/crearRol.vue'
-import EditarRol from '~/pages/rol/editarRol.vue'
+import NuevoProveedor from '~/pages/proveedores/crearProveedor.vue'
+import EditarProveedor from '~/pages/proveedores/editarProveedor.vue'
 
 export default {
   async asyncData({ $axios }) {
     try {
-      const { data } = await $axios.get('/rol')
-      return { rol: data }
+      const { data } = await $axios.get('/proveedor')
+      return { proveedores: data }
     } catch (error) {
-      console.error('Error fetching rol:', error)
-      return { rol: [] }
+      console.error('Error fetching proveedores:', error)
+      return { proveedores: [] }
     }
   },
   watch: {
     $route(to, from) {
       if (to.fullPath !== from.fullPath) {
-        this.loadRol()
+        this.loadProveedores()
       }
     },
   },
   data() {
     return {
-      tab: 0, // inicializamos el tab en 0
       search: '',
-      rol: [],
+      proveedores: [],
       headers: [
         { text: 'N°', value: 'nro' },
         { text: 'Nombre', value: 'nombre' },
@@ -132,22 +126,22 @@ export default {
         { text: 'Activo', value: true },
         { text: 'Inactivo', value: false },
       ],
-      //variables para activar los modales
-      dialogNuevoRol: false,
-      dialogEditarRol: false,
+      // Variables para activar los modales
+      dialogNuevoProveedor: false,
+      dialogEditarProveedor: false,
+      proveedorSeleccionado: false,
       dialogEliminar: false,
       dialogEliminarConfirm: false,
-      rolSeleccionada: false,
     }
   },
   methods: {
-    async loadRol() {
+    async loadProveedores() {
       try {
-        const { data } = await this.$axios.get('/rol')
-        this.rol = data
+        const { data } = await this.$axios.get('/proveedor')
+        this.proveedores = data
       } catch (error) {
-        console.error('Error fetching rol:', error)
-        this.rol = []
+        console.error('Error fetching proveedores:', error)
+        this.proveedores = []
       }
     },
     getEstadoText(estado) {
@@ -156,28 +150,28 @@ export default {
       )
       return estadoOption ? estadoOption.text : ''
     },
-    nuevoRol() {
-      this.dialogNuevoRol = true
+    nuevoProveedor() {
+      this.dialogNuevoProveedor = true
     },
-    editarRol(id) {
-      this.rolSeleccionada = this.rol.find((e) => e.id === id) || {}
-      this.dialogEditarRol = true
+    editarProveedor(id) {
+      this.proveedorSeleccionado = this.proveedores.find((e) => e.id === id) || {}
+      this.dialogEditarProveedor = true
     },
-    eliminarRol(id) {
-      this.rolSeleccionada = this.rol.find((e) => e.id === id) || {};
-      this.dialogEliminarConfirm = true;
+    eliminarProveedor(id) {
+      this.proveedorSeleccionado = this.proveedores.find((e) => e.id === id) || {};
+      this.dialogEliminarConfirm = true;  // Mostrar el modal de confirmación
     },
     confirmarEliminacion() {
       this.dialogEliminarConfirm = false;
       this.dialogEliminar = true;  // Mostrar el modal de carga
 
       this.$axios
-        .delete(`/rol/${this.rolSeleccionada.id}`)
+        .delete(`/proveedor/${this.proveedorSeleccionado.id}`)
         .then(() => {
-          this.rol = this.rol.filter((roles) => roles.id !== this.rolSeleccionada.id);
+          this.proveedores = this.proveedores.filter((proveedor) => proveedor.id !== this.proveedorSeleccionado.id);
         })
         .catch((error) => {
-          console.error("Error eliminando el rol:", error);
+          console.error("Error eliminando el proveedor:", error);
         })
         .finally(() => {
           setTimeout(() => {
@@ -185,23 +179,20 @@ export default {
           }, 2000);
         });
     },
-    fetchRoles() {
+    fetchProveedores() {
       this.$axios
-        .get('/rol')
+        .get('/proveedor')
         .then((response) => {
-          this.rol = response.data
+          this.proveedores = response.data
         })
         .catch((error) => {
-          console.error('Error fetching rol:', error)
+          console.error('Error fetching proveedores:', error)
         })
-    },
-    regresar() {
-      this.$router.push('usuarios')
     },
   },
   components: {
-    NuevoRol,
-    EditarRol,
+    NuevoProveedor,
+    EditarProveedor,
   },
 }
 </script>
