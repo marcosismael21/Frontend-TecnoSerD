@@ -61,16 +61,16 @@
     </v-row>
     <!-- Dialogos para crear Ciudad-->
 
-    <v-dialog v-model="dialogNuevoComercio" max-width="700px">
-      <nuevo-comercio @close="dialogNuevoComercio = false" @saved="fetchComercios"></nuevo-comercio>
+    <v-dialog v-model="dialogNuevoComercio" max-width="700px" persistent>
+      <nuevo-comercio @close="dialogNuevoComercio = false" @saved="onSuccess" @error="onError"></nuevo-comercio>
     </v-dialog>
 
-    <v-dialog v-model="dialogEditarComercio" max-width="700px">
-      <editar-comercio :id="comercioSeleccionada.id" @close="dialogEditarComercio = false"
-        @saved="fetchComercios"></editar-comercio>
+    <v-dialog v-model="dialogEditarComercio" max-width="700px" persistent>
+      <editar-comercio :id="comercioSeleccionada.id" @close="dialogEditarComercio = false" @saved="onSuccess"
+        @error="onError"></editar-comercio>
     </v-dialog>
 
-    <v-dialog v-model="dialogDetalleComercio" max-width="700px">
+    <v-dialog v-model="dialogDetalleComercio" max-width="700px" persistent>
       <detalle-comercio :id="comercioSeleccionada.id" @close="dialogDetalleComercio = false"></detalle-comercio>
     </v-dialog>
 
@@ -85,8 +85,6 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-
-
 
     <v-dialog v-model="dialogEliminar" max-width="400" persistent>
       <v-card>
@@ -105,6 +103,10 @@
         </v-card-subtitle>
       </v-card>
     </v-dialog>
+
+    <v-snackbar v-model="snackbar" :color="snackbarColor" timeout="3000" top>
+      {{ snackbarMessage }}
+    </v-snackbar>
 
   </v-container>
 </template>
@@ -153,6 +155,10 @@ export default {
       comercioSeleccionada: false,
       alertMessage: '',
       alertType: '',
+      // Añadimos estos campos para el snackbar
+      snackbar: false,
+      snackbarMessage: '',
+      snackbarColor: '',  // 'success' o 'error' para diferenciar el tipo de mensaje
     }
   },
   methods: {
@@ -186,21 +192,37 @@ export default {
 
       this.$axios
         .delete(`/comercio/${this.comercioSeleccionada.id}`)
-        .then(response => {
-          const message = response.data.message || 'Error al eliminar este comercio'
-          this.setAlert(message, "error");
+        .then((response) => {
           this.comercio = this.comercio.filter((comercio) => comercio.id !== this.comercioSeleccionada.id);
+          // Mostrar el mensaje que viene del backend en el snackbar
+          this.showSnackbar(response.data.message, "success");
         })
         .catch((error) => {
-          console.error("Error eliminando el comercio:", error);
-          const message =  'Error al eliminar este comercio'
-          this.setAlert(message, "error");
+          // Mostrar el mensaje de error del backend o un mensaje genérico si no está disponible
+          const errorMessage = error.response && error.response.data && error.response.data.message
+            ? error.response.data.message
+            : "Error eliminando el comercio";
+          this.showSnackbar(errorMessage, "error");
         })
         .finally(() => {
           setTimeout(() => {
             this.dialogEliminar = false;  // Cerrar el modal de carga después de 3 segundos
           }, 2000);
         });
+    },
+    showSnackbar(message, color) {
+      this.snackbarMessage = message;
+      this.snackbarColor = color;
+      this.snackbar = true;
+    },
+    onSuccess(message) {
+      // Mostrar el snackbar con un mensaje de éxito
+      this.showSnackbar(message, 'success');
+      this.fetchComercios()
+    },
+    onError(message) {
+      // Mostrar el snackbar con un mensaje de error
+      this.showSnackbar(message, 'error');
     },
     fetchComercios() {
       this.$axios

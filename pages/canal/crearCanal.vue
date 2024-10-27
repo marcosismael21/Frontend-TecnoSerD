@@ -79,11 +79,15 @@ export default {
                 this.$axios
                     .post("/canal", this.nuevoCanal)
                     .then((response) => {
-                        this.$emit("saved");
-                        this.closeDialog();
+                      this.$emit('saved', response.data.message)
+                      this.closeDialog()
                     })
                     .catch((error) => {
-                        console.error("Error guardando el canal:", error);
+                      const errorMessage = error.response && error.response.data && error.response.data.message
+                            ? error.response.data.message
+                            : 'Error creando el canal';
+                        // Emitimos un evento para informar al padre que ocurrió un error
+                        this.$emit('error', errorMessage);
                     });
             }
         },
