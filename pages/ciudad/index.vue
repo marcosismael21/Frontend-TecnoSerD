@@ -52,42 +52,45 @@
     </v-row>
     <!-- Dialogos para crear Ciudad-->
 
-    <v-dialog v-model="dialogNuevoCiudad" max-width="600px">
-      <nuevo-ciudad @close="dialogNuevoCiudad = false" @saved="fetchCiudads"></nuevo-ciudad>
+    <v-dialog v-model="dialogNuevoCiudad" max-width="600px" persistent>
+      <nuevo-ciudad @close="dialogNuevoCiudad = false" @saved="onSuccess" @error="onError"></nuevo-ciudad>
     </v-dialog>
 
-    <v-dialog v-model="dialogEditarCiudad" max-width="600px">
-      <editar-ciudad :id="ciudadSeleccionada.id" @close="dialogEditarCiudad = false"
-        @saved="fetchCiudads"></editar-ciudad>
+    <v-dialog v-model="dialogEditarCiudad" max-width="600px" persistent>
+      <editar-ciudad :id="ciudadSeleccionada.id" @close="dialogEditarCiudad = false" @saved="onSuccess"
+        @error="onError"></editar-ciudad>
     </v-dialog>
 
     <v-dialog v-model="dialogEliminarConfirm" max-width="400" persistent>
-            <v-card>
-                <v-card-title class="text-h6">Confirmar Eliminación</v-card-title>
-                <v-card-text>¿Estás seguro de que deseas eliminar esta ciudad?</v-card-text>
-                <v-spacer></v-spacer>
-                <v-card-actions>
-                    <v-btn color="red darken-1" text @click="dialogEliminarConfirm = false">Cancelar</v-btn>
-                    <v-btn color="green darken-1" text @click="confirmarEliminacion">Eliminar</v-btn>
-                </v-card-actions>
-            </v-card>
-        </v-dialog>
+      <v-card>
+        <v-card-title class="text-h6">Confirmar Eliminación</v-card-title>
+        <v-card-text>¿Estás seguro de que deseas eliminar esta ciudad?</v-card-text>
+        <v-spacer></v-spacer>
+        <v-card-actions>
+          <v-btn color="red darken-1" text @click="dialogEliminarConfirm = false">Cancelar</v-btn>
+          <v-btn color="green darken-1" text @click="confirmarEliminacion">Eliminar</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
-        <v-dialog v-model="dialogEliminar" max-width="400" persistent>
-            <v-card>
-                <v-card-title class="text-h6">Eliminando ciudad...</v-card-title>
-                <v-card-subtitle>
-                    <v-row align="center" class="ma-0 pa-0">
-                        <v-col cols="12" class="d-flex align-center">
-                            <span>Por favor, espere...</span>
-                            <v-spacer></v-spacer>
-                            <v-progress-circular indeterminate color="primary" size="64" width="4"
-                                class="mr-4"></v-progress-circular>
-                        </v-col>
-                    </v-row>
-                </v-card-subtitle>
-            </v-card>
-        </v-dialog>
+    <v-dialog v-model="dialogEliminar" max-width="400" persistent>
+      <v-card>
+        <v-card-title class="text-h6">Eliminando ciudad...</v-card-title>
+        <v-card-subtitle>
+          <v-row align="center" class="ma-0 pa-0">
+            <v-col cols="12" class="d-flex align-center">
+              <span>Por favor, espere...</span>
+              <v-spacer></v-spacer>
+              <v-progress-circular indeterminate color="primary" size="64" width="4" class="mr-4"></v-progress-circular>
+            </v-col>
+          </v-row>
+        </v-card-subtitle>
+      </v-card>
+    </v-dialog>
+
+    <v-snackbar v-model="snackbar" :color="snackbarColor" timeout="3000" top>
+      {{ snackbarMessage }}
+    </v-snackbar>
 
   </v-container>
 </template>
@@ -133,6 +136,10 @@ export default {
       ciudadSeleccionada: false,
       dialogEliminar: false,
       dialogEliminarConfirm: false,
+      // Añadimos estos campos para el snackbar
+      snackbar: false,
+      snackbarMessage: '',
+      snackbarColor: '',  // 'success' o 'error' para diferenciar el tipo de mensaje
     }
   },
   methods: {
@@ -159,8 +166,8 @@ export default {
       this.dialogEditarCiudad = true
     },
     eliminarCiudad(id) {
-            this.ciudadSeleccionada = this.ciudad.find((e) => e.id === id) || {};
-            this.dialogEliminarConfirm = true;  // Mostrar el modal de confirmación
+      this.ciudadSeleccionada = this.ciudad.find((e) => e.id === id) || {};
+      this.dialogEliminarConfirm = true;  // Mostrar el modal de confirmación
     },
     confirmarEliminacion() {
       this.dialogEliminarConfirm = false;
@@ -168,18 +175,39 @@ export default {
 
       this.$axios
         .delete(`/ciudad/${this.ciudadSeleccionada.id}`)
-        .then(() => {
+        .then((response) => {
           this.ciudad = this.ciudad.filter((ciudad) => ciudad.id !== this.ciudadSeleccionada.id);
+
+          // Mostrar el mensaje que viene del backend en el snackbar
+          this.showSnackbar(response.data.message, "success");
         })
         .catch((error) => {
-          console.error("Error eliminando la ciudad:", error);
+          // Mostrar el mensaje de error del backend o un mensaje genérico si no está disponible
+          const errorMessage = error.response && error.response.data && error.response.data.message
+            ? error.response.data.message
+            : "Error eliminando la ciudad";
+          this.showSnackbar(errorMessage, "error");
         })
         .finally(() => {
           setTimeout(() => {
             this.dialogEliminar = false;  // Cerrar el modal de carga después de 3 segundos
           }, 2000);
         });
-        },
+    },
+    showSnackbar(message, color) {
+      this.snackbarMessage = message;
+      this.snackbarColor = color;
+      this.snackbar = true;
+    },
+    onSuccess(message) {
+      // Mostrar el snackbar con un mensaje de éxito
+      this.showSnackbar(message, 'success');
+      this.fetchCiudads()
+    },
+    onError(message) {
+      // Mostrar el snackbar con un mensaje de error
+      this.showSnackbar(message, 'error');
+    },
     fetchCiudads() {
       this.$axios
         .get('/ciudad')
