@@ -52,8 +52,8 @@
                             <v-btn icon @click="editarAsignacion(item.idComercio, item.idServicio, item.idEstado)">
                                 <v-icon>mdi-pencil</v-icon>
                             </v-btn>
-                            <v-btn icon @click="editarAsignacion(item.idComercio, item.idServicio, item.idEstado)">
-                                <v-icon>mdi-pencil</v-icon>
+                            <v-btn icon @click="asignarTecnico(item.idComercio, item.idServicio, item.idEstado)">
+                                <v-icon>mdi-cube-send</v-icon>
                             </v-btn>
                         </template>
                     </v-data-table>
@@ -78,6 +78,11 @@
                 :idEstado="asignacionSeleccionada.idEstado" :idServicio="asignacionSeleccionada.idServicio"
                 @close="dialogEditarAsignacion = false" @saved="fetchAsignacion"></editar-asignacion>
         </v-dialog>
+        <v-dialog v-model="dialogasignarTecnico" max-width="600px">
+            <asignacion-tecnico :idComercio="asignacionSeleccionada.idComercio"
+                :idEstado="asignacionSeleccionada.idEstado" :idServicio="asignacionSeleccionada.idServicio"
+                @close="dialogasignarTecnico = false" @saved="fetchAsignacion"></asignacion-tecnico>
+        </v-dialog>
 
     </v-container>
 </template>
@@ -86,6 +91,7 @@
 import CrearAsignacion from '~/pages/asignacion/crearAsignacion.vue'
 import DetalleAsignacion from '~/pages/asignacion/detalleAsignacion.vue'
 import EditarAsignacion from '~/pages/asignacion/editarAsignacion.vue'
+import AsignacionTecnico from '~/pages/asignacion/crearAsignacionTecnico.vue'
 
 export default {
     async asyncData({ $axios }) {
@@ -119,6 +125,7 @@ export default {
             dialogEditarAsignacion: false,
             dialogDetalleAsignacion: false,
             asignacionSeleccionada: false,
+            dialogasignarTecnico: false,
         }
     },
     methods: {
@@ -133,6 +140,13 @@ export default {
         },
         nuevaAsignacion() {
             this.dialogNuevaAsignacion = true
+        },
+        asignarTecnico(idComercio, idServicio, idEstado) {
+            this.asignacionSeleccionada = this.asignacion.find(
+                (e) => e.idComercio === idComercio
+                    && e.idServicio === idServicio
+                    && e.idEstado === idEstado) || {}
+            this.dialogasignarTecnico = true
         },
         editarAsignacion(idComercio, idServicio, idEstado) {
             this.asignacionSeleccionada = this.asignacion.find(
@@ -175,7 +189,8 @@ export default {
     components: {
         CrearAsignacion,
         DetalleAsignacion,
-        EditarAsignacion
+        EditarAsignacion,
+        AsignacionTecnico
     },
 }
 </script>
