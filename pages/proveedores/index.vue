@@ -52,13 +52,13 @@
     </v-row>
     <!-- Diálogos para crear Proveedor -->
 
-    <v-dialog v-model="dialogNuevoProveedor" max-width="600px">
-      <nuevo-proveedor @close="dialogNuevoProveedor = false" @saved="fetchProveedores"></nuevo-proveedor>
+    <v-dialog v-model="dialogNuevoProveedor" max-width="600px" persistent>
+      <nuevo-proveedor @close="dialogNuevoProveedor = false" @saved="onSuccess" @error="onError"></nuevo-proveedor>
     </v-dialog>
 
-    <v-dialog v-model="dialogEditarProveedor" max-width="600px">
-      <editar-proveedor :id="proveedorSeleccionado.id" @close="dialogEditarProveedor = false"
-        @saved="fetchProveedores"></editar-proveedor>
+    <v-dialog v-model="dialogEditarProveedor" max-width="600px" persistent>
+      <editar-proveedor :id="proveedorSeleccionado.id" @close="dialogEditarProveedor = false" @saved="onSuccess"
+        @error="onError"></editar-proveedor>
     </v-dialog>
 
     <v-dialog v-model="dialogEliminarConfirm" max-width="400" persistent>
@@ -87,6 +87,10 @@
         </v-card-subtitle>
       </v-card>
     </v-dialog>
+
+    <v-snackbar v-model="snackbar" :color="snackbarColor" timeout="3000" top>
+      {{ snackbarMessage }}
+    </v-snackbar>
 
   </v-container>
 </template>
@@ -132,6 +136,10 @@ export default {
       proveedorSeleccionado: false,
       dialogEliminar: false,
       dialogEliminarConfirm: false,
+      // Añadimos estos campos para el snackbar
+      snackbar: false,
+      snackbarMessage: '',
+      snackbarColor: '',  // 'success' o 'error' para diferenciar el tipo de mensaje
     }
   },
   methods: {
@@ -167,17 +175,38 @@ export default {
 
       this.$axios
         .delete(`/proveedor/${this.proveedorSeleccionado.id}`)
-        .then(() => {
+        .then((response) => {
           this.proveedores = this.proveedores.filter((proveedor) => proveedor.id !== this.proveedorSeleccionado.id);
+
+          // Mostrar el mensaje que viene del backend en el snackbar
+          this.showSnackbar(response.data.message, "success");
         })
         .catch((error) => {
-          console.error("Error eliminando el proveedor:", error);
+          // Mostrar el mensaje de error del backend o un mensaje genérico si no está disponible
+          const errorMessage = error.response && error.response.data && error.response.data.message
+            ? error.response.data.message
+            : "Error eliminando el proveedor";
+          this.showSnackbar(errorMessage, "error");
         })
         .finally(() => {
           setTimeout(() => {
             this.dialogEliminar = false;  // Cerrar el modal de carga después de 3 segundos
           }, 2000);
         });
+    },
+    showSnackbar(message, color) {
+      this.snackbarMessage = message;
+      this.snackbarColor = color;
+      this.snackbar = true;
+    },
+    onSuccess(message) {
+      // Mostrar el snackbar con un mensaje de éxito
+      this.showSnackbar(message, 'success');
+      this.fetchProveedores();
+    },
+    onError(message) {
+      // Mostrar el snackbar con un mensaje de error
+      this.showSnackbar(message, 'error');
     },
     fetchProveedores() {
       this.$axios
