@@ -36,6 +36,9 @@
             <template v-slot:item.nomComerio="{ item }">
               {{ item.nomComerio }}
             </template>
+            <template v-slot:item.ciudad="{ item }">
+              {{ item.ciudad }}
+            </template>
             <template v-slot:item.servicio="{ item }">
               {{ item.servicio }}
             </template>
@@ -114,6 +117,7 @@ export default {
       headers: [
         { text: 'N°', value: 'nro' },
         { text: "Comercio", value: "nomComerio" },
+        { text: "Ciudad", value: "ciudad" },
         { text: "Tipo de Servicio", value: "servicio" },
         { text: "Estado", value: "estado" },
         { text: "Acciones", value: "acciones" },
