@@ -21,7 +21,6 @@
                   Añadir Rol
                 </v-btn>
               </v-col>
-
               <v-col cols="3">
                 <v-text-field v-model="search" density="compact" label="Buscar" prepend-inner-icon="mdi-magnify"
                   variant="outlined" flat hide-details single-line>
@@ -56,12 +55,13 @@
     </v-row>
     <!-- Dialogos para crear Ciudad-->
 
-    <v-dialog v-model="dialogNuevoRol" max-width="600px">
-      <nuevo-rol @close="dialogNuevoRol = false" @saved="fetchRoles"></nuevo-rol>
+    <v-dialog v-model="dialogNuevoRol" max-width="600px" persistent>
+      <nuevo-rol @close="dialogNuevoRol = false" @saved="onSuccess" @error="onError"></nuevo-rol>
     </v-dialog>
 
-    <v-dialog v-model="dialogEditarRol" max-width="600px">
-      <editar-rol :id="rolSeleccionada.id" @close="dialogEditarRol = false" @saved="fetchRoles"></editar-rol>
+    <v-dialog v-model="dialogEditarRol" max-width="600px" persistent>
+      <editar-rol :id="rolSeleccionada.id" @close="dialogEditarRol = false" @saved="onSuccess"
+        @error="onError"></editar-rol>
     </v-dialog>
 
     <!--Dialos de eliminar-->
@@ -92,7 +92,9 @@
         </v-card-subtitle>
       </v-card>
     </v-dialog>
-
+    <v-snackbar v-model="snackbar" :color="snackbarColor" timeout="3000" top>
+      {{ snackbarMessage }}
+    </v-snackbar>
   </v-container>
 </template>
 
@@ -138,6 +140,10 @@ export default {
       dialogEliminar: false,
       dialogEliminarConfirm: false,
       rolSeleccionada: false,
+      // Añadimos estos campos para el snackbar
+      snackbar: false,
+      snackbarMessage: '',
+      snackbarColor: '',  // 'success' o 'error' para diferenciar el tipo de mensaje
     }
   },
   methods: {
@@ -173,17 +179,38 @@ export default {
 
       this.$axios
         .delete(`/rol/${this.rolSeleccionada.id}`)
-        .then(() => {
+        .then((response) => {
           this.rol = this.rol.filter((roles) => roles.id !== this.rolSeleccionada.id);
+
+          // Mostrar el mensaje que viene del backend en el snackbar
+          this.showSnackbar(response.data.message, "success");
         })
         .catch((error) => {
-          console.error("Error eliminando el rol:", error);
+          // Mostrar el mensaje de error del backend o un mensaje genérico si no está disponible
+          const errorMessage = error.response && error.response.data && error.response.data.message
+            ? error.response.data.message
+            : "Error eliminando el rol";
+          this.showSnackbar(errorMessage, "error");
         })
         .finally(() => {
           setTimeout(() => {
             this.dialogEliminar = false;  // Cerrar el modal de carga después de 3 segundos
           }, 2000);
         });
+    },
+    showSnackbar(message, color) {
+      this.snackbarMessage = message;
+      this.snackbarColor = color;
+      this.snackbar = true;
+    },
+    onSuccess(message) {
+      // Mostrar el snackbar con un mensaje de éxito
+      this.showSnackbar(message, 'success');
+      this.fetchRoles()
+    },
+    onError(message) {
+      // Mostrar el snackbar con un mensaje de error
+      this.showSnackbar(message, 'error');
     },
     fetchRoles() {
       this.$axios

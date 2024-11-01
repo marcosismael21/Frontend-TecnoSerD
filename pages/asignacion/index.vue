@@ -29,7 +29,7 @@
             </v-row>
           </v-card-subtitle>
           <v-divider></v-divider>
-          <v-data-table :headers="headers" :items="asignacion" :search="search">
+          <v-data-table :headers="headers" v-model="se" :items="asignacion" :search="search" show-select>
             <template v-slot:item.nro="{ index }">
               {{ index + 1 }}
             </template>
@@ -55,8 +55,8 @@
               <v-btn icon @click="editarAsignacion(item.idComercio, item.idServicio, item.idEstado)">
                 <v-icon>mdi-pencil</v-icon>
               </v-btn>
-              <v-btn icon @click="editarAsignacion(item.idComercio, item.idServicio, item.idEstado)">
-                <v-icon>mdi-pencil</v-icon>
+              <v-btn icon @click="asignarTecnico(item.idComercio, item.idServicio, item.idEstado)">
+                <v-icon>mdi-cube-send</v-icon>
               </v-btn>
             </template>
           </v-data-table>
@@ -81,6 +81,12 @@
         @error="onError"></editar-asignacion>
     </v-dialog>
 
+    <v-dialog v-model="dialogasignarTecnico" max-width="600px" persistent>
+      <asignacion-tecnico :idComercio="asignacionSeleccionada.idComercio" :idEstado="asignacionSeleccionada.idEstado"
+        :idServicio="asignacionSeleccionada.idServicio" @close="dialogasignarTecnico = false" @saved="onSuccess"
+        @error="onError"></asignacion-tecnico>
+    </v-dialog>
+
     <v-snackbar v-model="snackbar" :color="snackbarColor" timeout="3000" top>
       {{ snackbarMessage }}
     </v-snackbar>
@@ -92,6 +98,7 @@
 import CrearAsignacion from '~/pages/asignacion/crearAsignacion.vue'
 import DetalleAsignacion from '~/pages/asignacion/detalleAsignacion.vue'
 import EditarAsignacion from '~/pages/asignacion/editarAsignacion.vue'
+import AsignacionTecnico from '~/pages/asignacion/crearAsignacionTecnico.vue'
 
 export default {
   async asyncData({ $axios }) {
@@ -112,6 +119,7 @@ export default {
   },
   data() {
     return {
+      se: [],
       search: '',
       asignacion: [],
       headers: [
@@ -126,6 +134,7 @@ export default {
       dialogEditarAsignacion: false,
       dialogDetalleAsignacion: false,
       asignacionSeleccionada: false,
+      dialogasignarTecnico: false,
       // Añadimos estos campos para el snackbar
       snackbar: false,
       snackbarMessage: '',
@@ -158,6 +167,13 @@ export default {
           && e.idServicio === idServicio
           && e.idEstado === idEstado) || {}
       this.dialogDetalleAsignacion = true
+    },
+    asignarTecnico(idComercio, idServicio, idEstado) {
+      this.asignacionSeleccionada = this.asignacion.find(
+        (e) => e.idComercio === idComercio
+          && e.idServicio === idServicio
+          && e.idEstado === idEstado) || {}
+      this.dialogasignarTecnico = true
     },
     fetchAsignacion() {
       this.$axios
@@ -200,7 +216,8 @@ export default {
   components: {
     CrearAsignacion,
     DetalleAsignacion,
-    EditarAsignacion
+    EditarAsignacion,
+    AsignacionTecnico
   },
 }
 </script>

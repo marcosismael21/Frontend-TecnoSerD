@@ -8,21 +8,20 @@
         <v-row>
           <v-col cols="6">
             <v-autocomplete v-model="nuevaAsignacion.idComercio" :items="comercio" item-text="nombreComercio"
-              item-value="id" label="Comercio" required></v-autocomplete>
+              item-value="id" label="Comercio" :rules="[rules.required]" required></v-autocomplete>
           </v-col>
           <v-col cols="6">
             <v-select v-model="nuevaAsignacion.idServicio" :items="servicio" item-text="nombre" item-value="id"
-              label="Tipo Servicio" required></v-select>
+              label="Tipo Servicio" :rules="[rules.required]" required></v-select>
           </v-col>
           <v-col cols="12">
             <v-autocomplete v-model="nuevaAsignacion.idEquipo" :items="equipo" item-text="idTipoEquipo" item-value="id"
-              label="Equipos" required chips closable-chips multiple></v-autocomplete>
+              label="Equipos" :rules="[rules.required]" required chips closable-chips multiple></v-autocomplete>
           </v-col>
           <v-col cols="12">
             <v-text-field v-model="nuevaAsignacion.tipoProblema" label="Descripción"
               placeholder="Ej.  Cambio de D2 Mini"></v-text-field>
           </v-col>
-
         </v-row>
       </v-form>
     </v-card-text>

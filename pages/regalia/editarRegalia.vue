@@ -12,15 +12,15 @@
           </v-col>
           <v-col cols="6">
             <v-select v-model="regalia.idTipoComercio" :items="tipoComercio" item-text="nombre" item-value="id"
-              label="Tipo Comercio" required></v-select>
+              label="Tipo Comercio" :rules="[rules.required]" required></v-select>
           </v-col>
           <v-col cols="6">
-            <v-text-field v-model="regalia.cantidad" label="Cantidad" placeholder="Ej. 1" :rules="[rules.required]"
-              required></v-text-field>
+            <v-text-field v-model="regalia.cantidad" label="Cantidad" placeholder="Ej. 1"
+              :rules="[rules.required, rules.numeric]" required></v-text-field>
           </v-col>
           <v-col cols="6">
             <v-select v-model="regalia.estado" :items="estadoOptions" item-text="text" item-value="value" label="Estado"
-              required></v-select>
+              :rules="[rules.estadoRequired]" required></v-select>
           </v-col>
         </v-row>
       </v-form>
@@ -53,6 +53,8 @@ export default {
       ],
       rules: {
         required: value => !!value || 'Requerido.',
+        numeric: (value) => /^[0-9]+$/.test(value) || "Solo números permitidos.",
+        estadoRequired: value => value !== null || 'Requerido.'
       }
     };
   },

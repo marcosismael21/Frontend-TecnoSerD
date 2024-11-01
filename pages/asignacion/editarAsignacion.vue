@@ -13,12 +13,12 @@
           </v-col>
           <v-col cols="6">
             <v-select v-model="asignacion.idServicio" :items="servicio" item-text="nombre" item-value="id"
-              label="Tipo Servicio" required></v-select>
+              label="Tipo Servicio" :rules="[rules.required]" required></v-select>
           </v-col>
           <v-col cols="12">
             <v-autocomplete v-model="asignacion.listEquiposIDs" :items="equiposCombinados" item-text="descripcionEquipo"
               item-value="id" label="Añadir/Quitar Equipos" multiple chips closable-chips
-              :key="asignacion.idComercio"></v-autocomplete>
+              :key="asignacion.idComercio" :rules="[rules.required]"></v-autocomplete>
           </v-col>
           <v-col cols="12">
             <v-text-field v-model="asignacion.tipoProblema" label="Descripción"

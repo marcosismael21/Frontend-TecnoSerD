@@ -55,16 +55,17 @@
 
     <!-- Diálogos para crear y editar Tipo de Equipo -->
 
-    <v-dialog v-model="dialogNuevoTipoEquipo" max-width="600px">
-      <nuevo @close="dialogNuevoTipoEquipo = false" @saved="fetchTiposEquipo"></nuevo>
+    <v-dialog v-model="dialogNuevoTipoEquipo" max-width="600px" persistent>
+      <nuevo @close="dialogNuevoTipoEquipo = false" @saved="onSuccess" @error="onError"></nuevo>
     </v-dialog>
 
-    <v-dialog v-model="dialogEditarTipoEquipo" max-width="600px">
-      <editar :id="tipoEquipoSeleccionado.id" @close="dialogEditarTipoEquipo = false" @saved="fetchTiposEquipo">
+    <v-dialog v-model="dialogEditarTipoEquipo" max-width="600px" persistent>
+      <editar :id="tipoEquipoSeleccionado.id" @close="dialogEditarTipoEquipo = false" @saved="onSuccess"
+        @error="onError">
       </editar>
     </v-dialog>
 
-     <!-- Diálogos eliminar -->
+    <!-- Diálogos eliminar -->
 
     <v-dialog v-model="dialogEliminarConfirm" max-width="400" persistent>
       <v-card>
@@ -93,6 +94,9 @@
       </v-card>
     </v-dialog>
 
+    <v-snackbar v-model="snackbar" :color="snackbarColor" timeout="3000" top>
+      {{ snackbarMessage }}
+    </v-snackbar>
 
   </v-container>
 </template>
@@ -131,6 +135,10 @@ export default {
       dialogEliminar: false,
       dialogEliminarConfirm: false,
       tipoEquipoSeleccionado: false,
+      // Añadimos estos campos para el snackbar
+      snackbar: false,
+      snackbarMessage: '',
+      snackbarColor: '',  // 'success' o 'error' para diferenciar el tipo de mensaje
     };
   },
   methods: {
@@ -151,17 +159,37 @@ export default {
 
       this.$axios
         .delete(`/tipoequipo/${this.tipoEquipoSeleccionado.id}`)
-        .then(() => {
+        .then((response) => {
           this.tiposEquipo = this.tiposEquipo.filter((tiposEquipo) => tiposEquipo.id !== this.tipoEquipoSeleccionado.id);
+          // Mostrar el mensaje que viene del backend en el snackbar
+          this.showSnackbar(response.data.message, "success");
         })
         .catch((error) => {
-          console.error("Error eliminando el tipos de equipo:", error);
+          // Mostrar el mensaje de error del backend o un mensaje genérico si no está disponible
+          const errorMessage = error.response && error.response.data && error.response.data.message
+            ? error.response.data.message
+            : "Error eliminando la regalia";
+          this.showSnackbar(errorMessage, "error");
         })
         .finally(() => {
           setTimeout(() => {
             this.dialogEliminar = false;  // Cerrar el modal de carga después de 3 segundos
           }, 2000);
         });
+    },
+    showSnackbar(message, color) {
+      this.snackbarMessage = message;
+      this.snackbarColor = color;
+      this.snackbar = true;
+    },
+    onSuccess(message) {
+      // Mostrar el snackbar con un mensaje de éxito
+      this.showSnackbar(message, 'success');
+      this.fetchTiposEquipo()
+    },
+    onError(message) {
+      // Mostrar el snackbar con un mensaje de error
+      this.showSnackbar(message, 'error');
     },
     getEstadoText(estado) {
       const estadoOption = this.estadoOptions.find(option => option.value === estado);
