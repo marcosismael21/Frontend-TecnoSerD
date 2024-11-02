@@ -31,19 +31,20 @@
         </v-card-actions>
       </v-col>
 
-      <v-dialog v-model="dialog" max-width="500">
+      <v-dialog v-model="dialog" max-width="800px" persistent>
         <v-card>
           <v-card-title class="headline">Advertencia</v-card-title>
           <v-card-text>
-            {{ messageDuplicates }}
+            <pre>{{ messageDuplicates }}</pre>
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="green darken-1" @click="confirmUpload">OK</v-btn>
             <v-btn color="red darken-1" @click="dialog = false">Cancelar</v-btn>
+            <v-btn color="green darken-1" @click="confirmUpload">OK</v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
+
 
 
     </v-card>
@@ -153,10 +154,11 @@ export default {
     },
     checkForDuplicates() {
       const uniqueItems = new Set();
-      this.duplicates = false; // Reiniciar el estado de duplicados
-      const equi = []
+      this.duplicates = false; // Reset duplicates state
+      const equi = [];
+      let duplicateCount = 0;
 
-      this.items.forEach(item => {
+      this.items.forEach((item, index) => {
         const identifier = (item['Tipo de Comercio'] || '')
           + (item['CANAL'] || '')
           + (item['USUARIO'] || '')
@@ -166,37 +168,31 @@ export default {
           + (item['NOMBRE DE CONTACTO'] || '')
           + (item['Tipo de Gestion'] || '');
 
-        // Omitir identificadores vacíos
+        // Skip empty identifiers
         if (identifier.trim() === '') {
-          console.log('Identificador vacío encontrado, se omite.');
+          console.log('Empty identifier found, skipping.');
           return;
         }
 
         if (uniqueItems.has(identifier)) {
-          this.duplicates = true; // Se detecta un duplicado real
-          const lis = 'Comercio: ' + item['Nombre de Comercio'] + ' Ciudad: ' + item['CIUDAD'] + ' Servicio: ' + item['Tipo de Gestion'] + ' Equipos: '
-          console.log('Duplicado encontrado:', identifier);
-          equi.push(lis)
+          this.duplicates = true; // Detect a real duplicate
+          duplicateCount++;
+          const equiposList = item['Equipos'] ? item['Equipos'] : "Sin equipos"; // Access the item's equipment
+          const lis = `${duplicateCount}. Comercio: ${item['Nombre de Comercio']}, Servicio: ${item['Tipo de Gestion']}, Equipos: ${equiposList}`;
+          equi.push(lis);
         } else {
-          uniqueItems.add(identifier); // Añadir identificador único al Set
+          uniqueItems.add(identifier); // Add unique identifier to the Set
         }
-
       });
 
-      this.messageDuplicates = `En este documento hay servicios duplicados,
-                                se procederá a guardar los equipos duplicados como
-                                equipos de tipo comodín.
-                                Lista de servicios:${equi}
-                                ¿Está seguro? Estos cambios no pueden ser reversibles
-                                desde esta pantalla.`
+      // Warning message with the list of duplicates and their equipment
+      this.messageDuplicates = `En este documento hay servicios duplicados.\nSe procederá a guardar los equipos duplicados como equipos de tipo comodín.\nLista de servicios duplicados:\n${equi.join('\n')}\n¿Está seguro? Estos cambios no pueden ser reversibles desde esta pantalla.`;
 
       if (this.duplicates) {
-        this.dialog = true; // Solo abrir el diálogo si hay duplicados significativos
-        console.log('Hay duplicados, se abre el diálogo: ' + equi);
+        this.dialog = true; // Only open the dialog if there are significant duplicates
       } else {
-        this.dialog = false; // Asegurar que el diálogo esté cerrado si no hay duplicados
+        this.dialog = false; // Ensure the dialog is closed if there are no duplicates
         this.uploadExcel();
-        console.log('No hay duplicados, se carga el archivo');
       }
     },
     confirmUpload() {
