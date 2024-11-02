@@ -1,53 +1,68 @@
 <template>
   <v-container>
     <v-card>
-      <v-col cols="12">
-        <v-card-title>
-          Archivo Excel
-          <v-spacer></v-spacer>
-        </v-card-title>
-        <v-divider></v-divider>
-        <v-card-subtitle>
-          Seleccione un archivo Excel (.xlsx) para cargar la información.
-        </v-card-subtitle>
-        <v-spacer></v-spacer>
-        <v-divider></v-divider>
-        <v-card-text>
-          <v-file-input v-model="file" accept=".csv, .xlsx, .xls" label="Archivo" placeholder="Seleccione un archivo"
-            prepend-icon="mdi-file" show-size @change="handleFileUpload">
-          </v-file-input>
+      <v-row>
+        <!-- Lado izquierdo: Controles -->
+        <v-col cols="12" md="4">
+          <v-card-title>
+            Archivo Excel
+            <v-spacer></v-spacer>
+          </v-card-title>
           <v-divider></v-divider>
-          <div class="table-scroll">
-            <v-data-table :headers="headers" :items="items"></v-data-table>
-          </div>
+          <v-card-subtitle>
+            Seleccione un archivo Excel (.xlsx) para cargar la información.
+          </v-card-subtitle>
+          <v-spacer></v-spacer>
+          <v-divider></v-divider>
+          <v-card-text>
+            <v-file-input v-model="file" accept=".csv, .xlsx, .xls" label="Archivo" placeholder="Seleccione un archivo"
+              prepend-icon="mdi-file" show-size @change="handleFileUpload">
+            </v-file-input>
+            <!-- v-select para seleccionar columnas -->
+            <v-select v-model="selectedColumns" :items="availableColumns" label="Seleccione las columnas" multiple chips
+              @change="updateTable"></v-select>
+          </v-card-text>
+          <!-- botones -->
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="red darken-1" @click="regresar">
+              <v-icon left>mdi-arrow-collapse-left</v-icon>
+              Regresar
+            </v-btn>
+            <v-btn color="green darken-1" @click="checkForDuplicates">Cargar</v-btn>
+          </v-card-actions>
+        </v-col>
+        <!-- Lado derecho: Tabla de datos -->
+        <v-col cols="12" md="8">
+          <v-card-title>
+            Tabla de Datos
+            <v-spacer></v-spacer>
+          </v-card-title>
+          <v-card-text>
+            <v-divider></v-divider>
+            <div class="table-scroll">
+              <v-data-table :headers="headers" :items="items"></v-data-table>
+            </div>
+          </v-card-text>
+        </v-col>
+      </v-row>
+    </v-card>
+
+    <v-dialog v-model="dialog" max-width="800px" persistent>
+      <v-card>
+        <v-card-title class="headline">Advertencia</v-card-title>
+        <v-card-text>
+          <pre>{{ messageDuplicates }}</pre>
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="red darken-1" @click="regresar">
-            <v-icon left>mdi-arrow-collapse-left</v-icon>
-            Regresar
-          </v-btn>
-          <v-btn color="green darken-1" @click="checkForDuplicates">Cargar</v-btn>
+          <v-btn color="red darken-1" @click="dialog = false">Cancelar</v-btn>
+          <v-btn color="green darken-1" @click="confirmUpload">OK</v-btn>
         </v-card-actions>
-      </v-col>
+      </v-card>
+    </v-dialog>
 
-      <v-dialog v-model="dialog" max-width="800px" persistent>
-        <v-card>
-          <v-card-title class="headline">Advertencia</v-card-title>
-          <v-card-text>
-            <pre>{{ messageDuplicates }}</pre>
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="red darken-1" @click="dialog = false">Cancelar</v-btn>
-            <v-btn color="green darken-1" @click="confirmUpload">OK</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-
-
-
-    </v-card>
+    <!-- Snackbar de notificación -->
     <v-snackbar v-model="snackbar" :color="snackbarColor" timeout="3000" top>
       {{ snackbarMessage }}
     </v-snackbar>
@@ -64,15 +79,12 @@ export default {
     headers: [],
     items: [],
     messageDuplicates: '',
-    selectedColumns: [
-      "Tipo de Comercio",
-      "CANAL",
-      "USUARIO",
-      "Nombre de Comercio",
-      "TELÉFONO",
-      "CIUDAD",
-      "NOMBRE DE CONTACTO",
-      "Tipo de Gestion",
+    selectedColumns: ["Tipo de Comercio", "Nombre de Comercio", "Tipo de Gestion"], // Valores por defecto
+    availableColumns: [
+      "CANAL", "Tipo de Comercio", "Nombre de Comercio", "ID TIENDA", "DIRECCIÓN", "CIUDAD", "DEPARTAMENTO",
+      "NOMBRE DE CONTACTO", "TELÉFONO", "USUARIO", "TOKEN", "RTN", "TIPO DE TERMINAL", "Tipo de Gestion",
+      "IMEI", "SN", "Latitud", "Lonjitud", "Compañía", "PIN", "PUK", "Power Bank SN", "Lectora S/N",
+      "SCANNER", "QPOS", "Tipo de Problema"
     ],
     dialog: false,
     duplicates: false,
@@ -81,6 +93,18 @@ export default {
     snackbarMessage: '',
     snackbarColor: '',  // 'success' o 'error' para diferenciar el tipo de mensaje
   }),
+  computed: {
+    filteredItems() {
+      // Filtra las columnas seleccionadas para mostrarlas en la tabla
+      return this.items.map((item, index) => {
+        const filteredItem = { Numero: index + 1, Equipos: item.Equipos };
+        this.selectedColumns.forEach(column => {
+          filteredItem[column] = item[column] || '';
+        });
+        return filteredItem;
+      });
+    }
+  },
   methods: {
     clearFileInput() {
       this.file = null;       // Limpia el archivo seleccionado en el file-input
@@ -110,24 +134,24 @@ export default {
     },
     generateTable(data) {
       const allHeaders = data[0];
-      const selectedHeaders = this.selectedColumns.filter(col => allHeaders.includes(col));
       this.headers = [
-        { text: 'N°', value: 'N°' },
-        ...selectedHeaders.map(header => ({ text: header, value: header })),
-        { text: 'Equipos', value: 'Equipos' }
+        { text: 'N°', value: 'Numero' },
+        { text: 'Equipos', value: 'Equipos' },
+        ...this.selectedColumns.map(header => ({ text: header, value: header })),
       ];
 
-      this.items = data.slice(1).map((row, rowIndex) => {
-        const item = { 'N°': rowIndex + 1 };
+      this.items = data.slice(1).map((row, index) => {
+        const item = { Numero: index + 1 }; // Asegúrate de incluir el número aquí
         const equipos = [];
 
         row.forEach((cell, index) => {
           const header = allHeaders[index];
-          if (this.selectedColumns.includes(header)) {
+          if (this.availableColumns.includes(header)) {
             item[header] = cell;
           }
 
-          // Agregar equipos basados en las condiciones
+
+          // Condiciones para agregar equipos específicos
           if (header === 'TIPO DE TERMINAL' && cell) {
             equipos.push('D2 MINI');
           }
@@ -148,9 +172,17 @@ export default {
           }
         });
 
-        item['Equipos'] = equipos.join(', ');
+        item.Equipos = equipos.join(', ');
         return item;
       });
+      this.updateTable();
+    },
+    updateTable() {
+      this.headers = [
+        { text: 'N°', value: 'Numero' },
+        { text: 'Equipos', value: 'Equipos' },
+        ...this.selectedColumns.map(column => ({ text: column, value: column })),
+      ];
     },
     checkForDuplicates() {
       const uniqueItems = new Set();
@@ -259,5 +291,12 @@ export default {
 .table-scroll {
   max-height: 400px;
   overflow-y: auto;
+}
+
+.checkbox-label .v-label {
+  white-space: nowrap;
+  /* Evita que el texto se sobreponga */
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 </style>
