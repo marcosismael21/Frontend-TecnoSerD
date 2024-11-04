@@ -42,6 +42,7 @@ export default {
         idServicio: '',
         idEquipo: '',
         tipoProblema: '',
+        interpretacion:'',
         idEstado: 1
       },
       comercio: [],
@@ -67,6 +68,7 @@ export default {
         idServicio: '',
         idEquipo: '',
         tipoProblema: '',
+        interpretacion:'',
         idEstado: 1
       }
       this.$refs.form.resetValidation()
@@ -117,6 +119,11 @@ export default {
         if (!this.nuevaAsignacion.tipoProblema) {
           this.nuevaAsignacion.tipoProblema = ' ';
         }
+
+        if (!this.nuevaAsignacion.interpretacion) {
+          this.nuevaAsignacion.interpretacion = ' ';
+        }
+
 
         const requests = this.nuevaAsignacion.idEquipo.map(idEquipo => {
           const asignacion = {

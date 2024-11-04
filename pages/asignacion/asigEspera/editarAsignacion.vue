@@ -21,7 +21,11 @@
               :key="asignacion.idComercio" :rules="[rules.required]"></v-autocomplete>
           </v-col>
           <v-col cols="12">
-            <v-text-field v-model="asignacion.tipoProblema" label="Descripción"
+            <v-text-field v-model="asignacion.tipoProblema" label="Tipo de Problema"
+              placeholder="Ej.  Cambio de D2 Mini"></v-text-field>
+          </v-col>
+          <v-col cols="12">
+            <v-text-field v-model="asignacion.interpretacion" label="Interpretación"
               placeholder="Ej.  Cambio de D2 Mini"></v-text-field>
           </v-col>
         </v-row>
@@ -137,6 +141,9 @@ export default {
       if (this.$refs.form.validate()) {
         if (!this.asignacion.tipoProblema) {
           this.asignacion.tipoProblema = ' ';
+        }
+        if (!this.asignacion.interpretacion) {
+          this.asignacion.interpretacion = ' ';
         }
 
         try {
