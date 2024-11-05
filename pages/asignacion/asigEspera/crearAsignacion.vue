@@ -48,7 +48,6 @@ export default {
       comercio: [],
       servicio: [],
       equipo: [],
-      estado: [],
       rules: {
         required: value => !!value || 'Requerido.',
       }
@@ -56,7 +55,7 @@ export default {
   },
   async mounted() {
     try {
-      await Promise.all([this.fetchComercio(), this.fetchServicio(), this.fetchEquipo(), this.fetchEstado()])
+      await Promise.all([this.fetchComercio(), this.fetchServicio(), this.fetchEquipo()])
     } catch (error) {
       console.error('Error fetching data:', error)
     }
@@ -98,15 +97,6 @@ export default {
         })
         .catch(error => {
           console.error('Error fetching equipo:', error);
-        })
-    },
-    fetchEstado() {
-      this.$axios.get('/estado')
-        .then(response => {
-          this.estado = response.data;
-        })
-        .catch(error => {
-          console.error('Error fetching estado:', error);
         })
     },
     closeDialog() {
