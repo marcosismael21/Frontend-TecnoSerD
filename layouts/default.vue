@@ -103,6 +103,11 @@ export default {
           to: 'asignacion',
         },
         {
+          icon: 'mdi-clipboard-outline',
+          title: 'Pendientes',
+          to: 'tecnico',
+        },
+        {
           icon: 'mdi-store',
           title: 'Comercio',
           to: 'comercio',
