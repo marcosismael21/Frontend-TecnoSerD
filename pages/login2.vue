@@ -108,6 +108,7 @@ export default {
               this.errorMessage = ''; // Limpia el mensaje de error si es exitoso
               this.$router.push('inspire');*/
               Cookies.set('token', response.data.token, { expires: response.data.expiresIn / (60 * 60 * 24) });
+              Cookies.set('rol', userData.idrol);
               this.$router.push('tablero')
             } else {
               console.log(ok, " b")
