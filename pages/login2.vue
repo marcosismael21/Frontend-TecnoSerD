@@ -22,7 +22,7 @@
               <v-col cols="12">
                 <v-text-field v-model="logg.usuario" label="Nombre de Usuario" density="compact"
                   placeholder="Ingrese su nombre de usuario" prepend-inner-icon="mdi-account" variant="outlined"
-                  :error-messages="nombreErrors" required>
+                  :error-messages="nombreErrors" required @keyup.enter="login">
                 </v-text-field>
               </v-col>
 
@@ -31,17 +31,16 @@
                 <v-text-field v-model="logg.pass" label="Contraseña"
                   :append-inner-icon="visible ? 'mdi-eye-off' : 'mdi-eye'" :type="visible ? 'text' : 'password'"
                   density="compact" placeholder="Contraseña" prepend-inner-icon="mdi-lock-outline" variant="outlined"
-                  @click:append-inner="visible = !visible" :error-messages="passErrors" required>
+                  @click:append-inner="visible = !visible" :error-messages="passErrors" required @keyup.enter="login">
                 </v-text-field>
               </v-col>
-
               <v-col cols="12">
                 <!-- Mensaje de error -->
                 <v-alert v-if="errorMessage" type="error" class="mb-4">
                   {{ errorMessage }}
                 </v-alert>
                 <v-btn class="mb-8" color="blue" size="large" variant="tonal" block @click="login">
-                  Log In
+                  Iniciar Sesión
                 </v-btn>
               </v-col>
             </v-row>
@@ -96,14 +95,13 @@ export default {
               userData,
               mensage
             } = response.data;
-
             if (ok) {
               /*console.log(ok, " a")
               console.log('Login exitoso:', userData.nombre);
               this.errorMessage = ''; // Limpia el mensaje de error si es exitoso
               this.$router.push('inspire');*/
-              Cookies.set('token', response.data.token, { expires: response.data.expiresIn / (24 * 60 * 60) });
-              Cookies.set('userData', response.data.userData.id)
+              Cookies.set('token', response.data.token, { expires: response.data.expiresIn / (60 * 60 * 24) });
+              Cookies.set('rol', userData.idrol);
               this.$router.push('tablero')
             } else {
               console.log(ok, " b")
