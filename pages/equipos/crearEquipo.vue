@@ -7,27 +7,27 @@
       <v-form ref="form" v-model="valid" lazy-validation>
         <v-row>
           <v-col cols="12">
-            <v-autocomplete v-model="nuevoRegistro.idTipoEquipo" :items="tipoEquipo" item-text="nombre" item-value="id"
-              label="Equipos" required></v-autocomplete>
+            <v-autocomplete v-model="nuevoRegistro.idTipoEquipo" :items="tipoEquipo" item-text="displayName" item-value="id"
+              label="Equipos" :rules="[rules.required]" required></v-autocomplete>
           </v-col>
-          <v-col cols="6">
-            <v-text-field v-model="nuevoRegistro.noserie" label="N° de SERIE" placeholder="Ej. 12345678"
-              required></v-text-field>
+          <v-col cols="12" v-if="showNoSerie">
+            <v-text-field v-model="nuevoRegistro.noserie" label="N° de SERIE" placeholder="Ej. DM03221342332"
+            :rules="[rules.required, rules.serie]" required></v-text-field>
           </v-col>
-          <v-col cols="6">
+          <v-col cols="12" v-if="showNoImei">
             <v-text-field v-model="nuevoRegistro.noimei" label="N° de IMEI" placeholder="Ej. 12345678"
-              required></v-text-field>
+            :rules="[rules.required, rules.imei]" required></v-text-field>
           </v-col>
-          <v-col cols="6">
+          <v-col cols="6" v-if="showPin">
             <v-text-field v-model="nuevoRegistro.pin" label="N° de PIN" placeholder="Ej. 18919159"
-              required></v-text-field>
+            :rules="[rules.required, rules.pin]" required></v-text-field>
           </v-col>
-          <v-col cols="6">
-            <v-text-field v-model="nuevoRegistro.puk" label="N° de PUK" placeholder="Ej. 1234" required></v-text-field>
+          <v-col cols="6" v-if="showPuk">
+            <v-text-field v-model="nuevoRegistro.puk" label="N° de PUK" placeholder="Ej. 1234" :rules="[rules.required, rules.puk]" required></v-text-field>
           </v-col>
           <v-col cols="6">
             <v-select v-model="nuevoRegistro.estado" :items="estadoOptions" item-text="text" item-value="value"
-              label="Estado" required></v-select>
+              label="Estado" :rules="[rules.estadoRequired]" required></v-select>
           </v-col>
           <v-col cols="6">
             <v-menu ref="menu" v-model="menu" :close-on-content-click="false" :nudge-right="40"
@@ -73,7 +73,26 @@ export default {
       ],
       rules: {
         required: value => !!value || 'Requerido.',
+        estadoRequired: value => value !== null || 'Requerido.',
+        serie: value => /^[A-Za-z0-9]{1,20}$/.test(value) || 'Máximo 20 caracteres, solo letras y números, sin espacios ni caracteres especiales.',
+        imei: value => /^[0-9]{15}$/.test(value) || 'Debe tener 15 dígitos numéricos, sin espacios ni caracteres especiales.',
+        pin: value => /^[0-9]{4}$/.test(value) || 'Debe tener 4 dígitos numéricos, sin espacios ni caracteres especiales.',
+        puk: value => /^[0-9]{8}$/.test(value) || 'Debe tener 8 dígitos numéricos, sin espacios ni caracteres especiales.',
       }
+    }
+  },
+  computed: {
+    showNoSerie() {
+      return this.nuevoRegistro.idTipoEquipo !== 9 && this.nuevoRegistro.idTipoEquipo !== 10;
+    },
+    showNoImei() {
+      return this.nuevoRegistro.idTipoEquipo === 3 || this.nuevoRegistro.idTipoEquipo === 4;
+    },
+    showPin() {
+      return this.nuevoRegistro.idTipoEquipo === 9 || this.nuevoRegistro.idTipoEquipo === 10;
+    },
+    showPuk() {
+      return this.nuevoRegistro.idTipoEquipo === 9 || this.nuevoRegistro.idTipoEquipo === 10;
     }
   },
   mounted() {
@@ -96,7 +115,10 @@ export default {
     fetchTipoEquipo() {
       this.$axios.get('/tipoequipo')
         .then(response => {
-          this.tipoEquipo = response.data;
+          this.tipoEquipo = response.data.map(item => ({
+            ...item,
+            displayName: `${item.nombre} - ${item.idProveedor}`  // Concatenamos nombre y proveedor
+          }));
         })
         .catch(error => {
           console.error('Error fetching Tipo Equipo:', error);
@@ -109,15 +131,21 @@ export default {
     guardarRegistro() {
 
       if (this.$refs.form.validate()) {
-        const registro = {
-          ...this.nuevoRegistro,
-          noserie: this.nuevoRegistro.noserie || '0',
-          noimei: this.nuevoRegistro.noimei || '0',
-          pin: this.nuevoRegistro.pin || '0',
-          puk: this.nuevoRegistro.puk || '0'
+
+        // Ajustar valores antes de enviar
+        if (this.nuevoRegistro.idTipoEquipo === 9 || this.nuevoRegistro.idTipoEquipo === 10) { // Chip Tigo o Chip Claro
+          this.nuevoRegistro.noserie = '0';
+          this.nuevoRegistro.noimei = '0';
+        } else if (this.nuevoRegistro.idTipoEquipo === 3 || this.nuevoRegistro.idTipoEquipo === 4) { // D2 MINI
+          this.nuevoRegistro.pin = '0';
+          this.nuevoRegistro.puk = '0';
+        } else { // Otros equipos
+          this.nuevoRegistro.noimei = '0';
+          this.nuevoRegistro.pin = '0';
+          this.nuevoRegistro.puk = '0';
         }
 
-        this.$axios.post('/equipo', registro)
+        this.$axios.post('/equipo', this.nuevoRegistro)
           .then((response) => {
             this.$emit('saved', response.data.message);
             this.closeDialog();

@@ -34,7 +34,6 @@
                   @click:append-inner="visible = !visible" :error-messages="passErrors" required @keyup.enter="login">
                 </v-text-field>
               </v-col>
-
               <v-col cols="12">
                 <!-- Mensaje de error -->
                 <v-alert v-if="errorMessage" type="error" class="mb-4">
@@ -69,11 +68,6 @@
 }
 </style>
 
-
-
-
-
-
 <script>
 import axios from 'axios';
 import Cookies from 'js-cookie';
@@ -101,7 +95,6 @@ export default {
               userData,
               mensage
             } = response.data;
-
             if (ok) {
               /*console.log(ok, " a")
               console.log('Login exitoso:', userData.nombre);

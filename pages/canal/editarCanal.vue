@@ -7,16 +7,16 @@
       <v-form ref="form" lazy-validation>
         <v-row>
           <v-col cols="6">
-            <v-text-field v-model="canal.nombre" label="Canal" placeholder="Ej. ABA" :rules="[rules.required]"
-              required></v-text-field>
+            <v-text-field v-model="canal.nombre" label="Canal" placeholder="Ej. ABA"
+              :rules="[rules.required, rules.text]" required></v-text-field>
           </v-col>
           <v-col cols="6">
             <v-select v-model="canal.idTipoComercio" :items="tipoComercio" item-text="nombre" item-value="id"
-              label="Tipo Comercio" required></v-select>
+              label="Tipo Comercio" :rules="[rules.required]" required></v-select>
           </v-col>
           <v-col cols="12">
             <v-select v-model="canal.estado" :items="estadoOptions" item-text="text" item-value="value" label="Estado"
-              required></v-select>
+              :rules="[rules.estadoRequired]" required></v-select>
           </v-col>
         </v-row>
       </v-form>
@@ -49,6 +49,8 @@ export default {
       ],
       rules: {
         required: value => !!value || 'Requerido.',
+        text: value => /^[A-Za-zÀ-ÿ0-9\s]+$/.test(value) || 'Solo letras, números y espacios.',
+        estadoRequired: value => value !== null || 'Requerido.',
       }
     };
   },
