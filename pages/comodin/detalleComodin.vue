@@ -6,7 +6,7 @@
     <v-card-text>
       <v-row>
         <v-col cols="12">
-          <v-select v-model="equipo.idTipoEquipo" :items="tipoEquipo" item-text="nombre" item-value="id" label="Equipos"
+          <v-select v-model="equipo.idTipoEquipo" :items="tipoEquipo" item-text="displayName" item-value="id" label="Equipos"
             readonly></v-select>
         </v-col>
         <v-col cols="6">
@@ -91,8 +91,10 @@ export default {
     fetchTipoEquipo() {
       this.$axios.get('/tipoequipo')
         .then(response => {
-          this.tipoEquipo = response.data;
-        })
+          this.tipoEquipo = response.data.map(item => ({
+            ...item,
+            displayName: `${item.nombre} - ${item.idProveedor}`  // Concatenamos nombre y proveedor
+          }));        })
         .catch(error => {
           console.error('Error fetching tipo de equipos:', error);
         });

@@ -8,7 +8,7 @@
         <v-row>
           <v-col cols="6">
             <v-text-field v-model="usuario.nombres" label="Nombres" placeholder="Ej. Jose Roberto Mejia"
-              :rules="[rules.required]" required></v-text-field>
+              :rules="[rules.required, rules.text]" required></v-text-field>
           </v-col>
           <v-col cols="6">
             <v-text-field v-model="usuario.usuario" label="Nombre de usuario" placeholder="Ej. jorome"
@@ -21,11 +21,11 @@
           </v-col>
           <v-col cols="6">
             <v-select v-model="usuario.idrol" :items="roles" item-text="nombre" item-value="id" label="Roles"
-              required></v-select>
+            :rules="[rules.required]" required></v-select>
           </v-col>
           <v-col cols="12">
             <v-select v-model="usuario.estado" :items="estadoOptions" item-text="text" item-value="value" label="Estado"
-              required></v-select>
+            :rules="[rules.estadoRequired]" required></v-select>
           </v-col>
         </v-row>
       </v-form>
@@ -60,6 +60,9 @@ export default {
       ],
       rules: {
         required: value => !!value || 'Requerido.',
+        min: v => v.length >= 8 || 'Min 8 caracteres',
+        text: value => /^[A-Za-zÀ-ÿ0-9\s]+$/.test(value) || 'Solo letras, números y espacios.',
+        estadoRequired: value => value !== null || 'Requerido.',
       }
     };
   },

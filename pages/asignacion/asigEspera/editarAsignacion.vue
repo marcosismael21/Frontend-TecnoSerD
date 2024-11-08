@@ -13,15 +13,19 @@
           </v-col>
           <v-col cols="6">
             <v-select v-model="asignacion.idServicio" :items="servicio" item-text="nombre" item-value="id"
-              label="Tipo Servicio" required></v-select>
+              label="Tipo Servicio" :rules="[rules.required]" required></v-select>
           </v-col>
           <v-col cols="12">
             <v-autocomplete v-model="asignacion.listEquiposIDs" :items="equiposCombinados" item-text="descripcionEquipo"
-              item-value="id" label="Añadir/Quitar Equipos" multiple chips closable-chips
-              :key="asignacion.idComercio"></v-autocomplete>
+              item-value="id" label="Añadir/Quitar Equipos" multiple chips closable-chips :key="asignacion.idComercio"
+              :rules="[rules.required]"></v-autocomplete>
           </v-col>
           <v-col cols="12">
-            <v-text-field v-model="asignacion.tipoProblema" label="Descripción"
+            <v-text-field v-model="asignacion.tipoProblema" label="Tipo de Problema"
+              placeholder="Ej.  Cambio de D2 Mini"></v-text-field>
+          </v-col>
+          <v-col cols="12">
+            <v-text-field v-model="asignacion.interpretacion" label="Interpretación"
               placeholder="Ej.  Cambio de D2 Mini"></v-text-field>
           </v-col>
         </v-row>
@@ -138,15 +142,22 @@ export default {
         if (!this.asignacion.tipoProblema) {
           this.asignacion.tipoProblema = ' ';
         }
+        if (!this.asignacion.interpretacion) {
+          this.asignacion.interpretacion = ' ';
+        }
 
         try {
           // Desestructuramos la asignación para crear el objeto con el campo 'nuevosEquipos'
-          const { listEquiposIDs, ...restoAsignacion } = this.asignacion;
+          const { listEquiposIDs, idComercio, idServicio, ...restoAsignacion } = this.asignacion;
 
-          // Creamos el nuevo objeto con el arreglo de nuevos equipos
+          // Creamos el nuevo objeto con el arreglo de nuevos equipos, idComercioAnterior e idServicioAnterior
           const asignacionActualizada = {
             ...restoAsignacion,
-            nuevosEquipos: listEquiposIDs // Enviamos los equipos seleccionados como 'nuevosEquipos'
+            nuevosEquipos: listEquiposIDs, // Enviamos los equipos seleccionados como 'nuevosEquipos'
+            idComercioAnterior: this.idComercio, // Enviamos el idComercio anterior
+            idServicioAnterior: this.idServicio, // Enviamos el idServicio anterior
+            idComercio, // Enviamos el nuevo idComercio
+            idServicio // Enviamos el nuevo idServicio
           };
 
           // Realizamos la petición PUT con el nuevo objeto

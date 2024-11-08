@@ -8,21 +8,20 @@
         <v-row>
           <v-col cols="6">
             <v-autocomplete v-model="nuevaAsignacion.idComercio" :items="comercio" item-text="nombreComercio"
-              item-value="id" label="Comercio" required></v-autocomplete>
+              item-value="id" label="Comercio" :rules="[rules.required]" required></v-autocomplete>
           </v-col>
           <v-col cols="6">
             <v-select v-model="nuevaAsignacion.idServicio" :items="servicio" item-text="nombre" item-value="id"
-              label="Tipo Servicio" required></v-select>
+              label="Tipo Servicio" :rules="[rules.required]" required></v-select>
           </v-col>
           <v-col cols="12">
             <v-autocomplete v-model="nuevaAsignacion.idEquipo" :items="equipo" item-text="idTipoEquipo" item-value="id"
-              label="Equipos" required chips closable-chips multiple></v-autocomplete>
+              label="Equipos" :rules="[rules.required]" required chips closable-chips multiple></v-autocomplete>
           </v-col>
           <v-col cols="12">
             <v-text-field v-model="nuevaAsignacion.tipoProblema" label="Descripción"
               placeholder="Ej.  Cambio de D2 Mini"></v-text-field>
           </v-col>
-
         </v-row>
       </v-form>
     </v-card-text>
@@ -43,12 +42,12 @@ export default {
         idServicio: '',
         idEquipo: '',
         tipoProblema: '',
+        interpretacion:'',
         idEstado: 1
       },
       comercio: [],
       servicio: [],
       equipo: [],
-      estado: [],
       rules: {
         required: value => !!value || 'Requerido.',
       }
@@ -56,7 +55,7 @@ export default {
   },
   async mounted() {
     try {
-      await Promise.all([this.fetchComercio(), this.fetchServicio(), this.fetchEquipo(), this.fetchEstado()])
+      await Promise.all([this.fetchComercio(), this.fetchServicio(), this.fetchEquipo()])
     } catch (error) {
       console.error('Error fetching data:', error)
     }
@@ -68,6 +67,7 @@ export default {
         idServicio: '',
         idEquipo: '',
         tipoProblema: '',
+        interpretacion:'',
         idEstado: 1
       }
       this.$refs.form.resetValidation()
@@ -99,15 +99,6 @@ export default {
           console.error('Error fetching equipo:', error);
         })
     },
-    fetchEstado() {
-      this.$axios.get('/estado')
-        .then(response => {
-          this.estado = response.data;
-        })
-        .catch(error => {
-          console.error('Error fetching estado:', error);
-        })
-    },
     closeDialog() {
       this.resetForm();
       this.$emit('close');
@@ -118,6 +109,11 @@ export default {
         if (!this.nuevaAsignacion.tipoProblema) {
           this.nuevaAsignacion.tipoProblema = ' ';
         }
+
+        if (!this.nuevaAsignacion.interpretacion) {
+          this.nuevaAsignacion.interpretacion = ' ';
+        }
+
 
         const requests = this.nuevaAsignacion.idEquipo.map(idEquipo => {
           const asignacion = {

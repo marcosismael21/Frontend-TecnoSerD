@@ -8,11 +8,11 @@
         <v-row>
           <v-col cols="12">
             <v-text-field v-model="nuevoCiudad.nombre" label="Ciudad" placeholder="Ej. Olanchito"
-              :rules="[rules.required]" required></v-text-field>
+              :rules="[rules.required, rules.text]" required></v-text-field>
           </v-col>
           <v-col cols="12">
             <v-select v-model="nuevoCiudad.estado" :items="estadoOptions" item-text="text" item-value="value"
-              label="Estado" required></v-select>
+              label="Estado" :rules="[rules.estadoRequired]" required></v-select>
           </v-col>
         </v-row>
       </v-form>
@@ -39,6 +39,8 @@ export default {
       ],
       rules: {
         required: value => !!value || 'Requerido.',
+        text: value => /^[A-Za-zÀ-ÿ0-9\s]+$/.test(value) || 'Solo letras, números y espacios.',
+        estadoRequired: value => value !== null || 'Requerido.',
       }
     }
   },

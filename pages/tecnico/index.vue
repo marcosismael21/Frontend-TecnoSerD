@@ -4,23 +4,13 @@
       <v-col cols="12">
         <v-card>
           <v-card-title class="d-flex align-center pe-2">
-            <v-icon icon="mdi-account-circle"></v-icon> &nbsp; Lista de Roles
+            <v-icon icon="mdi-account-circle"></v-icon> &nbsp; Lista de Asignaciones Pendientes
             <v-spacer></v-spacer>
           </v-card-title>
           <v-spacer></v-spacer>
           <v-divider></v-divider>
           <v-card-subtitle>
-            <v-row align="center">
-              <v-col cols="9">
-                <v-btn color="primary" @click="regresar">
-                  <v-icon left>mdi-arrow-collapse-left</v-icon>
-                  Regresar
-                </v-btn>
-                <v-btn color="primary" @click="nuevoRol">
-                  <v-icon left>mdi-plus</v-icon>
-                  Añadir Rol
-                </v-btn>
-              </v-col>
+            <v-row align="center" justify="end">
               <v-col cols="3">
                 <v-text-field v-model="search" density="compact" label="Buscar" prepend-inner-icon="mdi-magnify"
                   variant="outlined" flat hide-details single-line>
@@ -42,10 +32,13 @@
               {{ getEstadoText(item.estado) }}
             </template>
             <template v-slot:item.acciones="{ item }">
-              <v-btn icon @click="editarRol(item.id)">
+              <v-btn icon @click="verDetalle(item.id)">
                 <v-icon>mdi-pencil</v-icon>
               </v-btn>
-              <v-btn icon @click="eliminarRol(item.id)">
+              <v-btn icon @click="aceptarAsignacion(item.id)">
+                <v-icon>mdi-delete</v-icon>
+              </v-btn>
+              <v-btn icon @click="cancelarAsignacion(item.id)">
                 <v-icon>mdi-delete</v-icon>
               </v-btn>
             </template>
@@ -99,8 +92,6 @@
 </template>
 
 <script>
-import NuevoRol from '~/pages/rol/crearRol.vue'
-import EditarRol from '~/pages/rol/editarRol.vue'
 
 export default {
   async asyncData({ $axios }) {
@@ -227,8 +218,6 @@ export default {
     },
   },
   components: {
-    NuevoRol,
-    EditarRol,
   },
 }
 </script>
