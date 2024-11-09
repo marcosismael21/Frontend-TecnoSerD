@@ -6,6 +6,7 @@ export default {
       routes.push({
         path: '',
         redirect: '/login2',
+        middleware: ['acl']
       })
     },
   },
