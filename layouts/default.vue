@@ -158,8 +158,6 @@ export default {
       try {
         const response = await this.$axios.post('/usuario/logout', {}, { withCredentials: true });
         if (response.data.ok) {
-          Cookies.remove('token'); // Borra el token de autenticación
-          Cookies.remove('rol');   // Borra el rol del usuario (cambio solicitado)
           this.$router.push('/');
         } else {
           console.error('Error al cerrar sesión:', response.data.mensage);

@@ -21,25 +21,36 @@
 
           <v-divider></v-divider>
 
-          <v-data-table :headers="headers" :items="rol" :search="search">
+          <v-data-table :headers="headers" :items="pendiente" :search="search">
             <template v-slot:item.nro="{ index }">
               {{ index + 1 }}
             </template>
-            <template v-slot:item.nombre="{ item }">
-              {{ item.nombre }}
+            <template v-slot:item.tecnico="{ item }">
+              {{ item.tecnico }}
+            </template>
+            <template v-slot:item.nomComercio="{ item }">
+              {{ item.nomComercio }}
+            </template>
+            <template v-slot:item.ciudad="{ item }">
+              {{ item.ciudad }}
+            </template>
+            <template v-slot:item.servicio="{ item }">
+              {{ item.servicio }}
             </template>
             <template v-slot:item.estado="{ item }">
-              {{ getEstadoText(item.estado) }}
+              {{ item.estado }}
             </template>
             <template v-slot:item.acciones="{ item }">
-              <v-btn icon @click="verDetalle(item.id)">
-                <v-icon>mdi-pencil</v-icon>
+              <v-btn icon @click="getMapa(item.latitud, item.longitud)">
+                <v-icon>mdi-map-marker</v-icon>
               </v-btn>
-              <v-btn icon @click="aceptarAsignacion(item.id)">
-                <v-icon>mdi-delete</v-icon>
+              <v-btn icon
+                @click="detallesAsignacionPendiente(item.idUsuario, item.idComercio, item.idServicio, item.idEstado)">
+                <v-icon>mdi-eye</v-icon>
               </v-btn>
-              <v-btn icon @click="cancelarAsignacion(item.id)">
-                <v-icon>mdi-delete</v-icon>
+              <v-btn icon
+                @click="cancelarAsignacionPendiente(item.idUsuario, item.idComercio, item.idServicio, item.idEstado)">
+                <v-icon>mdi-account-minus</v-icon>
               </v-btn>
             </template>
           </v-data-table>
@@ -93,11 +104,14 @@
 
 <script>
 
+import Cookies from 'js-cookie';
+
 export default {
   async asyncData({ $axios }) {
+    const idTecnico = Cookies.get('id')
     try {
-      const { data } = await $axios.get('/rol')
-      return { rol: data }
+      const { data } = await $axios.get(`asignacionTecnico/lap/${idTecnico}`)
+      return { pendiente: data }
     } catch (error) {
       console.error('Error fetching rol:', error)
       return { rol: [] }
@@ -114,12 +128,15 @@ export default {
     return {
       tab: 0, // inicializamos el tab en 0
       search: '',
-      rol: [],
+      pendiente: [],
       headers: [
         { text: 'N°', value: 'nro' },
-        { text: 'Nombre', value: 'nombre' },
-        { text: 'Estado', value: 'estado' },
-        { text: 'Acciones', value: 'acciones' },
+        { text: "Técnico", value: "tecnico" },
+        { text: "Comercio", value: "nomComercio" },
+        { text: "Ciudad", value: "ciudad" },
+        { text: "Tipo de Servicio", value: "servicio" },
+        { text: "Estado", value: "estado" },
+        { text: "Acciones", value: "acciones" },
       ],
       estadoOptions: [
         { text: 'Activo', value: true },
