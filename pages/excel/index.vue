@@ -2,8 +2,7 @@
   <v-container>
     <v-card>
       <v-row>
-        <!-- Lado izquierdo: Controles -->
-        <v-col cols="12" md="4">
+        <v-col cols="12">
           <v-card-title>
             Archivo Excel
             <v-spacer></v-spacer>
@@ -22,18 +21,6 @@
             <v-select v-model="selectedColumns" :items="availableColumns" label="Seleccione las columnas" multiple chips
               @change="updateTable"></v-select>
           </v-card-text>
-          <!-- botones -->
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="red darken-1" @click="regresar">
-              <v-icon left>mdi-arrow-collapse-left</v-icon>
-              Regresar
-            </v-btn>
-            <v-btn color="green darken-1" @click="checkForDuplicates">Cargar</v-btn>
-          </v-card-actions>
-        </v-col>
-        <!-- Lado derecho: Tabla de datos -->
-        <v-col cols="12" md="8">
           <v-card-title>
             Tabla de Datos
             <v-spacer></v-spacer>
@@ -44,6 +31,15 @@
               <v-data-table :headers="headers" :items="items"></v-data-table>
             </div>
           </v-card-text>
+          <!-- botones -->
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="red darken-1" @click="regresar">
+              <v-icon left>mdi-arrow-collapse-left</v-icon>
+              Regresar
+            </v-btn>
+            <v-btn color="green darken-1" @click="checkForDuplicates">Cargar</v-btn>
+          </v-card-actions>
         </v-col>
       </v-row>
     </v-card>
@@ -97,10 +93,11 @@ export default {
     filteredItems() {
       // Filtra las columnas seleccionadas para mostrarlas en la tabla
       return this.items.map((item, index) => {
-        const filteredItem = { Numero: index + 1, Equipos: item.Equipos };
+        const filteredItem = { Numero: index + 1 };
         this.selectedColumns.forEach(column => {
           filteredItem[column] = item[column] || '';
         });
+        filteredItem.Equipos = item.Equipos; // Agregar "Equipos" al final
         return filteredItem;
       });
     }
@@ -136,11 +133,11 @@ export default {
       const allHeaders = data[0];
       this.headers = [
         { text: 'N°', value: 'Numero' },
-        { text: 'Equipos', value: 'Equipos' },
         ...this.selectedColumns.map(header => ({ text: header, value: header })),
+        { text: 'Equipos', value: 'Equipos' } // Mover "Equipos" al final
       ];
 
-      this.items = data.slice(1).map((row, index) => {
+      this.items = data.slice(1).filter(row => row.some(cell => cell)).map((row, index) => {
         const item = { Numero: index + 1 }; // Asegúrate de incluir el número aquí
         const equipos = [];
 
@@ -149,7 +146,6 @@ export default {
           if (this.availableColumns.includes(header)) {
             item[header] = cell;
           }
-
 
           // Condiciones para agregar equipos específicos
           if (header === 'TIPO DE TERMINAL' && cell) {
@@ -180,8 +176,8 @@ export default {
     updateTable() {
       this.headers = [
         { text: 'N°', value: 'Numero' },
-        { text: 'Equipos', value: 'Equipos' },
         ...this.selectedColumns.map(column => ({ text: column, value: column })),
+        { text: 'Equipos', value: 'Equipos' } // Mover "Equipos" al final
       ];
     },
     checkForDuplicates() {
