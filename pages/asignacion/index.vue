@@ -43,12 +43,17 @@
                     <v-data-table :headers="headers" :items="espera" :search="search" item-key="idComercio">
                       <template v-slot:top>
                         <v-toolbar flat>
-                          <v-toolbar-title>Lista de Asignaciones</v-toolbar-title>
                           <v-spacer></v-spacer>
-                          <v-btn color="primary" @click="asignarTecnicoMultiple(selectedItems)">
-                            <v-icon left>mdi-account-multiple</v-icon>
-                            Asignación Múltiple
-                          </v-btn>
+                          <v-col cols="12" align="right">
+                            <v-btn color="primary" @click="generarReporte">
+                              <v-icon left>mdi-file-outline</v-icon>
+                              Generar Reporte
+                            </v-btn>
+                            <v-btn color="primary" @click="asignarTecnicoMultiple(selectedItems)">
+                              <v-icon left>mdi-account-multiple</v-icon>
+                              Asignación Múltiple
+                            </v-btn>
+                          </v-col>
                         </v-toolbar>
                       </template>
                       <!-- Checkbox para seleccionar filas -->
@@ -343,6 +348,9 @@ import DetalleAsignacionPendiente from '~/pages/asignacion/asigPendiente/detalle
 import DetalleAsignacionProceso from '~/pages/asignacion/asigProceso/detalleAsigProceso.vue'
 import DetalleAsignacionFinalizada from '~/pages/asignacion/asigFinalizada/detalleAsigFinalizada.vue'
 
+import jsPDF from 'jspdf'
+import 'jspdf-autotable'
+
 export default {
   async asyncData({ $axios }) {
     try {
@@ -628,6 +636,183 @@ export default {
     },
     imprimirFormato(idServicio) {
       this.showSnackbar("Hola mundo <3", "success");
+    },
+    async generarReporte() {
+      try {
+        const { data } = await this.$axios.get('/reporte/asig-espera')
+
+        // Agrupar los datos por servicio
+        const reportesPorServicio = data.reduce((acc, item, index) => {
+          const equipos = item.listEquipos.split(', ')
+          const series = item.listNoSerie.split(', ')
+          const imeis = item.listNoIMEI.split(', ')
+          const puks = item.listPUK.split(', ')
+          const pins = item.listPIN.split(', ')
+
+          const comercioRow = {
+            nro: index + 1,
+            servicio: item.servicio,
+            tipoComercio: item.tipoComercio,
+            nomComercio: item.nomComercio,
+            nombreContacto: item.nombreContacto,
+            numTienda: item.numTienda,
+            numUsuario: item.numUsuario,
+            direccion: item.direccion,
+            ciudad: item.ciudad,
+            tipoProblema: item.tipoProblema,
+            interpretacion: item.interpretacion,
+          }
+
+          const equipoRows = equipos.map((equipo, i) => ({
+            equipo,
+            serie: series[i] || 'N/A',
+            imei: imeis[i] || 'N/A',
+            pin: pins[i] || 'N/A',
+            puk: puks[i] || 'N/A',
+          }))
+
+          if (!acc[item.servicio]) {
+            acc[item.servicio] = []
+          }
+
+          acc[item.servicio].push({ comercioRow, equipoRows })
+          return acc
+        }, {})
+
+
+        const doc = new jsPDF({ orientation: 'landscape' })
+
+        // Añadir el logo en tamaño grande
+        const logo = new Image()
+        logo.src = '/Logo.jpg'
+        const logoWidth = 100 // Ancho ajustado del logo
+        const logoHeight = 40 // Alto ajustado del logo
+        const logoX = 14 // Posición X del logo
+        const logoY = 10 // Posición Y del logo
+        doc.addImage(logo, 'JPEG', logoX, logoY, logoWidth, logoHeight)
+
+        // Posicionar la información de la empresa a la derecha del logo
+        const textStartX = logoX + logoWidth + 20 // Posición X de los textos después del logo
+        const textStartY = logoY + 12 // Posición Y inicial de los textos
+
+        doc.setFontSize(13)
+        doc.setFont('helvetica', 'bold')
+        doc.text('TECNOLOGÍA Y SERVICIOS DIVERSOS - TECNOSERD', textStartX, textStartY)
+
+        doc.setFontSize(12) // Fuente más pequeña para los demás textos
+        doc.text('Oficina: ', textStartX, textStartY + 6)
+        doc.setFont('helvetica', 'normal')
+        doc.text('OFICINA PRINCIPAL', textStartX + 18, textStartY + 6)
+
+        doc.setFont('helvetica', 'bold')
+        doc.text('Teléfono: ', textStartX, textStartY + 12)
+        doc.setFont('helvetica', 'normal') // Cambiado a 'normal' antes del número de teléfono
+        doc.text('+504 9976-3205', textStartX + 18, textStartY + 12)
+
+        doc.setFont('helvetica', 'bold')
+        doc.text('Email: ', textStartX, textStartY + 18) // Cambiado el valor de textStartY
+        doc.setFont('helvetica', 'normal')
+        doc.text('jorcer27@gmail.com', textStartX + 18, textStartY + 18) // Cambiado el valor de textStartY y textStartX
+
+        doc.setFont('helvetica', 'bold')
+        doc.text('Dirección: ', textStartX, textStartY + 24) // Ajustado para que esté debajo del email
+        doc.setFont('helvetica', 'normal')
+        doc.text('COL. PALMIRA 3RA AVE ENTRE 4TA Y 5TA CALLE CASA #415', textStartX + 18, textStartY + 24) // Ajustado para que esté debajo del email
+
+        // Añadir el título del reporte debajo del logo y la información
+        doc.setFontSize(14)
+        doc.setFont('helvetica', 'bold')
+        doc.text('Reporte sobre Asignaciones en Espera', 14, textStartY + 38)
+
+        // Encabezados para la información del comercio y equipos
+        const comercioHeaders = [
+          'N°', 'Tipo de Comercio', 'Nombre de Comercio', 'Nombre de Contacto', 'N° de Tienda',
+          'N° de Usuario', 'Dirección del Comercio', 'Ciudad del Comercio', 'Tipo de Problema', 'Interpretación'
+        ]
+
+        const equipoHeaders = ['Equipo', 'N° de Serie', 'N° de IMEI', 'N° de PIN', 'N° de PUK']
+
+        let startY = textStartY + 50 
+
+        // Iterar sobre cada grupo de servicio
+        Object.keys(reportesPorServicio).forEach(servicio => {
+          // Añadir el título del servicio
+          doc.setFontSize(12)
+          doc.setFont('helvetica', 'bold')
+          doc.text(servicio, 14, startY)
+          startY += 10
+
+          // Añadir las tablas para cada comercio y sus equipos
+          reportesPorServicio[servicio].forEach(({ comercioRow, equipoRows }) => {
+            // Tabla de información del comercio
+            doc.autoTable({
+              head: [comercioHeaders],
+              body: [[
+                comercioRow.nro, comercioRow.tipoComercio, comercioRow.nomComercio, comercioRow.nombreContacto,
+                comercioRow.numTienda, comercioRow.numUsuario, comercioRow.direccion, comercioRow.ciudad,
+                comercioRow.tipoProblema, comercioRow.interpretacion
+              ]],
+              startY,
+              styles: {
+                halign: 'center',
+                valign: 'middle',
+                fontSize: 9,
+                cellPadding: 1,
+              },
+              headStyles: {
+                fillColor: [240, 240, 240],
+                fontSize: 10,
+              },
+              theme: 'plain',
+            })
+
+            startY = doc.autoTable.previous.finalY + 2
+
+            // Tabla de equipos con sus detalles
+            doc.autoTable({
+              head: [equipoHeaders],
+              body: equipoRows.map(equipo => [
+                equipo.equipo, equipo.serie, equipo.imei, equipo.pin, equipo.puk
+              ]),
+              startY,
+              styles: {
+                halign: 'center',
+                valign: 'middle',
+                fontSize: 9,
+                cellPadding: 1,
+              },
+              headStyles: {
+                fillColor: [220, 220, 220],
+                fontSize: 10,
+              },
+              theme: 'plain',
+            })
+
+            startY = doc.autoTable.previous.finalY + 10 // Espacio entre bloques de comercio
+          })
+        })
+
+
+        // Obtener la fecha y hora actuales en el formato deseado
+        const fechaActual = new Date().toLocaleDateString().replace(/\//g, '-')
+
+        // Convertir la hora al formato de 12 horas con AM/PM y separador de punto sin espacio
+        const now = new Date()
+        let horas = now.getHours()
+        const minutos = now.getMinutes().toString().padStart(2, '0')
+        const ampm = horas >= 12 ? 'PM' : 'AM'
+        horas = horas % 12 || 12 // Convertir a formato de 12 horas, donde 0 se convierte en 12
+
+        // Formatear la hora sin espacio antes de AM/PM
+        const horaActual = `${horas}.${minutos}${ampm}`
+
+        // Guardar el PDF con el nombre personalizado usando - para fecha y punto para la hora
+        doc.save(`reporte_asignaciones_espera-${fechaActual}-${horaActual}.pdf`)
+
+      } catch (error) {
+        console.error('Error generating report:', error)
+        this.showSnackbar('Error generando el reporte', 'error')
+      }
     },
     fetchAsignacion() {
       this.$axios

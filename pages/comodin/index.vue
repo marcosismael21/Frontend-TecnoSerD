@@ -239,10 +239,10 @@ export default {
         // Añadir el logo en tamaño grande
         const logo = new Image()
         logo.src = '/Logo.jpg'
-        const logoWidth = 60 // Ancho ajustado del logo
+        const logoWidth = 70 // Ancho ajustado del logo
         const logoHeight = 30 // Alto ajustado del logo
         const logoX = 14 // Posición X del logo
-        const logoY = 10 // Posición Y del logo
+        const logoY = 15 // Posición Y del logo
         doc.addImage(logo, 'JPEG', logoX, logoY, logoWidth, logoHeight)
 
         // Posicionar la información de la empresa a la derecha del logo
@@ -280,7 +280,7 @@ export default {
 
         const headers = [
           { title: 'N°', dataKey: 'nro' },
-          { title: 'Nombre', dataKey: 'idTipoEquipo' },
+          { title: 'Equipo', dataKey: 'idTipoEquipo' },
           { title: 'N° SERIE', dataKey: 'noserie' },
           { title: 'N° IMEI', dataKey: 'noimei' },
           { title: 'PIN', dataKey: 'pin' },

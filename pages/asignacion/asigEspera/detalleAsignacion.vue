@@ -11,8 +11,11 @@
         <v-col cols="12">
           <v-text-field v-model="asignacion.servicio" label="Servicio" readonly></v-text-field>
         </v-col>
-        <v-col cols="12">
+        <v-col cols="6">
           <v-text-field v-model="asignacion.tipoProblema" label="Tipo de Problema" readonly></v-text-field>
+        </v-col>
+        <v-col cols="6">
+          <v-text-field v-model="asignacion.interpretacion" label="Interpretación" readonly></v-text-field>
         </v-col>
         <v-col cols="12">
           <v-textarea v-model="asignacion.listEquipos" label="Equipos" auto-grow readonly></v-textarea>

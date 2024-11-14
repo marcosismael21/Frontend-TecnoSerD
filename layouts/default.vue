@@ -1,5 +1,9 @@
 <template>
   <v-app :class="appBackgroundClass">
+
+    <!-- Componente de sesión expirada -->
+    <session-expired-dialog />
+
     <v-navigation-drawer v-model="drawer" :mini-variant="miniVariant" :clipped="clipped" fixed app :color="drawerColor">
       <!-- botones del nav-->
       <v-list>
@@ -13,25 +17,25 @@
         </v-list-item>
         <!-- Botón desplegable de Parámetros -->
         <template v-if="userRole !== 2 && userRole !== 3"> <!-- Oculta para técnico y gestor logístico -->
-  <v-list-group prepend-icon="mdi-cog" no-action>
-    <template v-slot:activator>
-      <v-list-item>
-        <v-list-item-content>
-          <v-list-item-title>Parámetros</v-list-item-title>
-        </v-list-item-content>
-      </v-list-item>
-    </template>
-    <!-- Botones anidados en Parámetros -->
-    <v-list-item v-for="(submenu, i) in permittedParametrosItems" :key="i" :to="submenu.to" router exact>
-      <v-list-item-action>
-        <v-icon>{{ submenu.icon }}</v-icon>
-      </v-list-item-action>
-      <v-list-item-content>
-        <v-list-item-title>{{ submenu.title }}</v-list-item-title>
-      </v-list-item-content>
-    </v-list-item>
-  </v-list-group>
-  </template>
+          <v-list-group prepend-icon="mdi-cog" no-action>
+            <template v-slot:activator>
+              <v-list-item>
+                <v-list-item-content>
+                  <v-list-item-title>Parámetros</v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+            </template>
+            <!-- Botones anidados en Parámetros -->
+            <v-list-item v-for="(submenu, i) in permittedParametrosItems" :key="i" :to="submenu.to" router exact>
+              <v-list-item-action>
+                <v-icon>{{ submenu.icon }}</v-icon>
+              </v-list-item-action>
+              <v-list-item-content>
+                <v-list-item-title>{{ submenu.title }}</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list-group>
+        </template>
         <!-- Botón de salir -->
         <v-list-item @click="openLogoutDialog">
           <v-list-item-action>
@@ -79,10 +83,15 @@
 </template>
 
 <script>
+import SessionExpiredDialog from '~/components/SessionExpiredDialog.vue';
+
 import Cookies from 'js-cookie';
 
 export default {
   name: 'DefaultLayout',
+  components: {
+    SessionExpiredDialog
+  },
   data() {
     return {
       userRole: parseInt(Cookies.get('rol')), // Ahora obtiene el rol de la cookie 'rol'
@@ -96,12 +105,12 @@ export default {
       title: 'Vuetify.js',
       logoutDialog: false, // Controla la visibilidad del diálogo de logout
       items: [
-        { icon: 'mdi-chart-bar', title: 'Métricas', to: 'tablero', roles: [1]},
-        { icon: 'mdi-clipboard-outline', title: 'Asignaciones', to: 'asignacion', roles: [1,3] },
+        { icon: 'mdi-chart-bar', title: 'Métricas', to: 'tablero', roles: [1] },
+        { icon: 'mdi-clipboard-outline', title: 'Asignaciones', to: 'asignacion', roles: [1, 3] },
         { icon: 'mdi-clipboard-outline', title: 'Pendientes', to: 'tecnico', roles: [2] }, // Solo Técnico
-        { icon: 'mdi-store', title: 'Comercio', to: 'comercio', roles: [1,3] },
-        { icon: 'mdi-package', title: 'Equipos', to: 'equipos', roles: [1,3]},
-        { icon: 'mdi-archive', title: 'Comodin', to: 'comodin', roles: [1,3] },
+        { icon: 'mdi-store', title: 'Comercio', to: 'comercio', roles: [1, 3] },
+        { icon: 'mdi-package', title: 'Equipos', to: 'equipos', roles: [1, 3] },
+        { icon: 'mdi-archive', title: 'Comodin', to: 'comodin', roles: [1, 3] },
         { icon: 'mdi-account-multiple', title: 'Colaboradores', to: 'usuarios', roles: [1] },
       ],
       parametrosItems: [
@@ -116,11 +125,9 @@ export default {
     // Filtra los módulos según el rol del usuario
     permittedItems() {
       return this.items.filter(this.canAccessModule);
-      //return this.items.filter((item) => this.canAccessModule(item.title));
     },
     permittedParametrosItems() {
       return this.parametrosItems.filter(this.canAccessModule);
-      //return this.parametrosItems.filter((item) => this.canAccessModule(item.title));
     },
     drawerColor() {
       return this.isDark ? 'grey darken-4' : 'indigo lighten-4';
@@ -135,12 +142,6 @@ export default {
   methods: {
     // Filtra los permisos de acuerdo al rol del usuario
     canAccessModule(item) {
-      /*const permissions = {
-        1: ['metricas', 'asignacion', 'comercio', 'equipos', 'comodin', 'colaboradores'],
-        2: ['tecnico'],
-        3: ['asignacion', 'comercio', 'equipos', 'comodin'],
-      };
-      return permissions[this.userRole]?.includes(moduleTitle);*/
       return item.roles.includes(this.userRole);
     },
     toggleTheme() {
@@ -190,4 +191,3 @@ export default {
   color: #000000;
 }
 </style>
-

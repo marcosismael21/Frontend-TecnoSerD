@@ -95,7 +95,7 @@ export default {
               mensage
             } = response.data;
             if (ok) {
-              Cookies.set('token', response.data.token)
+              Cookies.set('token', response.data.token, { expires: response.data.expiresIn })
               Cookies.set('rol', userData.idrol)
               Cookies.set('id', userData.id)
               this.$router.push('tablero')
