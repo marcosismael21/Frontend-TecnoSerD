@@ -304,6 +304,18 @@ export default {
           theme: 'plain'              // Cambia el estilo a una tabla con todos los bordes visibles
         })
 
+        // Pie de página: iterar sobre cada página para agregar la numeración
+        const pageCount = doc.internal.getNumberOfPages()
+        const pageSize = doc.internal.pageSize
+        const pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight()
+        const pageWidth = pageSize.width ? pageSize.width : pageSize.getWidth()
+
+        for (let i = 1; i <= pageCount; i++) {
+          doc.setPage(i)
+          doc.setFontSize(10)
+          doc.text(`Página ${i} de ${pageCount}`, pageWidth / 2, pageHeight - 10, { align: 'center' })
+        }
+
         // Obtener la fecha y hora actuales en el formato deseado
         const fechaActual = new Date().toLocaleDateString().replace(/\//g, '-')
 
