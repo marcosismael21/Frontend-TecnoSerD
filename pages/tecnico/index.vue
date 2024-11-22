@@ -48,47 +48,41 @@
                 @click="detallesAsignacionPendiente(item.idUsuario, item.idComercio, item.idServicio, item.idEstado)">
                 <v-icon>mdi-eye</v-icon>
               </v-btn>
-              <v-btn icon
-                @click="cancelarAsignacionPendiente(item.idUsuario, item.idComercio, item.idServicio, item.idEstado)">
-                <v-icon>mdi-account-minus</v-icon>
+              <v-btn icon @click="empezarProceso(item.idEstado, item.listAsignacionId, item.listAsignacionTecnicoIDs)">
+                <v-icon>mdi-check</v-icon>
               </v-btn>
             </template>
           </v-data-table>
         </v-card>
       </v-col>
     </v-row>
-    <!-- Dialogos para crear Ciudad-->
 
-    <v-dialog v-model="dialogNuevoRol" max-width="600px" persistent>
-      <nuevo-rol @close="dialogNuevoRol = false" @saved="onSuccess" @error="onError"></nuevo-rol>
+    <v-dialog v-model="dialogDetalleAsignacionPendiente" max-width="600px" persistent>
+      <detalle-asignacion-pendiente :idUsuario="asignacionSeleccionadaPendiente.idUsuario"
+        :idComercio="asignacionSeleccionadaPendiente.idComercio" :idEstado="asignacionSeleccionadaPendiente.idEstado"
+        :idServicio="asignacionSeleccionadaPendiente.idServicio" @close="dialogDetalleAsignacionPendiente = false">
+      </detalle-asignacion-pendiente>
     </v-dialog>
 
-    <v-dialog v-model="dialogEditarRol" max-width="600px" persistent>
-      <editar-rol :id="rolSeleccionada.id" @close="dialogEditarRol = false" @saved="onSuccess"
-        @error="onError"></editar-rol>
-    </v-dialog>
-
-    <!--Dialos de eliminar-->
-
-    <v-dialog v-model="dialogEliminarConfirm" max-width="400" persistent>
+    <v-dialog v-model="dialogEmpezarConfirm" max-width="400" persistent>
       <v-card>
-        <v-card-title class="text-h6">Confirmar Eliminación</v-card-title>
-        <v-card-text>¿Estás seguro de que deseas eliminar este rol?</v-card-text>
+        <v-card-title class="text-h6">Aceptar Asignación</v-card-title>
+        <v-card-text>¿Estás seguro de que deseas aceptar esta asignación?</v-card-text>
         <v-spacer></v-spacer>
         <v-card-actions>
-          <v-btn color="red darken-1" text @click="dialogEliminarConfirm = false">Cancelar</v-btn>
-          <v-btn color="green darken-1" text @click="confirmarEliminacion">Eliminar</v-btn>
+          <v-btn color="red darken-1" text @click="dialogEmpezarConfirm = false">Cancelar</v-btn>
+          <v-btn color="green darken-1" text @click="confirmar">Aceptar</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="dialogEliminar" max-width="400" persistent>
+    <v-dialog v-model="dialogEmpezar" max-width="500" persistent>
       <v-card>
-        <v-card-title class="text-h6">Eliminando rol...</v-card-title>
+        <v-card-title class="text-h6">Aceptando asignación...</v-card-title>
         <v-card-subtitle>
           <v-row align="center" class="ma-0 pa-0">
             <v-col cols="12" class="d-flex align-center">
-              <span>Por favor, espere...</span>
+              <span>Enviando la información a Asignaciones en Proceso espere favor, espere...</span>
               <v-spacer></v-spacer>
               <v-progress-circular indeterminate color="primary" size="64" width="4" class="mr-4"></v-progress-circular>
             </v-col>
@@ -103,6 +97,7 @@
 </template>
 
 <script>
+import DetalleAsignacionPendiente from '~/pages/tecnico/detalleAsig.vue'
 
 import Cookies from 'js-cookie';
 
@@ -120,7 +115,7 @@ export default {
   watch: {
     $route(to, from) {
       if (to.fullPath !== from.fullPath) {
-        this.loadRol()
+        this.loadAsig()
       }
     },
   },
@@ -143,11 +138,10 @@ export default {
         { text: 'Inactivo', value: false },
       ],
       //variables para activar los modales
-      dialogNuevoRol: false,
-      dialogEditarRol: false,
-      dialogEliminar: false,
-      dialogEliminarConfirm: false,
-      rolSeleccionada: false,
+      dialogDetalleAsignacionPendiente: false,
+      asignacionSeleccionadaPendiente: false,
+      dialogEmpezar: false,
+      dialogEmpezarConfirm: false,
       // Añadimos estos campos para el snackbar
       snackbar: false,
       snackbarMessage: '',
@@ -155,40 +149,55 @@ export default {
     }
   },
   methods: {
-    async loadRol() {
+    async loadAsig() {
+      const idTecnico = Cookies.get('id')
       try {
-        const { data } = await this.$axios.get('/rol')
-        this.rol = data
+        const { data } = await $axios.get(`asignacionTecnico/lap/${idTecnico}`)
+        this.pendiente = data
       } catch (error) {
-        console.error('Error fetching rol:', error)
-        this.rol = []
+        console.error('Error fetching pendiente:', error)
+        this.pendiente = []
       }
     },
-    getEstadoText(estado) {
-      const estadoOption = this.estadoOptions.find(
-        (option) => option.value === estado
-      )
-      return estadoOption ? estadoOption.text : ''
+    detallesAsignacionPendiente(idUsuario, idComercio, idServicio, idEstado) {
+      this.asignacionSeleccionadaPendiente = this.pendiente.find(
+        (e) => e.idUsuario === idUsuario
+          && e.idComercio === idComercio
+          && e.idServicio === idServicio
+          && e.idEstado === idEstado) || {}
+      this.dialogDetalleAsignacionPendiente = true
     },
-    nuevoRol() {
-      this.dialogNuevoRol = true
+    empezarProceso(idEstadoAnterior, listAsignacionId, listAsignacionTecnicoID) {
+      this.asignacionSeleccionadaPendiente = this.pendiente.find(
+        (e) => e.idEstado === idEstadoAnterior
+          && e.listAsignacionId === listAsignacionId
+          && e.listAsignacionTecnicoIDs === listAsignacionTecnicoID
+      ) || {}
+      this.dialogEmpezarConfirm = true
+      console.log(idEstadoAnterior + '\n' + listAsignacionId + '\n' + listAsignacionTecnicoID)
     },
-    editarRol(id) {
-      this.rolSeleccionada = this.rol.find((e) => e.id === id) || {}
-      this.dialogEditarRol = true
-    },
-    eliminarRol(id) {
-      this.rolSeleccionada = this.rol.find((e) => e.id === id) || {};
-      this.dialogEliminarConfirm = true;
-    },
-    confirmarEliminacion() {
-      this.dialogEliminarConfirm = false;
-      this.dialogEliminar = true;  // Mostrar el modal de carga
+    confirmar() {
+      this.dialogEmpezarConfirm = false;
+      this.dialogEmpezar = true;
 
       this.$axios
-        .delete(`/rol/${this.rolSeleccionada.id}`)
+        .patch(`/asignacionTecnico/t`, {
+          idEstado: 3,
+          idEstadoAnterior: this.asignacionSeleccionadaPendiente.idEstado,
+          listAsignacionId: this.asignacionSeleccionadaPendiente.listAsignacionId.map(id => parseInt(id)),
+          listAsignacionTecnicoID: this.asignacionSeleccionadaPendiente.listAsignacionTecnicoIDs.map(id => parseInt(id))
+        })
         .then((response) => {
-          this.rol = this.rol.filter((roles) => roles.id !== this.rolSeleccionada.id);
+
+          // Filtrar el elemento eliminado de la lista de pendientes
+          this.pendiente = this.pendiente.filter(
+            (pendiente) =>
+              !(
+                pendiente.idEstado === this.asignacionSeleccionadaPendiente.idEstado &&
+                pendiente.listAsignacionId === this.asignacionSeleccionadaPendiente.listAsignacionId &&
+                pendiente.listAsignacionTecnicoID === this.asignacionSeleccionadaPendiente.listAsignacionTecnicoID
+              )
+          );
 
           // Mostrar el mensaje que viene del backend en el snackbar
           this.showSnackbar(response.data.message, "success");
@@ -197,14 +206,24 @@ export default {
           // Mostrar el mensaje de error del backend o un mensaje genérico si no está disponible
           const errorMessage = error.response && error.response.data && error.response.data.message
             ? error.response.data.message
-            : "Error eliminando el rol";
+            : "Error aceptando la asignación";
           this.showSnackbar(errorMessage, "error");
         })
         .finally(() => {
           setTimeout(() => {
-            this.dialogEliminar = false;  // Cerrar el modal de carga después de 3 segundos
+            this.dialogEmpezar = false;  // Cerrar el modal de carga después de 3 segundos
           }, 2000);
         });
+    },
+    getMapa(latitud, longitud) {
+      this.$axios.get(`/comercio/maps/${latitud}/${longitud}`)
+        .then((response) => {
+          const { googleMapsUrl } = response.data
+          window.open(googleMapsUrl, '_blank')
+        })
+        .catch((error) => {
+          console.error("Error al obtener el mapa: ", error)
+        })
     },
     showSnackbar(message, color) {
       this.snackbarMessage = message;
@@ -214,27 +233,26 @@ export default {
     onSuccess(message) {
       // Mostrar el snackbar con un mensaje de éxito
       this.showSnackbar(message, 'success');
-      this.fetchRoles()
+      this.fetchAsig()
     },
     onError(message) {
       // Mostrar el snackbar con un mensaje de error
       this.showSnackbar(message, 'error');
     },
-    fetchRoles() {
+    fetchAsig() {
+      const idTecnico = Cookies.get('id')
       this.$axios
-        .get('/rol')
+        .get(`asignacionTecnico/lap/${idTecnico}`)
         .then((response) => {
-          this.rol = response.data
+          this.pendiente = response.data
         })
         .catch((error) => {
-          console.error('Error fetching rol:', error)
+          console.error('Error fetching asignacion:', error)
         })
-    },
-    regresar() {
-      this.$router.push('usuarios')
     },
   },
   components: {
+    DetalleAsignacionPendiente,
   },
 }
 </script>
