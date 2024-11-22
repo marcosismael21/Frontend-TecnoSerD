@@ -111,7 +111,7 @@ export default {
         { icon: 'mdi-store', title: 'Comercio', to: 'comercio', roles: [1, 3] },
         { icon: 'mdi-package', title: 'Equipos', to: 'equipos', roles: [1, 3] },
         { icon: 'mdi-archive', title: 'Comodin', to: 'comodin', roles: [1, 3] },
-        { icon: 'mdi-account-multiple', title: 'Colaboradores', to: 'usuarios', roles: [1] },
+        { icon: 'mdi-crown', title: 'Regalía', to: 'regaliaComercio', roles: [2] },
       ],
       parametrosItems: [
         { icon: 'mdi-city', title: 'Ciudades', to: 'ciudad', roles: [1] },
