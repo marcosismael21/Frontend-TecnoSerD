@@ -19,6 +19,7 @@
     "jspdf": "^2.5.2",
     "jspdf-autotable": "^3.8.4",
     "nuxt": "^2.18.1",
+    "pdf-lib": "^1.17.1",
     "vue": "^2.7.10",
     "vue-apexcharts": "^1.6.2",
     "vue-server-renderer": "^2.7.10",
