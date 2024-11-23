@@ -184,8 +184,8 @@ export default {
         .patch(`/asignacionTecnico/t`, {
           idEstado: 3,
           idEstadoAnterior: this.asignacionSeleccionadaPendiente.idEstado,
-          listAsignacionId: this.asignacionSeleccionadaPendiente.listAsignacionId.map(id => parseInt(id)),
-          listAsignacionTecnicoID: this.asignacionSeleccionadaPendiente.listAsignacionTecnicoIDs.map(id => parseInt(id))
+          listAsignacionId: this.asignacionSeleccionadaPendiente.listAsignacionId.split(',').map(id => parseInt(id.trim())),
+          listAsignacionTecnicoID: this.asignacionSeleccionadaPendiente.listAsignacionTecnicoIDs.split(',').map(id => parseInt(id.trim()))
         })
         .then((response) => {
 
