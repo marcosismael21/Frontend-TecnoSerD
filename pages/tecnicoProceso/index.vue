@@ -67,7 +67,8 @@
     <v-dialog v-model="dialogFinalizarAsignacion" max-width="600px" persistent>
       <finalizar-asignacion :idUsuario="asignacionSeleccionadaPendiente.idUsuario"
         :idComercio="asignacionSeleccionadaPendiente.idComercio" :idEstado="asignacionSeleccionadaPendiente.idEstado"
-        :idServicio="asignacionSeleccionadaPendiente.idServicio" @close="dialogFinalizarAsignacion = false">
+        :idServicio="asignacionSeleccionadaPendiente.idServicio" @close="dialogFinalizarAsignacion = false" @saved="onSuccess"
+        @error="onError">
       </finalizar-asignacion>
     </v-dialog>
 

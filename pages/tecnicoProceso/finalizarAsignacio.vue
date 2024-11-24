@@ -33,6 +33,8 @@
     <v-card-actions>
       <v-spacer></v-spacer>
       <v-btn color="red darken-1" text @click="closeDialog">Cerrar</v-btn>
+      <v-btn color="green darken-1" text
+        @click="finalizarAsignacion(asignacion.idEstado, asignacion.listAsignacionId, asignacion.listAsignacionTecnicoIDs)">Finalizar</v-btn>
     </v-card-actions>
   </v-card>
   <v-alert v-else-if="!isLoading && !asignacion" type="error">No se pudo cargar la información de la
@@ -86,6 +88,31 @@ export default {
         console.error('Error fetching asignacion:', error)
         this.asignacion = null
       }
+    },
+    finalizarAsignacion(idEstadoAnterior, listAsignacionId, listAsignacionTecnicoIDs) {
+      this.$axios
+        .patch(`/asignacionTecnico/t`, {
+          idEstado: 4,
+          idEstadoAnterior: idEstadoAnterior,
+          listAsignacionId: listAsignacionId.split(',').map(id => parseInt(id.trim())),
+          listAsignacionTecnicoID: listAsignacionTecnicoIDs.split(',').map(id => parseInt(id.trim()))
+        })
+        .then((response) => {
+          // Emitimos el evento de éxito
+          this.$emit('saved', response.data.message)
+          // Cerramos el diálogo
+          this.$emit('close');
+        })
+        .catch((error) => {
+          // Mostrar el mensaje de error del backend o un mensaje genérico si no está disponible
+          const errorMessage = error.response && error.response.data && error.response.data.message
+            ? error.response.data.message
+            : "Error finalizando la asignación";
+          this.$emit('error', errorMessage);
+        })
+        .finally(() => {
+          this.$emit('close')
+        });
     },
     closeDialog() {
       this.$emit('close')
