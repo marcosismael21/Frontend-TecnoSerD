@@ -1,12 +1,22 @@
 import colors from 'vuetify/es5/util/colors'
 
 export default {
+  router: {
+    extendRoutes(routes, resolve) {
+      routes.push({
+        path: '',
+        redirect: '/login2',
+        middleware: ['acl']
+      })
+    },
+  },
+
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
     titleTemplate: '%s - TecnoSerD',
     title: 'TecnoSerD',
     htmlAttrs: {
-      lang: 'en',
+      lang: 'es',
     },
     meta: [
       { charset: 'utf-8' },
@@ -21,7 +31,13 @@ export default {
   css: [],
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
-  plugins: [],
+  plugins: [
+    /*'~/plugins/axios.js',
+    { src: '~/plugins/apexcharts.js', mode: 'client' },
+    { src: '~/plugins/apexcharts.js', mode: 'client' }*/
+     '~/plugins/axios.js',
+     { src: '~/plugins/apexcharts.client.js', mode: 'client' }
+  ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
   components: true,
@@ -48,7 +64,6 @@ export default {
   vuetify: {
     customVariables: ['~/assets/variables.scss'],
     theme: {
-      dark: true,
       themes: {
         dark: {
           primary: colors.blue.darken2,
@@ -59,7 +74,18 @@ export default {
           error: colors.deepOrange.accent4,
           success: colors.green.accent3,
         },
+        light: {
+          primary: colors.blue.lighten2,
+          accent: colors.grey.lighten3,
+          secondary: colors.indigo.lighten5,
+          info: colors.teal.darken1,
+          warning: colors.amber.lighten2,
+          error: colors.deepOrange.lighten1,
+          success: colors.green.lighten2,
+          background: colors.indigo.lighten3
+        },
       },
+      options: { customProperties: true },
     },
   },
 
