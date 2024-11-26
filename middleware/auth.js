@@ -1,42 +1,43 @@
-import Cookies from 'js-cookie';
+import Cookies from 'js-cookie'
 
-export default function ({ route, redirect, $axios, store }) {
+export default function ({ route, redirect, store }) {
+  // Solo ejecutar en el cliente
   if (process.client) {
-    const token = Cookies.get('token');
+    const token = Cookies.get('token')
+    const rol = Cookies.get('rol')
 
-    // Si no hay token y la ruta no es /login, redirigir a /login
-    if (!token && route.name !== 'login') {
-      return redirect('/login');
+    // Si no hay token y no estamos en la página de login
+    if (!token && route.path !== '/') {
+      return redirect('/')
     }
 
-    // Si hay un token y la ruta es /login, redirigir a la página principal
-    if (token && route.name === 'login') {
-      return redirect('/');
+    // Si hay token, actualizar el store
+    if (token && !store.state.authenticated) {
+      store.commit('setAuthenticated', true)
+      store.commit('setUser', { role: rol })
     }
 
-    // Si hay token y no estamos en login, verificar su validez
-    if (token && route.name !== 'login') {
-      $axios.get('/usuario/verify-token', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      }).catch(error => {
-        if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-          // Limpiar cookies
-          Cookies.remove('token');
-          Cookies.remove('rol');
-          Cookies.remove('id');
-          Cookies.remove('theme');
+    // Verificar permisos de ruta
+    if (rol && route.path !== '/') {
+      const allowedRoutes = {
+        '1': ['*'],
+        '2': ['/tecnico', '/tecnicoProceso', '/regaliaComercio'],
+        '3': ['/comercio', '/equipos', '/comodin', '/asignacion']
+      }
 
-          // Mostrar diálogo
-          store.commit('sessionDialog/showDialog');
+      const currentRoleRoutes = allowedRoutes[rol] || []
 
-          // Redirigir después de un breve delay para que el diálogo tenga tiempo de mostrarse
-          setTimeout(() => {
-            redirect('/login');
-          }, 100);
-        }
-      });
+      // Si es admin o la ruta está permitida, continuar
+      if (rol === '1' || currentRoleRoutes.includes(route.path)) {
+        return
+      }
+
+      // Si no tiene permisos, redirigir a su ruta por defecto
+      if (rol === '2') {
+        return redirect('/tecnico')
+      } else if (rol === '3') {
+        return redirect('/comercio')
+      }
     }
   }
 }
