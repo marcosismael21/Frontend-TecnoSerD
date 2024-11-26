@@ -6,9 +6,28 @@ export default {
       routes.push({
         path: '',
         redirect: '/login2',
-        middleware: ['acl']
+        middleware: [
+          'auth',           // Tu middleware de autenticación existente
+          'routeProtection' // Nuevo middleware de protección de rutas
+        ]
       })
     },
+  },
+
+  // Definir las rutas y sus meta datos
+  routeRules: {
+    '/tecnico/**': { middleware: ['routeProtection'] },
+    '/comercio/**': { middleware: ['routeProtection'] },
+    '/equipos/**': { middleware: ['routeProtection'] },
+    '/comodin/**': { middleware: ['routeProtection'] },
+    '/asignacion/**': { middleware: ['routeProtection'] },
+    '/usuarios/**': { middleware: ['routeProtection'] },
+    '/tecnicoProceso/**': { middleware: ['routeProtection'] },
+    '/regaliaComercio/**': { middleware: ['routeProtection'] },
+    '/ciudad/**': { middleware: ['routeProtection'] },
+    '/canal/**': { middleware: ['routeProtection'] },
+    '/proveedores/**': { middleware: ['routeProtection'] },
+    '/regalia/**': { middleware: ['routeProtection'] }
   },
 
   // Global page headers: https://go.nuxtjs.dev/config-head
@@ -32,11 +51,9 @@ export default {
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   plugins: [
-    /*'~/plugins/axios.js',
-    { src: '~/plugins/apexcharts.js', mode: 'client' },
-    { src: '~/plugins/apexcharts.js', mode: 'client' }*/
-     '~/plugins/axios.js',
-     { src: '~/plugins/apexcharts.client.js', mode: 'client' }
+    '~/plugins/axios.js',
+    { src: '~/plugins/acl.js', mode: 'client' },
+    { src: '~/plugins/apexcharts.client.js', mode: 'client' }
   ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
@@ -89,6 +106,34 @@ export default {
     },
   },
 
+  ssr: true,
+
+  // Configuración de SSR para evitar problemas de hidratación
+  render: {
+    ssr: true,
+    bundleRenderer: {
+      directives: {
+        custom: function (el, binding) {
+          // Manejo personalizado de directivas
+        }
+      }
+    }
+  },
+
+
   // Build Configuration: https://go.nuxtjs.dev/config-build
-  build: {},
+  build: {
+   transpile: [
+      'vuetify/lib'
+    ]
+  },
+
+  vue: {
+    config: {
+      productionTip: false,
+      devtools: true
+    }
+  },
+
+
 }

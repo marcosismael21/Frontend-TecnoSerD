@@ -1,15 +1,33 @@
-// plugins/acl.js
 import Vue from 'vue'
 import VueSimpleAcl from 'vue-simple-acl'
 
-Vue.use(VueSimpleAcl)
+export default ({ app, store }) => {
+  // Solo inicializar en el cliente
+  if (process.client) {
+    Vue.use(VueSimpleAcl, {
+      init: (acl) => {
+        // Definir roles
+        acl.addRole('1')
+        acl.addRole('2')
+        acl.addRole('3')
 
-// Agrega los roles usando el nombre o ID como referencia
-Vue.acl.addRole('1') // Administrador
-Vue.acl.addRole('2') // Técnico
-Vue.acl.addRole('3') // Gestor Logístico
+        // Definir permisos base
+        acl.allow('1', '*')
+        acl.allow('2', ['tecnico', 'tecnicoProceso', 'regaliaComercio'])
+        acl.allow('3', ['comercio', 'equipos', 'comodin', 'asignacion'])
 
-// Define permisos para cada rol
-Vue.acl.allow('1', '*') // Administrador tiene acceso total
-Vue.acl.allow('2', ['read', 'update']) // Técnico puede leer y actualizar
-Vue.acl.allow('3', ['read']) // Gestor Logístico solo puede leer
+        return true
+      }
+    })
+
+    // Escuchar cambios en el store para actualizar el rol
+    store.watch(
+      (state) => state.user?.role,
+      (newRole) => {
+        if (newRole) {
+          Vue.acl.setRole(newRole)
+        }
+      }
+    )
+  }
+}
