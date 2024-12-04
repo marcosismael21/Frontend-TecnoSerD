@@ -99,7 +99,7 @@ export default {
               Cookies.set('rol', userData.idrol)
               Cookies.set('id', userData.id)
               if (userData.idrol == 2) {
-                this.$router.push('tecnico')
+                this.$router.push('regaliaComercio')
               } else {
                 this.$router.push('tablero')
               }

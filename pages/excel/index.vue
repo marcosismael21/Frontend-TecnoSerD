@@ -17,7 +17,6 @@
             <v-file-input v-model="file" accept=".csv, .xlsx, .xls" label="Archivo" placeholder="Seleccione un archivo"
               prepend-icon="mdi-file" show-size @change="handleFileUpload">
             </v-file-input>
-            <!-- v-select para seleccionar columnas -->
             <v-select v-model="selectedColumns" :items="availableColumns" label="Seleccione las columnas" multiple chips
               @change="updateTable"></v-select>
           </v-card-text>
@@ -31,7 +30,6 @@
               <v-data-table :headers="headers" :items="items"></v-data-table>
             </div>
           </v-card-text>
-          <!-- botones -->
           <v-card-actions>
             <v-spacer></v-spacer>
             <v-btn color="red darken-1" @click="regresar">
@@ -58,11 +56,26 @@
       </v-card>
     </v-dialog>
 
-    <!-- Snackbar de notificación -->
+    <!-- Loading dialog -->
+    <v-dialog v-model="loadingDialog" max-width="320" persistent>
+     <v-card>
+        <v-card-title class="text-h6">Procesando datos...</v-card-title>
+        <v-card-subtitle>
+          <v-row align="center" class="ma-0 pa-0">
+            <v-col cols="12" class="d-flex align-center">
+              <span>Por favor, espere...</span>
+              <v-spacer></v-spacer>
+              <v-progress-circular indeterminate color="primary" size="64" width="4" class="mr-4"></v-progress-circular>
+            </v-col>
+          </v-row>
+        </v-card-subtitle>
+      </v-card>
+    </v-dialog>
+
+    <!-- Snackbar -->
     <v-snackbar v-model="snackbar" :color="snackbarColor" timeout="3000" top>
       {{ snackbarMessage }}
     </v-snackbar>
-
   </v-container>
 </template>
 
@@ -88,6 +101,7 @@ export default {
     snackbar: false,
     snackbarMessage: '',
     snackbarColor: '',  // 'success' o 'error' para diferenciar el tipo de mensaje
+    loadingDialog: false,
   }),
   computed: {
     filteredItems() {
@@ -227,41 +241,34 @@ export default {
       this.dialog = false;
       this.uploadExcel();
     },
-    uploadExcel() {
+    async uploadExcel() {
       if (!this.file) {
         this.showSnackbar("No se ha seleccionado ningún archivo.", "error");
         return;
       }
 
+      this.loadingDialog = true;  // Show loading dialog
       const formData = new FormData();
       formData.append('file', this.file);
 
-      this.$axios.post('/excel/importar', formData)
-        .then((response) => {
-          const message = response.data.message || "Archivo cargado exitosamente.";
-          // Mostrar el mensaje que viene del backend en el snackbar
-          this.showSnackbar(message, "success");
-          this.clearFileInput(); // Limpia tanto el file-input como la tabla
-        })
-        .catch(error => {
-          if (error.response) {
-            if (error.response.status === 500) {
-              const errorMessage = error.response?.data?.message + ' ' + error.response?.data?.error || "Error al cargar el archivo.";
-              this.showSnackbar(errorMessage, "error");
-            } else {
-              const errorMessage = error.response.data.message || "Error al cargar el archivo.";
-              this.showSnackbar(errorMessage, "error");
-            }
+      try {
+        const response = await this.$axios.post('/excel/importar', formData);
+        const message = response.data.message || "Archivo cargado exitosamente.";
+        this.showSnackbar(message, "success");
+        this.clearFileInput();
+      } catch (error) {
+        let errorMessage = "Error al cargar el archivo.";
+        if (error.response) {
+          if (error.response.status === 500) {
+            errorMessage = error.response?.data?.message + ' ' + error.response?.data?.error || errorMessage;
           } else {
-            this.showSnackbar("Error al cargar el archivo.", "error");
+            errorMessage = error.response.data.message || errorMessage;
           }
-
-          // Mostrar el mensaje de error del backend o un mensaje genérico si no está disponible
-          const errorMessage = error.response && error.response.data && error.response.data.message
-            ? error.response.data.message
-            : "Error al cargar el archivo.";
-          this.showSnackbar(errorMessage, "error");
-        });
+        }
+        this.showSnackbar(errorMessage, "error");
+      } finally {
+        this.loadingDialog = false;  // Hide loading dialog
+      }
     },
     regresar() {
       this.$router.push('asignacion');
@@ -291,7 +298,6 @@ export default {
 
 .checkbox-label .v-label {
   white-space: nowrap;
-  /* Evita que el texto se sobreponga */
   overflow: hidden;
   text-overflow: ellipsis;
 }
