@@ -1,22 +1,65 @@
 <template>
   <v-container>
-    <v-row>
-      <!-- Primer gráfico: Equipos por tipo -->
-      <v-col cols="12" md="6">
-        <v-card>
-          <v-card-title>Gráfica de Equipos por Tipo</v-card-title>
+    <!-- Sparkline Boxes -->
+    <v-row class="mt-4 mb-4">
+      <v-col cols="12" md="4">
+        <v-card class="box box1">
           <v-card-subtitle>
-            <apexchart type="bar" :options="chartOptionsType" :series="chartSeriesType" />
+            <apexchart type="area" :options="sparkOptions1" :series="sparkSeries1" />
           </v-card-subtitle>
         </v-card>
       </v-col>
-
-      <!-- Segundo gráfico: Equipos por estado -->
-      <v-col cols="12" md="6">
-        <v-card>
-          <v-card-title>Gráfica de Equipos por Estado</v-card-title>
+      <v-col cols="12" md="4">
+        <v-card class="box box2">
           <v-card-subtitle>
-            <apexchart type="pie" :options="chartOptionsState" :series="chartSeriesState" />
+            <apexchart type="area" :options="sparkOptions2" :series="sparkSeries2" />
+          </v-card-subtitle>
+        </v-card>
+      </v-col>
+      <v-col cols="12" md="4">
+        <v-card class="box box3">
+          <v-card-subtitle>
+            <apexchart type="area" :options="sparkOptions3" :series="sparkSeries3" />
+          </v-card-subtitle>
+        </v-card>
+      </v-col>
+    </v-row>
+
+    <!-- Bar and Donut Charts -->
+    <v-row class="mt-5 mb-4">
+      <v-col cols="12" md="6">
+        <v-card class="box">
+          <v-card-title>Servicios Prestados por Ciudad</v-card-title>
+          <v-card-subtitle>
+            <apexchart type="bar" :options="barOptions" :series="barSeries" />
+          </v-card-subtitle>
+        </v-card>
+      </v-col>
+      <v-col cols="12" md="6">
+        <v-card class="box">
+          <v-card-title>Asignaciones por Estado</v-card-title>
+          <v-card-subtitle>
+            <apexchart type="donut" :options="donutOptions" :series="donutSeries" />
+          </v-card-subtitle>
+        </v-card>
+      </v-col>
+    </v-row>
+
+    <!-- Area and Pie Charts -->
+    <v-row class="mt-4 mb-4">
+      <v-col cols="12" md="6">
+        <v-card class="box">
+          <v-card-title>Crecimiento de Equipos por Estado</v-card-title>
+          <v-card-subtitle>
+            <apexchart type="area" :options="areaOptions" :series="areaSeries" />
+          </v-card-subtitle>
+        </v-card>
+      </v-col>
+      <v-col cols="12" md="6">
+        <v-card class="box">
+          <v-card-title>Equipos en Buen y Mal Estado</v-card-title>
+          <v-card-subtitle>
+            <apexchart type="pie" :options="pieOptions" :series="pieSeries" />
           </v-card-subtitle>
         </v-card>
       </v-col>
@@ -33,101 +76,148 @@ export default {
   },
   data() {
     return {
-      // Opciones y datos para el gráfico de tipos de equipos
-      chartOptionsType: {
-        chart: {
-          type: 'bar',
-          height: 350
-        },
-        plotOptions: {
-          bar: {
-            horizontal: false,
-            columnWidth: '55%',
-            endingShape: 'rounded'
-          }
-        },
-        dataLabels: {
-          enabled: false
-        },
-        xaxis: {
-          categories: []
-        },
-        yaxis: {
-          title: {
-            text: 'Cantidad'
-          }
-        },
-        fill: {
-          opacity: 1
-        },
-        tooltip: {
-          y: {
-            formatter: function (val) {
-              return val
-            }
-          }
-        }
+      sparkOptions1: {
+        chart: { type: 'area', height: 160, sparkline: { enabled: true } },
+        stroke: { curve: 'smooth' },
+        fill: { opacity: 0.3 },
+        xaxis: { type: 'datetime', crosshairs: { width: 1 } },
+        tooltip: { x: { format: 'MMM dd' }, y: { formatter: (value) => `${value}` } },
+        title: { text: '40', offsetX: 0, style: { fontSize: '24px' } },
+        subtitle: { text: 'Instalaciones', offsetX: 0, style: { fontSize: '14px' } },
       },
-      chartSeriesType: [],
-
-      // Opciones y datos para el gráfico de estados de equipos
-      chartOptionsState: {
-        chart: {
-          type: 'pie',
-          height: 350
-        },
-        labels: ['En buen estado', 'En mal estado'],
-        responsive: [{
-          breakpoint: 480,
-          options: {
-            chart: {
-              width: 200
-            },
-            legend: {
-              position: 'bottom'
-            }
-          }
-        }]
+      sparkSeries1: [],
+      sparkOptions2: {
+        chart: { type: 'area', height: 160, sparkline: { enabled: true } },
+        stroke: { curve: 'smooth' },
+        fill: { opacity: 0.3 },
+        xaxis: { type: 'datetime', crosshairs: { width: 1 } },
+        tooltip: { x: { format: 'MMM dd' }, y: { formatter: (value) => `${value}` } },
+        title: { text: '80', offsetX: 0, style: { fontSize: '24px' } },
+        subtitle: { text: 'Soportes', offsetX: 0, style: { fontSize: '14px' } },
       },
-      chartSeriesState: []
+      sparkSeries2: [],
+      sparkOptions3: {
+        chart: { type: 'area', height: 160, sparkline: { enabled: true } },
+        stroke: { curve: 'smooth' },
+        fill: { opacity: 0.3 },
+        xaxis: { type: 'datetime', crosshairs: { width: 1 } },
+        tooltip: { x: { format: 'MMM dd' }, y: { formatter: (value) => `${value}` } },
+        title: { text: '60', offsetX: 0, style: { fontSize: '24px' } },
+        subtitle: { text: 'Retiros', offsetX: 0, style: { fontSize: '14px' } },
+      },
+      sparkSeries3: [],
+      barOptions: {
+        chart: { type: 'bar', height: 350 },
+        plotOptions: { bar: { horizontal: false, columnWidth: '55%' } },
+        xaxis: { categories: [] },
+        yaxis: { title: { text: 'Cantidad de servicios' } },
+        fill: { opacity: 1 },
+      },
+      barSeries: [],
+      donutOptions: {
+        chart: { type: 'donut', height: 350 },
+        labels: [],
+      },
+      donutSeries: [],
+      areaOptions: {
+        chart: { type: 'area', height: 350 },
+        stroke: { curve: 'smooth' },
+        xaxis: { categories: [] },
+        yaxis: { title: { text: 'Cantidad de equipos' } },
+      },
+      areaSeries: [],
+      pieOptions: {
+        chart: { type: 'pie', height: 350 },
+        labels: [],
+      },
+      pieSeries: [],
     }
   },
-  async mounted() {
-    try {
-      // Cargar datos para el gráfico de tipos de equipos
-      const responseType = await this.$axios.get('/equipo/cantidad')
-      this.updateChartType(responseType.data)
-
-      // Cargar datos para el gráfico de estados de equipos
-      const responseState = await this.$axios.get('/equipo/cantidad-estado')
-      this.updateChartState(responseState.data)
-    } catch (error) {
-      console.error('Error fetching data:', error)
-    }
+  mounted() {
+    this.fetchSparklineData()
+    this.fetchBarData()
+    this.fetchDonutData()
+    this.fetchAreaData()
+    this.fetchPieData()
   },
   methods: {
-    updateChartType(data) {
-      const categories = data.map(item => item.idTipoEquipo)
-      const seriesData = data.map(item => item.cantidad)
+    async fetchSparklineData() {
+      try {
+        const resInstalaciones = await this.$axios.get('/tablero/sparkline-instalaciones')
+        this.sparkSeries1 = [{ name: 'Instalaciones', data: resInstalaciones.data.map(item => ({ x: new Date(item.fecha).getTime(), y: item.cantidad })) }]
+        this.sparkOptions1.title.text = resInstalaciones.data.reduce((sum, item) => sum + item.cantidad, 0).toString()
 
-      this.chartOptionsType.xaxis.categories = categories
-      this.chartSeriesType = [{
-        name: 'Cantidad',
-        data: seriesData
-      }]
+        const resSoportes = await this.$axios.get('/tablero/sparkline-soportes')
+        this.sparkSeries2 = [{ name: 'Soportes', data: resSoportes.data.map(item => ({ x: new Date(item.fecha).getTime(), y: item.cantidad })) }]
+        this.sparkOptions2.title.text = resSoportes.data.reduce((sum, item) => sum + item.cantidad, 0).toString()
+
+        const resRetiros = await this.$axios.get('/tablero/sparkline-retiros')
+        this.sparkSeries3 = [{ name: 'Retiros', data: resRetiros.data.map(item => ({ x: new Date(item.fecha).getTime(), y: item.cantidad })) }]
+        this.sparkOptions3.title.text = resRetiros.data.reduce((sum, item) => sum + item.cantidad, 0).toString()
+      } catch (error) {
+        console.error(error)
+      }
     },
-    updateChartState(data) {
-      const seriesData = data.map(item => item.cantidad)
-
-      this.chartSeriesState = seriesData
-    }
-  }
+    async fetchBarData() {
+      try {
+        const res = await this.$axios.get('/tablero/servicios-ciudad')
+        this.barSeries = [{ name: 'Servicios', data: res.data.map(item => item.cantidad) }]
+        this.barOptions.xaxis.categories = res.data.map(item => item.nombre)
+      } catch (error) {
+        console.error(error)
+      }
+    },
+    async fetchDonutData() {
+      try {
+        const res = await this.$axios.get('/tablero/asignaciones-estado')
+        this.donutSeries = res.data.map(item => item.cantidad)
+      } catch (error) {
+        console.error(error)
+      }
+    },
+    async fetchAreaData() {
+      try {
+        const res = await this.$axios.get('/tablero/crecimiento-equipos-estado')
+        this.areaSeries = [
+          {
+            name: 'Crecimiento',
+            data: res.data.map(item => ({ x: item.fecha, y: item.cantidad })),
+          },
+        ]
+        this.areaOptions.xaxis.categories = res.data.map(item => item.fecha)
+      } catch (error) {
+        console.error(error)
+      }
+    },
+    async fetchPieData() {
+      try {
+        const res = await this.$axios.get('/tablero/cantidad-estado')
+        this.pieSeries = res.data.map(item => item.cantidad)
+        this.pieOptions.labels = res.data.map(item => item.estado)
+      } catch (error) {
+        console.error(error)
+      }
+    },
+  },
 }
 </script>
 
 <style scoped>
-/* Ajusta el tamaño de los gráficos si es necesario */
-v-card {
-  min-height: 400px;
+.box {
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.box1 {
+  background-color: #e3f2fd;
+}
+
+.box2 {
+  background-color: #f1f8e9;
+}
+
+.box3 {
+  background-color: #fce4ec;
 }
 </style>
