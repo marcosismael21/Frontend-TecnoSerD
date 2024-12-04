@@ -948,6 +948,7 @@ export default {
 
         //limpiar los valores de seleccion
         this.dialogSelectReport = false
+        this.checkCompleto = false
         this.checkCiudad = false
         this.checkServicio = false
         this.checkServicioCiudad = false
@@ -1153,6 +1154,7 @@ export default {
 
         //limpiar los valores de seleccion
         this.dialogSelectReport = false
+        this.checkCompleto = false
         this.checkCiudad = false
         this.checkServicio = false
         this.checkServicioCiudad = false
@@ -1358,6 +1360,7 @@ export default {
 
         //limpiar los valores de seleccion
         this.dialogSelectReport = false
+        this.checkCompleto = false
         this.checkCiudad = false
         this.checkServicio = false
         this.checkServicioCiudad = false
@@ -1574,6 +1577,7 @@ export default {
 
         //limpiar los valores de seleccion
         this.dialogSelectReport = false
+        this.checkCompleto = false
         this.checkCiudad = false
         this.checkServicio = false
         this.checkServicioCiudad = false
