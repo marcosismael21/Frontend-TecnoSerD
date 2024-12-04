@@ -304,12 +304,12 @@ export default {
       this.dialogEliminar = true;  // Mostrar el modal de carga
 
       // Usamos this.usuarioSeleccionado.id para obtener el ID del usuario
-      this.$axios.patch(`/usuario/${this.usuarioSeleccionado.id}`, { estado: false })
+      this.$axios.patch(`/usuario/${this.usuarioSeleccionado.id}`, { estado: 0 })
         .then((response) => {
           // Buscar el usuario en la lista de usuarios activos
           const usuario = this.usuario.find(usuario => usuario.id === this.usuarioSeleccionado.id);
           if (usuario) {
-            usuario.estado = false;  // Cambiar el estado a inactivo
+            usuario.estado = 0;  // Cambiar el estado a inactivo
             // Eliminar el usuario de la lista de habilitados
             this.usuario = this.usuario.filter(usuarios => usuarios.id !== this.usuarioSeleccionado.id);
             // Agregar el usuario a la lista de inhabilitados
@@ -356,12 +356,12 @@ export default {
       this.dialogFalse = true;  // Mostrar el modal de carga
 
       // Usamos this.usuarioSeleccionado.id para obtener el ID del usuario
-      this.$axios.patch(`/usuario/${this.usuarioSeleccionado.id}`, { estado: true })
+      this.$axios.patch(`/usuario/${this.usuarioSeleccionado.id}`, { estado: 1 })
         .then((response) => {
           // Buscar el usuario en la lista de usuarios inactivos
           const usuario = this.usuarioFalse.find(usuario => usuario.id === this.usuarioSeleccionado.id);
           if (usuario) {
-            usuario.estado = true;  // Cambiar el estado a activo
+            usuario.estado = 1;  // Cambiar el estado a activo
             // Eliminar el usuario de la lista de inhabilitados
             this.usuarioFalse = this.usuarioFalse.filter(usuarios => usuarios.id !== this.usuarioSeleccionado.id);
             // Agregar el usuario a la lista de habilitados

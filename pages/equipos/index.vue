@@ -77,6 +77,17 @@
                 <v-row>
                   <v-col>
                     <v-data-table :headers="headers" :items="equipoMalo" :search="search">
+                      <template v-slot:top>
+                        <v-toolbar flat>
+                          <v-spacer></v-spacer>
+                          <v-col cols="12" align="right">
+                            <v-btn color="primary" @click="generarReporte">
+                              <v-icon left>mdi-file-outline</v-icon>
+                              Generar Reporte
+                            </v-btn>
+                          </v-col>
+                        </v-toolbar>
+                      </template>
                       <template v-slot:item.nro="{ index }">
                         {{ index + 1 }}
                       </template>

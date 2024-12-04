@@ -4,7 +4,7 @@
       <v-col cols="12">
         <v-card>
           <v-card-title class="d-flex align-center pe-2">
-            <v-icon icon="mdi-account-circle"></v-icon> &nbsp; Lista de Asignaciones Pendientes
+            <v-icon icon="mdi-account-circle"></v-icon> &nbsp; Lista de Asignaciones en Proceso
             <v-spacer></v-spacer>
           </v-card-title>
           <v-spacer></v-spacer>
@@ -21,7 +21,7 @@
 
           <v-divider></v-divider>
 
-          <v-data-table :headers="headers" :items="pendiente" :search="search">
+          <v-data-table :headers="headers" :items="proceso" :search="search">
             <template v-slot:item.nro="{ index }">
               {{ index + 1 }}
             </template>
@@ -48,8 +48,8 @@
                 @click="detallesAsignacionPendiente(item.idUsuario, item.idComercio, item.idServicio, item.idEstado)">
                 <v-icon>mdi-eye</v-icon>
               </v-btn>
-              <v-btn icon @click="empezarProceso(item.idEstado, item.listAsignacionId, item.listAsignacionTecnicoIDs)">
-                <v-icon>mdi-check</v-icon>
+              <v-btn icon @click="finalizarAsignacioPendiente(item.idUsuario, item.idComercio, item.idServicio, item.idEstado)">
+                <v-icon>mdi-package-variant</v-icon>
               </v-btn>
             </template>
           </v-data-table>
@@ -58,10 +58,18 @@
     </v-row>
 
     <v-dialog v-model="dialogDetalleAsignacionPendiente" max-width="600px" persistent>
-      <detalle-asignacion-pendiente :idUsuario="asignacionSeleccionadaPendiente.idUsuario"
+      <detalle-asignacion-proceso :idUsuario="asignacionSeleccionadaPendiente.idUsuario"
         :idComercio="asignacionSeleccionadaPendiente.idComercio" :idEstado="asignacionSeleccionadaPendiente.idEstado"
         :idServicio="asignacionSeleccionadaPendiente.idServicio" @close="dialogDetalleAsignacionPendiente = false">
-      </detalle-asignacion-pendiente>
+      </detalle-asignacion-proceso>
+    </v-dialog>
+
+    <v-dialog v-model="dialogFinalizarAsignacion" max-width="600px" persistent>
+      <finalizar-asignacion :idUsuario="asignacionSeleccionadaPendiente.idUsuario"
+        :idComercio="asignacionSeleccionadaPendiente.idComercio" :idEstado="asignacionSeleccionadaPendiente.idEstado"
+        :idServicio="asignacionSeleccionadaPendiente.idServicio" @close="dialogFinalizarAsignacion = false" @saved="onSuccess"
+        @error="onError">
+      </finalizar-asignacion>
     </v-dialog>
 
     <v-dialog v-model="dialogEmpezarConfirm" max-width="400" persistent>
@@ -97,7 +105,8 @@
 </template>
 
 <script>
-import DetalleAsignacionPendiente from '~/pages/tecnico/detalleAsig.vue'
+import DetalleAsignacionProceso from '~/pages/tecnicoProceso/detalleProceso.vue'
+import FinalizarAsignacion from '~/pages/tecnicoProceso/finalizarAsignacio.vue'
 
 import Cookies from 'js-cookie';
 
@@ -105,8 +114,8 @@ export default {
   async asyncData({ $axios }) {
     const idTecnico = Cookies.get('id')
     try {
-      const { data } = await $axios.get(`asignacionTecnico/lap/${idTecnico}`)
-      return { pendiente: data }
+      const { data } = await $axios.get(`asignacionTecnico/lapr/${idTecnico}`)
+      return { proceso: data }
     } catch (error) {
       console.error('Error fetching rol:', error)
       return { rol: [] }
@@ -123,7 +132,7 @@ export default {
     return {
       tab: 0, // inicializamos el tab en 0
       search: '',
-      pendiente: [],
+      proceso: [],
       headers: [
         { text: 'N°', value: 'nro' },
         { text: "Técnico", value: "tecnico" },
@@ -139,6 +148,7 @@ export default {
       ],
       //variables para activar los modales
       dialogDetalleAsignacionPendiente: false,
+      dialogFinalizarAsignacion: false,
       asignacionSeleccionadaPendiente: false,
       dialogEmpezar: false,
       dialogEmpezarConfirm: false,
@@ -152,23 +162,31 @@ export default {
     async loadAsig() {
       const idTecnico = Cookies.get('id')
       try {
-        const { data } = await $axios.get(`asignacionTecnico/lap/${idTecnico}`)
-        this.pendiente = data
+        const { data } = await $axios.get(`asignacionTecnico/lapr/${idTecnico}`)
+        this.proceso = data
       } catch (error) {
-        console.error('Error fetching pendiente:', error)
-        this.pendiente = []
+        console.error('Error fetching proceso:', error)
+        this.proceso = []
       }
     },
     detallesAsignacionPendiente(idUsuario, idComercio, idServicio, idEstado) {
-      this.asignacionSeleccionadaPendiente = this.pendiente.find(
+      this.asignacionSeleccionadaPendiente = this.proceso.find(
         (e) => e.idUsuario === idUsuario
           && e.idComercio === idComercio
           && e.idServicio === idServicio
           && e.idEstado === idEstado) || {}
       this.dialogDetalleAsignacionPendiente = true
     },
+    finalizarAsignacioPendiente(idUsuario, idComercio, idServicio, idEstado) {
+      this.asignacionSeleccionadaPendiente = this.proceso.find(
+        (e) => e.idUsuario === idUsuario
+          && e.idComercio === idComercio
+          && e.idServicio === idServicio
+          && e.idEstado === idEstado) || {}
+      this.dialogFinalizarAsignacion = true
+    },
     empezarProceso(idEstadoAnterior, listAsignacionId, listAsignacionTecnicoID) {
-      this.asignacionSeleccionadaPendiente = this.pendiente.find(
+      this.asignacionSeleccionadaPendiente = this.proceso.find(
         (e) => e.idEstado === idEstadoAnterior
           && e.listAsignacionId === listAsignacionId
           && e.listAsignacionTecnicoIDs === listAsignacionTecnicoID
@@ -190,12 +208,12 @@ export default {
         .then((response) => {
 
           // Filtrar el elemento eliminado de la lista de pendientes
-          this.pendiente = this.pendiente.filter(
-            (pendiente) =>
+          this.proceso = this.proceso.filter(
+            (proceso) =>
               !(
-                pendiente.idEstado === this.asignacionSeleccionadaPendiente.idEstado &&
-                pendiente.listAsignacionId === this.asignacionSeleccionadaPendiente.listAsignacionId &&
-                pendiente.listAsignacionTecnicoID === this.asignacionSeleccionadaPendiente.listAsignacionTecnicoID
+                proceso.idEstado === this.asignacionSeleccionadaPendiente.idEstado &&
+                proceso.listAsignacionId === this.asignacionSeleccionadaPendiente.listAsignacionId &&
+                proceso.listAsignacionTecnicoID === this.asignacionSeleccionadaPendiente.listAsignacionTecnicoID
               )
           );
 
@@ -242,9 +260,9 @@ export default {
     fetchAsig() {
       const idTecnico = Cookies.get('id')
       this.$axios
-        .get(`asignacionTecnico/lap/${idTecnico}`)
+        .get(`asignacionTecnico/lapr/${idTecnico}`)
         .then((response) => {
-          this.pendiente = response.data
+          this.proceso = response.data
         })
         .catch((error) => {
           console.error('Error fetching asignacion:', error)
@@ -252,7 +270,8 @@ export default {
     },
   },
   components: {
-    DetalleAsignacionPendiente,
+    DetalleAsignacionProceso,
+    FinalizarAsignacion,
   },
 }
 </script>

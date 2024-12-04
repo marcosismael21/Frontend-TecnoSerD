@@ -69,7 +69,6 @@
 </style>
 
 <script>
-import axios from 'axios';
 import Cookies from 'js-cookie';
 
 export default {
@@ -96,13 +95,15 @@ export default {
               mensage
             } = response.data;
             if (ok) {
-              /*console.log(ok, " a")
-              console.log('Login exitoso:', userData.nombre);
-              this.errorMessage = ''; // Limpia el mensaje de error si es exitoso
-              this.$router.push('inspire');*/
-              Cookies.set('token', response.data.token, { expires: response.data.expiresIn / (60 * 60 * 24) });
-              Cookies.set('rol', userData.idrol);
-              this.$router.push('tablero')
+              Cookies.set('token', response.data.token, { expires: response.data.expiresIn })
+              Cookies.set('rol', userData.idrol)
+              Cookies.set('id', userData.id)
+              if (userData.idrol == 2) {
+                this.$router.push('regaliaComercio')
+              } else {
+                this.$router.push('tablero')
+              }
+
             } else {
               console.log(ok, " b")
               this.errorMessage = mensage;

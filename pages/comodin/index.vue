@@ -16,6 +16,10 @@
                   <v-icon left>mdi-plus</v-icon>
                   Añadir Comodín
                 </v-btn>
+                <v-btn color="primary" @click="generarReporte">
+                  <v-icon left>mdi-file-outline</v-icon>
+                  Generar Reporte
+                </v-btn>
               </v-col>
               <v-col cols="3">
                 <v-text-field v-model="search" density="compact" label="Buscar" prepend-inner-icon="mdi-magnify"
@@ -109,6 +113,9 @@
 import CrearComodin from '~/pages/comodin/crearComodin.vue'
 import EditarComodines from '~/pages/comodin/editarComodin.vue'
 import VerDetallesComodin from '~/pages/comodin/detalleComodin.vue'
+
+import jsPDF from 'jspdf'
+import 'jspdf-autotable'
 
 export default {
   async asyncData({ $axios }) {
@@ -211,6 +218,124 @@ export default {
             this.dialogEliminar = false;  // Cerrar el modal de carga después de 3 segundos
           }, 2000);
         });
+    },
+    async generarReporte() {
+      try {
+        const { data } = await this.$axios.get('/equipo/comodin/1')
+
+        // Almacenar los datos en el arreglo reportes
+        const reportes = data.map((item, index) => ({
+          nro: index + 1,
+          idTipoEquipo: item.idTipoEquipo,
+          noserie: item.noserie,
+          noimei: item.noimei,
+          pin: item.pin,
+          puk: item.puk,
+          fechaLlegada: new Date(item.fechaLlegada).toLocaleDateString(),
+        }))
+
+        const doc = new jsPDF()
+
+        // Añadir el logo en tamaño grande
+        const logo = new Image()
+        logo.src = '/Logo.jpg'
+        const logoWidth = 70 // Ancho ajustado del logo
+        const logoHeight = 30 // Alto ajustado del logo
+        const logoX = 14 // Posición X del logo
+        const logoY = 15 // Posición Y del logo
+        doc.addImage(logo, 'JPEG', logoX, logoY, logoWidth, logoHeight)
+
+        // Posicionar la información de la empresa a la derecha del logo
+        const textStartX = logoX + logoWidth + 10 // Posición X de los textos después del logo
+        const textStartY = logoY + 5 // Posición Y inicial de los textos
+
+        doc.setFontSize(10)
+        doc.setFont('helvetica', 'bold')
+        doc.text('TECNOLOGÍA Y SERVICIOS DIVERSOS - TECNOSERD', textStartX, textStartY)
+
+        doc.setFontSize(9) // Fuente más pequeña para los demás textos
+        doc.text('Oficina: ', textStartX, textStartY + 6)
+        doc.setFont('helvetica', 'normal')
+        doc.text('OFICINA PRINCIPAL', textStartX + 18, textStartY + 6)
+
+        doc.setFont('helvetica', 'bold')
+        doc.text('Teléfono: ', textStartX, textStartY + 12)
+        doc.setFont('helvetica', 'normal') // Cambiado a 'normal' antes del número de teléfono
+        doc.text('+504 9976-3205', textStartX + 18, textStartY + 12)
+
+        doc.setFont('helvetica', 'bold')
+        doc.text('Email: ', textStartX, textStartY + 18) // Cambiado el valor de textStartY
+        doc.setFont('helvetica', 'normal')
+        doc.text('jorcer27@gmail.com', textStartX + 18, textStartY + 18) // Cambiado el valor de textStartY y textStartX
+
+        doc.setFont('helvetica', 'bold')
+        doc.text('Dirección: ', textStartX, textStartY + 24) // Ajustado para que esté debajo del email
+        doc.setFont('helvetica', 'normal')
+        doc.text('COL. PALMIRA 3RA AVE ENTRE 4TA Y 5TA CALLE CASA #415', textStartX + 18, textStartY + 24) // Ajustado para que esté debajo del email
+
+        // Añadir el título del reporte debajo del logo y la información
+        doc.setFontSize(14)
+        doc.setFont('helvetica', 'bold')
+        doc.text('Reporte de Comodines', 14, textStartY + 38)
+
+        const headers = [
+          { title: 'N°', dataKey: 'nro' },
+          { title: 'Equipo', dataKey: 'idTipoEquipo' },
+          { title: 'N° SERIE', dataKey: 'noserie' },
+          { title: 'N° IMEI', dataKey: 'noimei' },
+          { title: 'PIN', dataKey: 'pin' },
+          { title: 'PUK', dataKey: 'puk' },
+          { title: 'Fecha de Ingreso', dataKey: 'fechaLlegada' },
+        ]
+
+        doc.autoTable({
+          head: [headers.map(header => header.title)],
+          body: reportes.map(row => Object.values(row)),
+          startY: textStartY + 40,
+          styles: {
+            halign: 'center',        // Centrar el texto horizontalmente en las celdas
+            valign: 'middle',        // Centrar el texto verticalmente en las celdas
+            lineWidth: 0.5,          // Grosor de los bordes de cada celda
+            lineColor: [0, 0, 0],    // Color negro para los bordes
+            cellWidth: 'wrap'        // Ajustar el ancho de la celda según el contenido
+          },
+          tableLineWidth: 0.75,      // Grosor de los bordes de la tabla
+          tableLineColor: [0, 0, 0], // Color de los bordes de la tabla
+          theme: 'plain'              // Cambia el estilo a una tabla con todos los bordes visibles
+        })
+
+        // Pie de página: iterar sobre cada página para agregar la numeración
+        const pageCount = doc.internal.getNumberOfPages()
+        const pageSize = doc.internal.pageSize
+        const pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight()
+        const pageWidth = pageSize.width ? pageSize.width : pageSize.getWidth()
+
+        for (let i = 1; i <= pageCount; i++) {
+          doc.setPage(i)
+          doc.setFontSize(10)
+          doc.text(`Página ${i} de ${pageCount}`, pageWidth / 2, pageHeight - 10, { align: 'center' })
+        }
+
+        // Obtener la fecha y hora actuales en el formato deseado
+        const fechaActual = new Date().toLocaleDateString().replace(/\//g, '-')
+
+        // Convertir la hora al formato de 12 horas con AM/PM y separador de punto sin espacio
+        const now = new Date()
+        let horas = now.getHours()
+        const minutos = now.getMinutes().toString().padStart(2, '0')
+        const ampm = horas >= 12 ? 'PM' : 'AM'
+        horas = horas % 12 || 12 // Convertir a formato de 12 horas, donde 0 se convierte en 12
+
+        // Formatear la hora sin espacio antes de AM/PM
+        const horaActual = `${horas}.${minutos}${ampm}`
+
+        // Guardar el PDF con el nombre personalizado usando - para fecha y punto para la hora
+        doc.save(`reporte_comodines-${fechaActual}-${horaActual}.pdf`)
+
+      } catch (error) {
+        console.error('Error generating report:', error)
+        this.showSnackbar('Error generando el reporte', 'error')
+      }
     },
     showSnackbar(message, color) {
       this.snackbarMessage = message;

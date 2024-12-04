@@ -1,26 +1,33 @@
-// store/index.js
+// store/auth.js
 export const state = () => ({
-    authenticated: false,
-    user: null
+  currentRole: null,
+  allowedRoutes: {
+    1: ['*'],
+    2: ['tecnico', 'tecnicoProceso', 'regaliaComercio'],
+    3: ['comercio', 'equipos', 'comodin', 'asignacion']
+  }
 })
 
 export const mutations = {
-    setAuthenticated(state, value) {
-        state.authenticated = value
-    },
-    setUser(state, user) {
-        state.user = user
-    }
+  setCurrentRole(state, role) {
+    state.currentRole = role
+  }
+}
+
+export const getters = {
+  isRouteAllowed: (state) => (route) => {
+    if (!state.currentRole) return false
+    if (state.currentRole === 1) return true
+
+    const allowedRoutes = state.allowedRoutes[state.currentRole] || []
+    return allowedRoutes.some(allowed => route.startsWith(allowed))
+  },
+
+  getCurrentRole: (state) => state.currentRole
 }
 
 export const actions = {
-    login({ commit }, user) {
-        // Aquí iría tu lógica de autenticación
-        commit('setAuthenticated', true)
-        commit('setUser', user)
-    },
-    logout({ commit }) {
-        commit('setAuthenticated', false)
-        commit('setUser', null)
-    }
+  checkRouteAccess({ getters }, route) {
+    return getters.isRouteAllowed(route)
+  }
 }

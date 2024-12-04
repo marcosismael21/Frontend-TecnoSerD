@@ -43,12 +43,17 @@
                     <v-data-table :headers="headers" :items="espera" :search="search" item-key="idComercio">
                       <template v-slot:top>
                         <v-toolbar flat>
-                          <v-toolbar-title>Lista de Asignaciones</v-toolbar-title>
                           <v-spacer></v-spacer>
-                          <v-btn color="primary" @click="asignarTecnicoMultiple(selectedItems)">
-                            <v-icon left>mdi-account-multiple</v-icon>
-                            Asignación Múltiple
-                          </v-btn>
+                          <v-col cols="12" align="right">
+                            <v-btn color="primary" @click="selectReport">
+                              <v-icon left>mdi-file-outline</v-icon>
+                              Generar Reporte
+                            </v-btn>
+                            <v-btn color="primary" @click="asignarTecnicoMultiple(selectedItems)">
+                              <v-icon left>mdi-account-multiple</v-icon>
+                              Asignación Múltiple
+                            </v-btn>
+                          </v-col>
                         </v-toolbar>
                       </template>
                       <!-- Checkbox para seleccionar filas -->
@@ -326,6 +331,108 @@
       </detalle-asignacion-finalizada>
     </v-dialog>
 
+    <!-- Tipo de reportes -->
+
+    <v-dialog v-model="dialogSelectReport" max-width="600px" persistent>
+      <v-card>
+        <v-card-title class="text-h6 d-flex justify-space-between align-center">
+          <span>Selección de Reporte</span>
+          <v-btn color="red darken-1" text @click="dialogSelectReport = false">Cancelar</v-btn>
+        </v-card-title>
+        <v-card-text>
+          <v-container fluid>
+            <v-row>
+              <v-col cols="6">
+                <!-- Checkbox: Reporte Completo -->
+                <v-checkbox v-model="checkCompleto" :disabled="checkCiudad || checkServicio || checkServicioCiudad"
+                  @change="handleCheckboxChange('checkCompleto')" class="custom-checkbox">
+                  <template #label>
+                    <span class="custom-label">Reporte de Servicios en Espera Completo</span>
+                  </template>
+                </v-checkbox>
+              </v-col>
+              <v-col cols="6">
+                <!-- Checkbox: Reporte por Ciudad -->
+                <v-checkbox v-model="checkCiudad" :disabled="checkServicio || checkServicioCiudad || checkCompleto"
+                  @change="handleCheckboxChange('checkCiudad')" class="custom-checkbox">
+                  <template #label>
+                    <span class="custom-label">Reporte de Servicios en Espera por Ciudad</span>
+                  </template>
+                </v-checkbox>
+              </v-col>
+              <v-col cols="6">
+                <!-- Checkbox: Reporte por Servicio -->
+                <v-checkbox v-model="checkServicio" :disabled="checkCiudad || checkServicioCiudad || checkCompleto"
+                  @change="handleCheckboxChange('checkServicio')" class="custom-checkbox">
+                  <template #label>
+                    <span class="custom-label">Reporte de Servicios en Espera por Servicio</span>
+                  </template>
+                </v-checkbox>
+              </v-col>
+              <v-col cols="6">
+                <!-- Checkbox: Reporte por Servicio y Ciudad -->
+                <v-checkbox v-model="checkServicioCiudad" :disabled="checkCiudad || checkServicio || checkCompleto"
+                  @change="handleCheckboxChange('checkServicioCiudad')" class="custom-checkbox">
+                  <template #label>
+                    <span class="custom-label">Reporte de Servicios en Espera por Servicio y Ciudad</span>
+                  </template>
+                </v-checkbox>
+              </v-col>
+            </v-row>
+          </v-container>
+
+          <!-- Campos condicionales según el checkbox seleccionado -->
+          <v-row v-if="checkCiudad">
+            <v-col cols="12">
+              <v-autocomplete v-model="selectedCiudad" :items="ciudades" item-text="nombre" item-value="id"
+                label="Ciudad" required />
+            </v-col>
+            <v-col cols="12">
+              <v-btn color="green" @click="generarReporteByIdCiudad(selectedCiudad)">
+                Generar Reporte
+              </v-btn>
+            </v-col>
+          </v-row>
+
+          <v-row v-if="checkServicio">
+            <v-col cols="12">
+              <v-autocomplete v-model="selectedServicio" :items="servicios" item-text="nombre" item-value="id"
+                label="Servicio" required />
+            </v-col>
+            <v-col cols="12">
+              <v-btn color="green" @click="generarReporteByIdServicio(selectedServicio)">
+                Generar Reporte
+              </v-btn>
+            </v-col>
+          </v-row>
+
+          <v-row v-if="checkServicioCiudad">
+            <v-col cols="6">
+              <v-autocomplete v-model="selectedCiudad" :items="ciudades" item-text="nombre" item-value="id"
+                label="Ciudad" required />
+            </v-col>
+            <v-col cols="6">
+              <v-autocomplete v-model="selectedServicio" :items="servicios" item-text="nombre" item-value="id"
+                label="Servicio" required />
+            </v-col>
+            <v-col cols="12">
+              <v-btn color="green" @click="generarReporteByIdCiudadIdServicio(selectedCiudad, selectedServicio)">
+                Generar Reporte
+              </v-btn>
+            </v-col>
+          </v-row>
+
+          <v-row v-if="checkCompleto">
+            <v-col cols="12">
+              <v-btn color="green" @click="generarReporte()">
+                Generar Reporte Completo
+              </v-btn>
+            </v-col>
+          </v-row>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
+
     <v-snackbar v-model="snackbar" :color="snackbarColor" timeout="3000" top>
       {{ snackbarMessage }}
     </v-snackbar>
@@ -342,6 +449,9 @@ import AsignacionMultipleTecnico from '~/pages/asignacion/asigEspera/crearMultip
 import DetalleAsignacionPendiente from '~/pages/asignacion/asigPendiente/detalleAsigPendiente.vue'
 import DetalleAsignacionProceso from '~/pages/asignacion/asigProceso/detalleAsigProceso.vue'
 import DetalleAsignacionFinalizada from '~/pages/asignacion/asigFinalizada/detalleAsigFinalizada.vue'
+
+import jsPDF from 'jspdf'
+import 'jspdf-autotable'
 
 export default {
   async asyncData({ $axios }) {
@@ -430,10 +540,27 @@ export default {
       asignacionSeleccionadaProceso: false,
       dialogDetalleAsignacionFinalizada: false,
       asignacionSeleccionadaFinalizada: false,
+      //Seleccion de reporteria
+      dialogSelectReport: false,
+      checkCiudad: false,
+      checkServicio: false,
+      checkServicioCiudad: false,
+      checkCompleto: false, // Nuevo checkbox
+      ciudades: [], // Lista de ciudades
+      servicios: [], // Lista de servicios
+      selectedCiudad: null,
+      selectedServicio: null,
       // Añadimos estos campos para el snackbar
       snackbar: false,
       snackbarMessage: '',
       snackbarColor: '',  // 'success' o 'error' para diferenciar el tipo de mensaje
+    }
+  },
+  async mounted() {
+    try {
+      await Promise.all([this.fetchServicio(), this.fetchCiudad()])
+    } catch (error) {
+      console.error('Error fetching data:', error)
     }
   },
   methods: {
@@ -629,6 +756,839 @@ export default {
     imprimirFormato(idServicio) {
       this.showSnackbar("Hola mundo <3", "success");
     },
+    selectReport() {
+      this.dialogSelectReport = true
+    },
+    async generarReporte() {
+      try {
+        const { data } = await this.$axios.get('/reporte/asig-espera')
+
+        this.showSnackbar("Generando reporte completo.", 'success');
+
+        // Agrupar los datos por servicio
+        const reportesPorServicio = data.reduce((acc, item, index) => {
+          const equipos = item.listEquipos.split(', ')
+          const series = item.listNoSerie.split(', ')
+          const imeis = item.listNoIMEI.split(', ')
+          const puks = item.listPUK.split(', ')
+          const pins = item.listPIN.split(', ')
+
+          const comercioRow = {
+            nro: index + 1,
+            servicio: item.servicio,
+            tipoComercio: item.tipoComercio,
+            nomComercio: item.nomComercio,
+            nombreContacto: item.nombreContacto,
+            numTienda: item.numTienda,
+            numUsuario: item.numUsuario,
+            direccion: item.direccion,
+            ciudad: item.ciudad,
+            tipoProblema: item.tipoProblema,
+            interpretacion: item.interpretacion,
+          }
+
+          const equipoRows = equipos.map((equipo, i) => ({
+            equipo,
+            serie: series[i] || 'N/A',
+            imei: imeis[i] || 'N/A',
+            pin: pins[i] || 'N/A',
+            puk: puks[i] || 'N/A',
+          }))
+
+          if (!acc[item.servicio]) {
+            acc[item.servicio] = []
+          }
+
+          acc[item.servicio].push({ comercioRow, equipoRows })
+          return acc
+        }, {})
+
+        const doc = new jsPDF({ orientation: 'landscape' })
+
+        // Añadir el logo en tamaño grande
+        const logo = new Image()
+        logo.src = '/Logo.jpg'
+        const logoWidth = 100 // Ancho ajustado del logo
+        const logoHeight = 40 // Alto ajustado del logo
+        const logoX = 14 // Posición X del logo
+        const logoY = 10 // Posición Y del logo
+        doc.addImage(logo, 'JPEG', logoX, logoY, logoWidth, logoHeight)
+
+        // Posicionar la información de la empresa a la derecha del logo
+        const textStartX = logoX + logoWidth + 20 // Posición X de los textos después del logo
+        const textStartY = logoY + 12 // Posición Y inicial de los textos
+
+        doc.setFontSize(13)
+        doc.setFont('helvetica', 'bold')
+        doc.text('TECNOLOGÍA Y SERVICIOS DIVERSOS - TECNOSERD', textStartX, textStartY)
+
+        doc.setFontSize(12)
+        doc.setFont('helvetica', 'bold')
+        doc.text('Oficina:', textStartX, textStartY + 8)
+        doc.setFont('helvetica', 'normal')
+        doc.text('OFICINA PRINCIPAL', textStartX + 25, textStartY + 8)
+
+        doc.setFont('helvetica', 'bold')
+        doc.text('Teléfono:', textStartX, textStartY + 16)
+        doc.setFont('helvetica', 'normal')
+        doc.text('+504 9976-3205', textStartX + 25, textStartY + 16)
+
+        doc.setFont('helvetica', 'bold')
+        doc.text('Email:', textStartX, textStartY + 24)
+        doc.setFont('helvetica', 'normal')
+        doc.text('jorcer27@gmail.com', textStartX + 25, textStartY + 24)
+
+        doc.setFont('helvetica', 'bold')
+        doc.text('Dirección:', textStartX, textStartY + 32)
+        doc.setFont('helvetica', 'normal')
+        doc.text('COL. PALMIRA 3RA AVE ENTRE 4TA Y 5TA CALLE CASA #415', textStartX + 25, textStartY + 32,)
+
+        // Añadir el título del reporte debajo del logo y la información
+        doc.setFontSize(14)
+        doc.setFont('helvetica', 'bold')
+        doc.text('Reporte sobre Asignaciones en Espera', 14, textStartY + 38)
+
+        let startY = textStartY + 50
+
+        // Encabezados para la información del comercio y equipos
+        const comercioHeaders = [
+          'N°', 'Tipo de Comercio', 'Nombre de Comercio', 'Nombre de Contacto', 'N° de Tienda',
+          'N° de Usuario', 'Dirección del Comercio', 'Ciudad del Comercio', 'Tipo de Problema', 'Interpretación'
+        ]
+
+        const equipoHeaders = ['Equipo', 'N° de Serie', 'N° de IMEI', 'N° de PIN', 'N° de PUK']
+
+        // Iterar sobre cada grupo de servicio
+        Object.keys(reportesPorServicio).forEach(servicio => {
+          // Añadir el título del servicio
+          doc.setFontSize(12)
+          doc.setFont('helvetica', 'bold')
+          doc.text(servicio, 14, startY)
+          startY += 10
+
+          // Añadir las tablas para cada comercio y sus equipos
+          reportesPorServicio[servicio].forEach(({ comercioRow, equipoRows }) => {
+            // Tabla de información del comercio
+            doc.autoTable({
+              head: [comercioHeaders],
+              body: [[
+                comercioRow.nro, comercioRow.tipoComercio, comercioRow.nomComercio, comercioRow.nombreContacto,
+                comercioRow.numTienda, comercioRow.numUsuario, comercioRow.direccion, comercioRow.ciudad,
+                comercioRow.tipoProblema, comercioRow.interpretacion
+              ]],
+              startY,
+              styles: {
+                halign: 'center',
+                valign: 'middle',
+                fontSize: 9,
+                cellPadding: 1,
+              },
+              headStyles: {
+                fillColor: [240, 240, 240],
+                fontSize: 10,
+              },
+              theme: 'plain',
+            })
+
+            startY = doc.autoTable.previous.finalY + 2
+
+            // Tabla de equipos con sus detalles
+            doc.autoTable({
+              head: [equipoHeaders],
+              body: equipoRows.map(equipo => [
+                equipo.equipo, equipo.serie, equipo.imei, equipo.pin, equipo.puk
+              ]),
+              startY,
+              styles: {
+                halign: 'center',
+                valign: 'middle',
+                fontSize: 9,
+                cellPadding: 1,
+              },
+              headStyles: {
+                fillColor: [220, 220, 220],
+                fontSize: 10,
+              },
+              theme: 'plain',
+            })
+
+            startY = doc.autoTable.previous.finalY + 10
+          })
+        })
+
+        // Pie de página: iterar sobre cada página para agregar la numeración
+        const pageCount = doc.internal.getNumberOfPages()
+        const pageSize = doc.internal.pageSize
+        const pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight()
+        const pageWidth = pageSize.width ? pageSize.width : pageSize.getWidth()
+
+        for (let i = 1; i <= pageCount; i++) {
+          doc.setPage(i)
+          doc.setFontSize(10)
+          doc.text(`Página ${i} de ${pageCount}`, pageWidth / 2, pageHeight - 10, { align: 'center' })
+        }
+
+        // Guardar el PDF
+
+        // Obtener la fecha y hora actuales en el formato deseado
+        const fechaActual = new Date().toLocaleDateString().replace(/\//g, '-')
+
+        // Convertir la hora al formato de 12 horas con AM/PM y separador de punto sin espacio
+        const now = new Date()
+        let horas = now.getHours()
+        const minutos = now.getMinutes().toString().padStart(2, '0')
+        const ampm = horas >= 12 ? 'PM' : 'AM'
+        horas = horas % 12 || 12 // Convertir a formato de 12 horas, donde 0 se convierte en 12
+
+        // Formatear la hora sin espacio antes de AM/PM
+        const horaActual = `${horas}.${minutos}${ampm}`
+
+        // Guardar el PDF con el nombre personalizado usando - para fecha y punto para la hora
+        doc.save(`reporte_asignaciones_espera-${fechaActual}-${horaActual}.pdf`)
+
+        //limpiar los valores de seleccion
+        this.dialogSelectReport = false
+        this.checkCompleto = false
+        this.checkCiudad = false
+        this.checkServicio = false
+        this.checkServicioCiudad = false
+        this.selectedCiudad = null
+        this.selectedServicio = null
+
+      } catch (error) {
+        console.error('Error generating report:', error)
+        this.showSnackbar('Error generando el reporte', 'error')
+      }
+    },
+    async generarReporteByIdServicio(idServicio) {
+      try {
+        if (!idServicio) {
+          this.showSnackbar('No se seleccionó ningun servicio.', 'error')
+          return;
+        }
+
+        this.showSnackbar("Generando reporte para el servicio seleccionado.", 'success');
+
+        const { data } = await this.$axios.get(`/reporte/asig-espera-servicio/${idServicio}`)
+
+        // Agrupar los datos por servicio
+        const reportesPorServicio = data.reduce((acc, item, index) => {
+          const equipos = item.listEquipos.split(', ')
+          const series = item.listNoSerie.split(', ')
+          const imeis = item.listNoIMEI.split(', ')
+          const puks = item.listPUK.split(', ')
+          const pins = item.listPIN.split(', ')
+
+          const comercioRow = {
+            nro: index + 1,
+            servicio: item.servicio,
+            tipoComercio: item.tipoComercio,
+            nomComercio: item.nomComercio,
+            nombreContacto: item.nombreContacto,
+            numTienda: item.numTienda,
+            numUsuario: item.numUsuario,
+            direccion: item.direccion,
+            ciudad: item.ciudad,
+            tipoProblema: item.tipoProblema,
+            interpretacion: item.interpretacion,
+          }
+
+          const equipoRows = equipos.map((equipo, i) => ({
+            equipo,
+            serie: series[i] || 'N/A',
+            imei: imeis[i] || 'N/A',
+            pin: pins[i] || 'N/A',
+            puk: puks[i] || 'N/A',
+          }))
+
+          if (!acc[item.servicio]) {
+            acc[item.servicio] = []
+          }
+
+          acc[item.servicio].push({ comercioRow, equipoRows })
+          return acc
+        }, {})
+
+        const doc = new jsPDF({ orientation: 'landscape' })
+
+        // Añadir el logo en tamaño grande
+        const logo = new Image()
+        logo.src = '/Logo.jpg'
+        const logoWidth = 100 // Ancho ajustado del logo
+        const logoHeight = 40 // Alto ajustado del logo
+        const logoX = 14 // Posición X del logo
+        const logoY = 10 // Posición Y del logo
+        doc.addImage(logo, 'JPEG', logoX, logoY, logoWidth, logoHeight)
+
+        // Posicionar la información de la empresa a la derecha del logo
+        const textStartX = logoX + logoWidth + 20 // Posición X de los textos después del logo
+        const textStartY = logoY + 12 // Posición Y inicial de los textos
+
+        doc.setFontSize(13)
+        doc.setFont('helvetica', 'bold')
+        doc.text('TECNOLOGÍA Y SERVICIOS DIVERSOS - TECNOSERD', textStartX, textStartY)
+
+        doc.setFontSize(12)
+        doc.setFont('helvetica', 'bold')
+        doc.text('Oficina:', textStartX, textStartY + 8)
+        doc.setFont('helvetica', 'normal')
+        doc.text('OFICINA PRINCIPAL', textStartX + 25, textStartY + 8)
+
+        doc.setFont('helvetica', 'bold')
+        doc.text('Teléfono:', textStartX, textStartY + 16)
+        doc.setFont('helvetica', 'normal')
+        doc.text('+504 9976-3205', textStartX + 25, textStartY + 16)
+
+        doc.setFont('helvetica', 'bold')
+        doc.text('Email:', textStartX, textStartY + 24)
+        doc.setFont('helvetica', 'normal')
+        doc.text('jorcer27@gmail.com', textStartX + 25, textStartY + 24)
+
+        doc.setFont('helvetica', 'bold')
+        doc.text('Dirección:', textStartX, textStartY + 32)
+        doc.setFont('helvetica', 'normal')
+        doc.text('COL. PALMIRA 3RA AVE ENTRE 4TA Y 5TA CALLE CASA #415', textStartX + 25, textStartY + 32,)
+
+        // Añadir el título del reporte debajo del logo y la información
+        doc.setFontSize(14)
+        doc.setFont('helvetica', 'bold')
+        doc.text('Reporte sobre Asignaciones en Espera', 14, textStartY + 38)
+
+        let startY = textStartY + 50
+
+        // Encabezados para la información del comercio y equipos
+        const comercioHeaders = [
+          'N°', 'Tipo de Comercio', 'Nombre de Comercio', 'Nombre de Contacto', 'N° de Tienda',
+          'N° de Usuario', 'Dirección del Comercio', 'Ciudad del Comercio', 'Tipo de Problema', 'Interpretación'
+        ]
+
+        const equipoHeaders = ['Equipo', 'N° de Serie', 'N° de IMEI', 'N° de PIN', 'N° de PUK']
+
+        // Iterar sobre cada grupo de servicio
+        Object.keys(reportesPorServicio).forEach(servicio => {
+          // Añadir el título del servicio
+          doc.setFontSize(12)
+          doc.setFont('helvetica', 'bold')
+          doc.text(servicio, 14, startY)
+          startY += 10
+
+          // Añadir las tablas para cada comercio y sus equipos
+          reportesPorServicio[servicio].forEach(({ comercioRow, equipoRows }) => {
+            // Tabla de información del comercio
+            doc.autoTable({
+              head: [comercioHeaders],
+              body: [[
+                comercioRow.nro, comercioRow.tipoComercio, comercioRow.nomComercio, comercioRow.nombreContacto,
+                comercioRow.numTienda, comercioRow.numUsuario, comercioRow.direccion, comercioRow.ciudad,
+                comercioRow.tipoProblema, comercioRow.interpretacion
+              ]],
+              startY,
+              styles: {
+                halign: 'center',
+                valign: 'middle',
+                fontSize: 9,
+                cellPadding: 1,
+              },
+              headStyles: {
+                fillColor: [240, 240, 240],
+                fontSize: 10,
+              },
+              theme: 'plain',
+            })
+
+            startY = doc.autoTable.previous.finalY + 2
+
+            // Tabla de equipos con sus detalles
+            doc.autoTable({
+              head: [equipoHeaders],
+              body: equipoRows.map(equipo => [
+                equipo.equipo, equipo.serie, equipo.imei, equipo.pin, equipo.puk
+              ]),
+              startY,
+              styles: {
+                halign: 'center',
+                valign: 'middle',
+                fontSize: 9,
+                cellPadding: 1,
+              },
+              headStyles: {
+                fillColor: [220, 220, 220],
+                fontSize: 10,
+              },
+              theme: 'plain',
+            })
+
+            startY = doc.autoTable.previous.finalY + 10
+          })
+        })
+
+        // Pie de página: iterar sobre cada página para agregar la numeración
+        const pageCount = doc.internal.getNumberOfPages()
+        const pageSize = doc.internal.pageSize
+        const pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight()
+        const pageWidth = pageSize.width ? pageSize.width : pageSize.getWidth()
+
+        for (let i = 1; i <= pageCount; i++) {
+          doc.setPage(i)
+          doc.setFontSize(10)
+          doc.text(`Página ${i} de ${pageCount}`, pageWidth / 2, pageHeight - 10, { align: 'center' })
+        }
+
+        // Guardar el PDF
+
+        // Obtener la fecha y hora actuales en el formato deseado
+        const fechaActual = new Date().toLocaleDateString().replace(/\//g, '-')
+
+        // Convertir la hora al formato de 12 horas con AM/PM y separador de punto sin espacio
+        const now = new Date()
+        let horas = now.getHours()
+        const minutos = now.getMinutes().toString().padStart(2, '0')
+        const ampm = horas >= 12 ? 'PM' : 'AM'
+        horas = horas % 12 || 12 // Convertir a formato de 12 horas, donde 0 se convierte en 12
+
+        // Formatear la hora sin espacio antes de AM/PM
+        const horaActual = `${horas}.${minutos}${ampm}`
+
+        // Guardar el PDF con el nombre personalizado usando - para fecha y punto para la hora
+        doc.save(`reporte_asignaciones_espera-${fechaActual}-${horaActual}.pdf`)
+
+        //limpiar los valores de seleccion
+        this.dialogSelectReport = false
+        this.checkCompleto = false
+        this.checkCiudad = false
+        this.checkServicio = false
+        this.checkServicioCiudad = false
+        this.selectedCiudad = null
+        this.selectedServicio = null
+
+      } catch (error) {
+        console.error('Error generating report:', error)
+        this.showSnackbar('Error generando el reporte', 'error')
+      }
+    },
+    async generarReporteByIdCiudad(idCiudad) {
+      try {
+        if (!idCiudad) {
+          this.showSnackbar('No se seleccionó ninguna ciudad.', 'error')
+          return;
+        }
+
+        this.showSnackbar("Generando reporte para la ciudad seleccionada.", 'success');
+
+        const { data } = await this.$axios.get(`/reporte/asig-espera/${idCiudad}`)
+
+        // Agrupar los datos por servicio
+        const reportesPorServicio = data.reduce((acc, item, index) => {
+          const equipos = item.listEquipos.split(', ')
+          const series = item.listNoSerie.split(', ')
+          const imeis = item.listNoIMEI.split(', ')
+          const puks = item.listPUK.split(', ')
+          const pins = item.listPIN.split(', ')
+
+          const comercioRow = {
+            nro: index + 1,
+            servicio: item.servicio,
+            tipoComercio: item.tipoComercio,
+            nomComercio: item.nomComercio,
+            nombreContacto: item.nombreContacto,
+            numTienda: item.numTienda,
+            numUsuario: item.numUsuario,
+            direccion: item.direccion,
+            ciudad: item.ciudad,
+            tipoProblema: item.tipoProblema,
+            interpretacion: item.interpretacion,
+          }
+
+          const equipoRows = equipos.map((equipo, i) => ({
+            equipo,
+            serie: series[i] || 'N/A',
+            imei: imeis[i] || 'N/A',
+            pin: pins[i] || 'N/A',
+            puk: puks[i] || 'N/A',
+          }))
+
+          if (!acc[item.servicio]) {
+            acc[item.servicio] = []
+          }
+
+          acc[item.servicio].push({ comercioRow, equipoRows })
+          return acc
+        }, {})
+
+        const doc = new jsPDF({ orientation: 'landscape' })
+
+        // Añadir el logo en tamaño grande
+        const logo = new Image()
+        logo.src = '/Logo.jpg'
+        const logoWidth = 100 // Ancho ajustado del logo
+        const logoHeight = 40 // Alto ajustado del logo
+        const logoX = 14 // Posición X del logo
+        const logoY = 10 // Posición Y del logo
+        doc.addImage(logo, 'JPEG', logoX, logoY, logoWidth, logoHeight)
+
+        // Posicionar la información de la empresa a la derecha del logo
+        const textStartX = logoX + logoWidth + 20 // Posición X de los textos después del logo
+        const textStartY = logoY + 12 // Posición Y inicial de los textos
+
+        doc.setFontSize(13)
+        doc.setFont('helvetica', 'bold')
+        doc.text('TECNOLOGÍA Y SERVICIOS DIVERSOS - TECNOSERD', textStartX, textStartY)
+
+        doc.setFontSize(12)
+        doc.setFont('helvetica', 'bold')
+        doc.text('Oficina:', textStartX, textStartY + 8)
+        doc.setFont('helvetica', 'normal')
+        doc.text('OFICINA PRINCIPAL', textStartX + 25, textStartY + 8)
+
+        doc.setFont('helvetica', 'bold')
+        doc.text('Teléfono:', textStartX, textStartY + 16)
+        doc.setFont('helvetica', 'normal')
+        doc.text('+504 9976-3205', textStartX + 25, textStartY + 16)
+
+        doc.setFont('helvetica', 'bold')
+        doc.text('Email:', textStartX, textStartY + 24)
+        doc.setFont('helvetica', 'normal')
+        doc.text('jorcer27@gmail.com', textStartX + 25, textStartY + 24)
+
+        doc.setFont('helvetica', 'bold')
+        doc.text('Dirección:', textStartX, textStartY + 32)
+        doc.setFont('helvetica', 'normal')
+        doc.text('COL. PALMIRA 3RA AVE ENTRE 4TA Y 5TA CALLE CASA #415', textStartX + 25, textStartY + 32,)
+
+        // Añadir el título del reporte debajo del logo y la información
+        doc.setFontSize(14)
+        doc.setFont('helvetica', 'bold')
+        doc.text('Reporte sobre Asignaciones en Espera', 14, textStartY + 38)
+
+        let startY = textStartY + 50
+
+        // Encabezados para la información del comercio y equipos
+        const comercioHeaders = [
+          'N°', 'Tipo de Comercio', 'Nombre de Comercio', 'Nombre de Contacto', 'N° de Tienda',
+          'N° de Usuario', 'Dirección del Comercio', 'Ciudad del Comercio', 'Tipo de Problema', 'Interpretación'
+        ]
+
+        const equipoHeaders = ['Equipo', 'N° de Serie', 'N° de IMEI', 'N° de PIN', 'N° de PUK']
+
+        // Iterar sobre cada grupo de servicio
+        Object.keys(reportesPorServicio).forEach(servicio => {
+          // Añadir el título del servicio
+          doc.setFontSize(12)
+          doc.setFont('helvetica', 'bold')
+          doc.text(servicio, 14, startY)
+          startY += 10
+
+          // Añadir las tablas para cada comercio y sus equipos
+          reportesPorServicio[servicio].forEach(({ comercioRow, equipoRows }) => {
+            // Tabla de información del comercio
+            doc.autoTable({
+              head: [comercioHeaders],
+              body: [[
+                comercioRow.nro, comercioRow.tipoComercio, comercioRow.nomComercio, comercioRow.nombreContacto,
+                comercioRow.numTienda, comercioRow.numUsuario, comercioRow.direccion, comercioRow.ciudad,
+                comercioRow.tipoProblema, comercioRow.interpretacion
+              ]],
+              startY,
+              styles: {
+                halign: 'center',
+                valign: 'middle',
+                fontSize: 9,
+                cellPadding: 1,
+              },
+              headStyles: {
+                fillColor: [240, 240, 240],
+                fontSize: 10,
+              },
+              theme: 'plain',
+            })
+
+            startY = doc.autoTable.previous.finalY + 2
+
+            // Tabla de equipos con sus detalles
+            doc.autoTable({
+              head: [equipoHeaders],
+              body: equipoRows.map(equipo => [
+                equipo.equipo, equipo.serie, equipo.imei, equipo.pin, equipo.puk
+              ]),
+              startY,
+              styles: {
+                halign: 'center',
+                valign: 'middle',
+                fontSize: 9,
+                cellPadding: 1,
+              },
+              headStyles: {
+                fillColor: [220, 220, 220],
+                fontSize: 10,
+              },
+              theme: 'plain',
+            })
+
+            startY = doc.autoTable.previous.finalY + 10
+          })
+        })
+
+        // Pie de página: iterar sobre cada página para agregar la numeración
+        const pageCount = doc.internal.getNumberOfPages()
+        const pageSize = doc.internal.pageSize
+        const pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight()
+        const pageWidth = pageSize.width ? pageSize.width : pageSize.getWidth()
+
+        for (let i = 1; i <= pageCount; i++) {
+          doc.setPage(i)
+          doc.setFontSize(10)
+          doc.text(`Página ${i} de ${pageCount}`, pageWidth / 2, pageHeight - 10, { align: 'center' })
+        }
+
+        // Guardar el PDF
+
+        // Obtener la fecha y hora actuales en el formato deseado
+        const fechaActual = new Date().toLocaleDateString().replace(/\//g, '-')
+
+        // Convertir la hora al formato de 12 horas con AM/PM y separador de punto sin espacio
+        const now = new Date()
+        let horas = now.getHours()
+        const minutos = now.getMinutes().toString().padStart(2, '0')
+        const ampm = horas >= 12 ? 'PM' : 'AM'
+        horas = horas % 12 || 12 // Convertir a formato de 12 horas, donde 0 se convierte en 12
+
+        // Formatear la hora sin espacio antes de AM/PM
+        const horaActual = `${horas}.${minutos}${ampm}`
+
+        // Guardar el PDF con el nombre personalizado usando - para fecha y punto para la hora
+        doc.save(`reporte_asignaciones_espera-${fechaActual}-${horaActual}.pdf`)
+
+        //limpiar los valores de seleccion
+        this.dialogSelectReport = false
+        this.checkCompleto = false
+        this.checkCiudad = false
+        this.checkServicio = false
+        this.checkServicioCiudad = false
+        this.selectedCiudad = null
+        this.selectedServicio = null
+
+      } catch (error) {
+        console.error('Error generating report:', error)
+        this.showSnackbar('Error generando el reporte', 'error')
+      }
+    },
+    async generarReporteByIdCiudadIdServicio(idCiudad, idServicio) {
+      try {
+
+        if (!idServicio && !idCiudad) {
+          this.showSnackbar('Seleccione una ciudad y un servicio.', 'error')
+          return;
+        }
+
+        if (!idCiudad) {
+          this.showSnackbar('No se seleccionó ninguna ciudad.', 'error')
+          return;
+        }
+
+        if (!idServicio) {
+          this.showSnackbar('No se seleccionó ningun servicio.', 'error')
+          return;
+        }
+
+        this.showSnackbar("Generando reporte para la ciudad y servicio seleccionado.", 'success');
+
+        const { data } = await this.$axios.get(`/reporte/asig-espera/${idCiudad}/${idServicio}`)
+
+        // Agrupar los datos por servicio
+        const reportesPorServicio = data.reduce((acc, item, index) => {
+          const equipos = item.listEquipos.split(', ')
+          const series = item.listNoSerie.split(', ')
+          const imeis = item.listNoIMEI.split(', ')
+          const puks = item.listPUK.split(', ')
+          const pins = item.listPIN.split(', ')
+
+          const comercioRow = {
+            nro: index + 1,
+            servicio: item.servicio,
+            tipoComercio: item.tipoComercio,
+            nomComercio: item.nomComercio,
+            nombreContacto: item.nombreContacto,
+            numTienda: item.numTienda,
+            numUsuario: item.numUsuario,
+            direccion: item.direccion,
+            ciudad: item.ciudad,
+            tipoProblema: item.tipoProblema,
+            interpretacion: item.interpretacion,
+          }
+
+          const equipoRows = equipos.map((equipo, i) => ({
+            equipo,
+            serie: series[i] || 'N/A',
+            imei: imeis[i] || 'N/A',
+            pin: pins[i] || 'N/A',
+            puk: puks[i] || 'N/A',
+          }))
+
+          if (!acc[item.servicio]) {
+            acc[item.servicio] = []
+          }
+
+          acc[item.servicio].push({ comercioRow, equipoRows })
+          return acc
+        }, {})
+
+        const doc = new jsPDF({ orientation: 'landscape' })
+
+        // Añadir el logo en tamaño grande
+        const logo = new Image()
+        logo.src = '/Logo.jpg'
+        const logoWidth = 100 // Ancho ajustado del logo
+        const logoHeight = 40 // Alto ajustado del logo
+        const logoX = 14 // Posición X del logo
+        const logoY = 10 // Posición Y del logo
+        doc.addImage(logo, 'JPEG', logoX, logoY, logoWidth, logoHeight)
+
+        // Posicionar la información de la empresa a la derecha del logo
+        const textStartX = logoX + logoWidth + 20 // Posición X de los textos después del logo
+        const textStartY = logoY + 12 // Posición Y inicial de los textos
+
+        doc.setFontSize(13)
+        doc.setFont('helvetica', 'bold')
+        doc.text('TECNOLOGÍA Y SERVICIOS DIVERSOS - TECNOSERD', textStartX, textStartY)
+
+        doc.setFontSize(12)
+        doc.setFont('helvetica', 'bold')
+        doc.text('Oficina:', textStartX, textStartY + 8)
+        doc.setFont('helvetica', 'normal')
+        doc.text('OFICINA PRINCIPAL', textStartX + 25, textStartY + 8)
+
+        doc.setFont('helvetica', 'bold')
+        doc.text('Teléfono:', textStartX, textStartY + 16)
+        doc.setFont('helvetica', 'normal')
+        doc.text('+504 9976-3205', textStartX + 25, textStartY + 16)
+
+        doc.setFont('helvetica', 'bold')
+        doc.text('Email:', textStartX, textStartY + 24)
+        doc.setFont('helvetica', 'normal')
+        doc.text('jorcer27@gmail.com', textStartX + 25, textStartY + 24)
+
+        doc.setFont('helvetica', 'bold')
+        doc.text('Dirección:', textStartX, textStartY + 32)
+        doc.setFont('helvetica', 'normal')
+        doc.text('COL. PALMIRA 3RA AVE ENTRE 4TA Y 5TA CALLE CASA #415', textStartX + 25, textStartY + 32,)
+
+        // Añadir el título del reporte debajo del logo y la información
+        doc.setFontSize(14)
+        doc.setFont('helvetica', 'bold')
+        doc.text('Reporte sobre Asignaciones en Espera', 14, textStartY + 38)
+
+        let startY = textStartY + 50
+
+        // Encabezados para la información del comercio y equipos
+        const comercioHeaders = [
+          'N°', 'Tipo de Comercio', 'Nombre de Comercio', 'Nombre de Contacto', 'N° de Tienda',
+          'N° de Usuario', 'Dirección del Comercio', 'Ciudad del Comercio', 'Tipo de Problema', 'Interpretación'
+        ]
+
+        const equipoHeaders = ['Equipo', 'N° de Serie', 'N° de IMEI', 'N° de PIN', 'N° de PUK']
+
+        // Iterar sobre cada grupo de servicio
+        Object.keys(reportesPorServicio).forEach(servicio => {
+          // Añadir el título del servicio
+          doc.setFontSize(12)
+          doc.setFont('helvetica', 'bold')
+          doc.text(servicio, 14, startY)
+          startY += 10
+
+          // Añadir las tablas para cada comercio y sus equipos
+          reportesPorServicio[servicio].forEach(({ comercioRow, equipoRows }) => {
+            // Tabla de información del comercio
+            doc.autoTable({
+              head: [comercioHeaders],
+              body: [[
+                comercioRow.nro, comercioRow.tipoComercio, comercioRow.nomComercio, comercioRow.nombreContacto,
+                comercioRow.numTienda, comercioRow.numUsuario, comercioRow.direccion, comercioRow.ciudad,
+                comercioRow.tipoProblema, comercioRow.interpretacion
+              ]],
+              startY,
+              styles: {
+                halign: 'center',
+                valign: 'middle',
+                fontSize: 9,
+                cellPadding: 1,
+              },
+              headStyles: {
+                fillColor: [240, 240, 240],
+                fontSize: 10,
+              },
+              theme: 'plain',
+            })
+
+            startY = doc.autoTable.previous.finalY + 2
+
+            // Tabla de equipos con sus detalles
+            doc.autoTable({
+              head: [equipoHeaders],
+              body: equipoRows.map(equipo => [
+                equipo.equipo, equipo.serie, equipo.imei, equipo.pin, equipo.puk
+              ]),
+              startY,
+              styles: {
+                halign: 'center',
+                valign: 'middle',
+                fontSize: 9,
+                cellPadding: 1,
+              },
+              headStyles: {
+                fillColor: [220, 220, 220],
+                fontSize: 10,
+              },
+              theme: 'plain',
+            })
+
+            startY = doc.autoTable.previous.finalY + 10
+          })
+        })
+
+        // Pie de página: iterar sobre cada página para agregar la numeración
+        const pageCount = doc.internal.getNumberOfPages()
+        const pageSize = doc.internal.pageSize
+        const pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight()
+        const pageWidth = pageSize.width ? pageSize.width : pageSize.getWidth()
+
+        for (let i = 1; i <= pageCount; i++) {
+          doc.setPage(i)
+          doc.setFontSize(10)
+          doc.text(`Página ${i} de ${pageCount}`, pageWidth / 2, pageHeight - 10, { align: 'center' })
+        }
+
+        // Guardar el PDF
+
+        // Obtener la fecha y hora actuales en el formato deseado
+        const fechaActual = new Date().toLocaleDateString().replace(/\//g, '-')
+
+        // Convertir la hora al formato de 12 horas con AM/PM y separador de punto sin espacio
+        const now = new Date()
+        let horas = now.getHours()
+        const minutos = now.getMinutes().toString().padStart(2, '0')
+        const ampm = horas >= 12 ? 'PM' : 'AM'
+        horas = horas % 12 || 12 // Convertir a formato de 12 horas, donde 0 se convierte en 12
+
+        // Formatear la hora sin espacio antes de AM/PM
+        const horaActual = `${horas}.${minutos}${ampm}`
+
+        // Guardar el PDF con el nombre personalizado usando - para fecha y punto para la hora
+        doc.save(`reporte_asignaciones_espera-${fechaActual}-${horaActual}.pdf`)
+
+        //limpiar los valores de seleccion
+        this.dialogSelectReport = false
+        this.checkCompleto = false
+        this.checkCiudad = false
+        this.checkServicio = false
+        this.checkServicioCiudad = false
+        this.selectedCiudad = null
+        this.selectedServicio = null
+
+      } catch (error) {
+        console.error('Error generating report:', error)
+        this.showSnackbar('Error generando el reporte', 'error')
+      }
+    },
     fetchAsignacion() {
       this.$axios
         .get('/asignacion/s/1')
@@ -669,6 +1629,24 @@ export default {
           console.error('Error fetching asignación:', error)
         })
     },
+    fetchServicio() {
+      this.$axios.get('/servicio/sc')
+        .then(response => {
+          this.servicios = response.data;
+        })
+        .catch(error => {
+          console.error('Error fetching servicio:', error);
+        })
+    },
+    fetchCiudad() {
+      this.$axios.get('/ciudad')
+        .then(response => {
+          this.ciudades = response.data;
+        })
+        .catch(error => {
+          console.error('Error fetching servicio:', error);
+        })
+    },
     getMapa(latitud, longitud) {
       this.$axios.get(`/comercio/maps/${latitud}/${longitud}`)
         .then((response) => {
@@ -699,6 +1677,37 @@ export default {
       // Mostrar el snackbar con un mensaje de error
       this.showSnackbar(message, 'error');
     },
+    handleCheckboxChange(selected) {
+      // Si se selecciona un checkbox, desactiva los demás
+      if (this[selected]) {
+        this.checkCiudad = selected === 'checkCiudad';
+        this.checkServicio = selected === 'checkServicio';
+        this.checkServicioCiudad = selected === 'checkServicioCiudad';
+        this.checkCompleto = selected === 'checkCompleto';
+      }
+      // Si se deselecciona un checkbox, verifica si todos están desmarcados
+      this.enableAllIfNoneSelected();
+    },
+    enableAllIfNoneSelected() {
+      if (
+        !this.checkCiudad &&
+        !this.checkServicio &&
+        !this.checkServicioCiudad &&
+        !this.checkCompleto
+      ) {
+        // Restablece las desactivaciones si no hay ninguno seleccionado
+        this.$forceUpdate(); // Asegura que Vue detecte cambios reactivos
+      }
+    },
+    isAnyOtherChecked(current) {
+      // Determina si otro checkbox está seleccionado
+      return (
+        (current !== 'checkCiudad' && this.checkCiudad) ||
+        (current !== 'checkServicio' && this.checkServicio) ||
+        (current !== 'checkServicioCiudad' && this.checkServicioCiudad) ||
+        (current !== 'checkCompleto' && this.checkCompleto)
+      );
+    }
   },
   components: {
     CrearAsignacion,
@@ -717,5 +1726,26 @@ export default {
 .justify-center {
   display: flex;
   justify-content: center;
+}
+
+.custom-checkbox {
+  margin-bottom: 16px;
+}
+
+.custom-label {
+  font-weight: bold;
+  color: #3f51b5;
+  /* Cambia por el color que prefieras */
+}
+
+.custom-checkbox .v-input__control {
+  border: 2px solid #3f51b5;
+  /* Personaliza el borde */
+  border-radius: 4px;
+}
+
+.custom-checkbox .v-input--selection-controls__ripple {
+  color: #3f51b5;
+  /* Efecto ripple */
 }
 </style>
