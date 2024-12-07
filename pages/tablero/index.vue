@@ -166,8 +166,30 @@ export default {
       },
       barSeries: [],
       donutOptions: {
-        chart: { type: 'donut', height: 350 },
-        labels: [],
+        chart: {
+          type: 'donut',
+          height: 350
+        },
+        labels: [], // Aquí irán los nombres de los estados
+        tooltip: {
+          y: {
+            formatter: function (val) {
+              return val
+            }
+          }
+        },
+        legend: {
+          position: 'right',
+          offsetY: 0,
+          height: 230,
+        },
+        dataLabels: {
+          enabled: true,
+          formatter: function (val) {
+            return val.toFixed(1) + '%'
+          }
+        },
+        colors: ['#FF9800', '#2196F3', '#4CAF50', '#F44336'] // Colores para los estados
       },
       donutSeries: [],
       areaOptions: {
@@ -295,6 +317,10 @@ export default {
       try {
         const res = await this.$axios.get('/tablero/asignaciones-estado')
         this.donutSeries = res.data.map(item => item.cantidad)
+        this.donutOptions = {
+          ...this.donutOptions,
+          labels: res.data.map(item => item.estado)
+        }
       } catch (error) {
         console.error(error)
       }
