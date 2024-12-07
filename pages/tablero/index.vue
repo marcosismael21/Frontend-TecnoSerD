@@ -197,7 +197,16 @@ export default {
           type: 'bar',
           height: 350,
           toolbar: {
-            show: true
+            show: true,
+            tools: {
+              download: true,
+              selection: false,
+              zoom: false,
+              zoomin: false,
+              zoomout: false,
+              pan: false,
+              reset: false
+            },
           }
         },
         plotOptions: {
