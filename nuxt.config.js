@@ -72,7 +72,7 @@ export default {
   ],
 
   axios: {
-    baseURL: 'http://localhost:3010/api/v1',
+    baseURL: 'http://c0k0c0w0gc8c4w4s4w0gg88g.34.66.88.184.sslip.io/api/v1',
   },
 
   vuetify: {
