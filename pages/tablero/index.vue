@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <!-- Sparkline Boxes -->
+    <!-- 3 Sparkline Cards -->
     <v-row class="mt-4 mb-4">
       <v-col cols="12" md="4">
         <v-card class="box box1">
@@ -25,7 +25,7 @@
       </v-col>
     </v-row>
 
-    <!-- Bar and Donut Charts -->
+    <!-- Gráficos de Barras y Donut -->
     <v-row class="mt-5 mb-4">
       <v-col cols="12" md="6">
         <v-card class="box">
@@ -45,7 +45,7 @@
       </v-col>
     </v-row>
 
-    <!-- Area and Pie Charts -->
+    <!-- Gráficos de Área y Pie -->
     <v-row class="mt-4 mb-4">
       <v-col cols="12" md="6">
         <v-card class="box">
@@ -78,31 +78,41 @@ export default {
     return {
       sparkOptions1: {
         chart: { type: 'area', height: 160, sparkline: { enabled: true } },
-        stroke: { curve: 'smooth' },
-        fill: { opacity: 0.3 },
+        stroke: { curve: 'smooth', width: 2 },
+        fill: { opacity: 0.3, type: 'solid' },
         xaxis: { type: 'datetime', crosshairs: { width: 1 } },
-        tooltip: { x: { format: 'MMM dd' }, y: { formatter: (value) => `${value}` } },
-        title: { text: '40', offsetX: 0, style: { fontSize: '24px' } },
+        tooltip: {
+          x: { format: 'dd/MM/yyyy' }, ixed: { enabled: true, position: 'topRight' },
+          y: { formatter: function (value) { return value } }
+        },
+        title: { text: '0', offsetX: 0, style: { fontSize: '24px', fontWeight: 'bold' } },
         subtitle: { text: 'Instalaciones', offsetX: 0, style: { fontSize: '14px' } },
+        colors: ['#1976D2']
       },
       sparkSeries1: [],
       sparkOptions2: {
         chart: { type: 'area', height: 160, sparkline: { enabled: true } },
-        stroke: { curve: 'smooth' },
-        fill: { opacity: 0.3 },
+        stroke: { curve: 'smooth', width: 2 },
+        fill: { opacity: 0.3, type: 'solid' },
         xaxis: { type: 'datetime', crosshairs: { width: 1 } },
-        tooltip: { x: { format: 'MMM dd' }, y: { formatter: (value) => `${value}` } },
-        title: { text: '80', offsetX: 0, style: { fontSize: '24px' } },
+        tooltip: {
+          x: { format: 'dd/MM/yyyy' }, ixed: { enabled: true, position: 'topRight' },
+          y: { formatter: function (value) { return value } }
+        },
+        title: { text: '0', offsetX: 0, style: { fontSize: '24px', fontWeight: 'bold' } },
         subtitle: { text: 'Soportes', offsetX: 0, style: { fontSize: '14px' } },
       },
       sparkSeries2: [],
       sparkOptions3: {
         chart: { type: 'area', height: 160, sparkline: { enabled: true } },
-        stroke: { curve: 'smooth' },
-        fill: { opacity: 0.3 },
+        stroke: { curve: 'smooth', width: 2 },
+        fill: { opacity: 0.3, type: 'solid' },
         xaxis: { type: 'datetime', crosshairs: { width: 1 } },
-        tooltip: { x: { format: 'MMM dd' }, y: { formatter: (value) => `${value}` } },
-        title: { text: '60', offsetX: 0, style: { fontSize: '24px' } },
+        tooltip: {
+          x: { format: 'dd/MM/yyyy' }, ixed: { enabled: true, position: 'topRight' },
+          y: { formatter: function (value) { return value } }
+        },
+        title: { text: '0', offsetX: 0, style: { fontSize: '24px', fontWeight: 'bold' } },
         subtitle: { text: 'Retiros', offsetX: 0, style: { fontSize: '14px' } },
       },
       sparkSeries3: [],
@@ -143,17 +153,62 @@ export default {
   methods: {
     async fetchSparklineData() {
       try {
+        // Instalaciones
         const resInstalaciones = await this.$axios.get('/tablero/sparkline-instalaciones')
-        this.sparkSeries1 = [{ name: 'Instalaciones', data: resInstalaciones.data.map(item => ({ x: new Date(item.fecha).getTime(), y: item.cantidad })) }]
-        this.sparkOptions1.title.text = resInstalaciones.data.reduce((sum, item) => sum + item.cantidad, 0).toString()
+        if (resInstalaciones.data && resInstalaciones.data.length > 0) {
+          this.sparkOptions1 = {
+            ...this.sparkOptions1,
+            title: {
+              ...this.sparkOptions1.title,
+              text: resInstalaciones.data[0].cantidad.toString()
+            }
+          }
+          this.sparkSeries1 = [{
+            name: 'Instalaciones',
+            data: [{
+              x: new Date(resInstalaciones.data[0].fecha).getTime(),
+              y: resInstalaciones.data[0].cantidad
+            }]
+          }]
+        }
 
+        // Soportes
         const resSoportes = await this.$axios.get('/tablero/sparkline-soportes')
-        this.sparkSeries2 = [{ name: 'Soportes', data: resSoportes.data.map(item => ({ x: new Date(item.fecha).getTime(), y: item.cantidad })) }]
-        this.sparkOptions2.title.text = resSoportes.data.reduce((sum, item) => sum + item.cantidad, 0).toString()
+        if (resSoportes.data && resSoportes.data.length > 0) {
+          this.sparkOptions2 = {
+            ...this.sparkOptions2,
+            title: {
+              ...this.sparkOptions2.title,
+              text: resSoportes.data[0].cantidad.toString()
+            }
+          }
+          this.sparkSeries2 = [{
+            name: 'Soportes',
+            data: [{
+              x: new Date(resSoportes.data[0].fecha).getTime(),
+              y: resSoportes.data[0].cantidad
+            }]
+          }]
+        }
 
+        // Retiros
         const resRetiros = await this.$axios.get('/tablero/sparkline-retiros')
-        this.sparkSeries3 = [{ name: 'Retiros', data: resRetiros.data.map(item => ({ x: new Date(item.fecha).getTime(), y: item.cantidad })) }]
-        this.sparkOptions3.title.text = resRetiros.data.reduce((sum, item) => sum + item.cantidad, 0).toString()
+        if (resRetiros.data && resRetiros.data.length > 0) {
+          this.sparkOptions3 = {
+            ...this.sparkOptions3,
+            title: {
+              ...this.sparkOptions3.title,
+              text: resRetiros.data[0].cantidad.toString()
+            }
+          }
+          this.sparkSeries3 = [{
+            name: 'Retiros',
+            data: [{
+              x: new Date(resRetiros.data[0].fecha).getTime(),
+              y: resRetiros.data[0].cantidad
+            }]
+          }]
+        }
       } catch (error) {
         console.error(error)
       }
