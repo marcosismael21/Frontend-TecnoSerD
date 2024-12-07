@@ -117,11 +117,52 @@ export default {
       },
       sparkSeries3: [],
       barOptions: {
-        chart: { type: 'bar', height: 350 },
-        plotOptions: { bar: { horizontal: false, columnWidth: '55%' } },
-        xaxis: { categories: [] },
-        yaxis: { title: { text: 'Cantidad de servicios' } },
-        fill: { opacity: 1 },
+        chart: {
+          type: 'bar',
+          height: 400,
+          stacked: true
+        },
+        plotOptions: {
+          bar: {
+            horizontal: false,
+            columnWidth: '55%',
+            endingShape: 'rounded'
+          }
+        },
+        dataLabels: {
+          enabled: true,
+          formatter: function (val) {
+            return val || ''
+          }
+        },
+        xaxis: {
+          categories: [], // Aquí irán los nombres de las ciudades
+          labels: {
+            rotate: -45,
+            style: {
+              fontSize: '12px'
+            }
+          }
+        },
+        yaxis: {
+          title: {
+            text: 'Cantidad de servicios'
+          }
+        },
+        tooltip: {
+          shared: true,
+          intersect: false,
+          y: {
+            formatter: function (val, opts) {
+              return `${val}`
+            }
+          }
+        },
+        legend: {
+          position: 'top',
+          horizontalAlign: 'center'
+        },
+        colors: ['#2196F3', '#4CAF50', '#FFC107'] // Azul para Instalación, Verde para Retiro, Amarillo para Soporte
       },
       barSeries: [],
       donutOptions: {
@@ -216,8 +257,36 @@ export default {
     async fetchBarData() {
       try {
         const res = await this.$axios.get('/tablero/servicios-ciudad')
-        this.barSeries = [{ name: 'Servicios', data: res.data.map(item => item.cantidad) }]
-        this.barOptions.xaxis.categories = res.data.map(item => item.nombre)
+
+        // Obtener ciudades únicas manteniendo el orden original
+        const ciudades = res.data.reduce((acc, item) => {
+          if (!acc.includes(item.nombre)) {
+            acc.push(item.nombre)
+          }
+          return acc
+        }, [])
+
+        // Obtener servicios únicos
+        const servicios = ['Instalación', 'Retiro', 'Soporte Técnico']
+
+        // Crear series para cada tipo de servicio
+        const series = servicios.map(servicio => ({
+          name: servicio,
+          data: ciudades.map(ciudad => {
+            const item = res.data.find(d => d.nombre === ciudad && d.servicio === servicio)
+            return item ? item.cantidad : 0
+          })
+        }))
+
+        this.barOptions = {
+          ...this.barOptions,
+          xaxis: {
+            ...this.barOptions.xaxis,
+            categories: ciudades
+          }
+        }
+        this.barSeries = series
+
       } catch (error) {
         console.error(error)
       }
