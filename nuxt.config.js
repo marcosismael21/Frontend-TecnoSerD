@@ -3,18 +3,26 @@ import colors from 'vuetify/es5/util/colors'
 export default {
   router: {
     extendRoutes(routes, resolve) {
-      routes.push({
+      const filteredRoutes = routes.filter(route => route.name !== 'tablero')
+
+      filteredRoutes.push({
         path: '',
         redirect: '/login2',
-        middleware: [
-          'auth',           // Tu middleware de autenticación existente
-          'routeProtection' // Nuevo middleware de protección de rutas
-        ]
+        middleware: ['auth', 'routeProtection']
       })
-    },
+
+      filteredRoutes.push({
+        name: 'tablero',
+        path: '/tablero',
+        component: resolve(__dirname, 'pages/tablero/index.vue'),
+        chunkName: 'pages/tablero/index',
+        ssr: false
+      })
+
+      return filteredRoutes
+    }
   },
 
-  // Definir las rutas y sus meta datos
   routeRules: {
     '/tecnico/**': { middleware: ['routeProtection'] },
     '/comercio/**': { middleware: ['routeProtection'] },
@@ -30,7 +38,6 @@ export default {
     '/regalia/**': { middleware: ['routeProtection'] }
   },
 
-  // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
     titleTemplate: '%s - TecnoSerD',
     title: 'TecnoSerD',
@@ -46,38 +53,28 @@ export default {
     link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
   },
 
-  // Global CSS: https://go.nuxtjs.dev/config-css
   css: [],
 
-  // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   plugins: [
     '~/plugins/axios.js',
     { src: '~/plugins/acl.js', mode: 'client' },
-    { src: '~/plugins/apexcharts.client.js', mode: 'client' }
+    { src: '~/plugins/apexcharts', mode: 'client' }
   ],
 
-  // Auto import components: https://go.nuxtjs.dev/config-components
   components: true,
 
-  // Modules for dev and build (recommended): https://go.nuxtjs.dev/config-modules
   buildModules: [
-    // https://go.nuxtjs.dev/vuetify
     '@nuxtjs/vuetify',
   ],
 
-  // Modules: https://go.nuxtjs.dev/config-modules
   modules: [
-    // https://go.nuxtjs.dev/axios
     '@nuxtjs/axios',
   ],
 
-  // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {
-    // Workaround to avoid enforcing hard-coded localhost:3000: https://github.com/nuxt-community/axios-module/issues/308
     baseURL: 'http://localhost:3010/api/v1',
   },
 
-  // Vuetify module configuration: https://go.nuxtjs.dev/config-vuetify
   vuetify: {
     customVariables: ['~/assets/variables.scss'],
     theme: {
@@ -108,24 +105,51 @@ export default {
 
   ssr: true,
 
-  // Configuración de SSR para evitar problemas de hidratación
   render: {
-    ssr: true,
+    resourceHints: false,
     bundleRenderer: {
-      directives: {
-        custom: function (el, binding) {
-          // Manejo personalizado de directivas
-        }
+      shouldPreload: (file, type) => {
+        return ['script', 'style', 'font'].includes(type)
       }
     }
   },
 
-
-  // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {
-   transpile: [
-      'vuetify/lib'
-    ]
+    transpile: [
+      'vuetify/lib',
+      'vue-apexcharts',
+      'apexcharts'
+    ],
+    babel: {
+      compact: true,
+      presets: [
+        ['@nuxt/babel-preset-app', {
+          corejs: { version: 3 }
+        }]
+      ]
+    },
+    extend(config, { isDev, isClient }) {
+      config.node = {
+        fs: 'empty'
+      }
+      if (isClient) {
+        config.optimization = {
+          splitChunks: {
+            chunks: 'all',
+            automaticNameDelimiter: '.',
+            name: isDev,
+            maxSize: 244000
+          }
+        }
+      }
+    },
+    terser: {
+      terserOptions: {
+        compress: {
+          drop_console: false
+        }
+      }
+    }
   },
 
   vue: {
@@ -135,5 +159,12 @@ export default {
     }
   },
 
+  loading: {
+    color: 'blue',
+    height: '5px'
+  },
 
+  // Configuración para manejo de errores y warnings
+  quiet: false,
+  telemetry: false,
 }

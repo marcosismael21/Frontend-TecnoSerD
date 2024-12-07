@@ -1,13 +1,10 @@
-import Vue from 'vue';
-import VueApexCharts from 'vue-apexcharts';
+import Vue from 'vue'
 
-if (process.client) {
-  Vue.use(VueApexCharts);
-  Vue.component('apexchart', VueApexCharts);
+export default function() {
+  if (process.client) {
+    const VueApexCharts = import('vue-apexcharts')
+    VueApexCharts.then(module => {
+      Vue.component('apexchart', module.default)
+    })
+  }
 }
-
-export default {
-  components: {
-    apexchart: VueApexCharts,
-  },
-};
