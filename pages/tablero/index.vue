@@ -193,15 +193,84 @@ export default {
       },
       donutSeries: [],
       areaOptions: {
-        chart: { type: 'area', height: 350 },
-        stroke: { curve: 'smooth' },
-        xaxis: { categories: [] },
-        yaxis: { title: { text: 'Cantidad de equipos' } },
+        chart: {
+          type: 'bar',
+          height: 350,
+          toolbar: {
+            show: true
+          }
+        },
+        plotOptions: {
+          bar: {
+            horizontal: false,
+            columnWidth: '55%',
+            endingShape: 'rounded',
+            borderRadius: 4,
+          }
+        },
+        stroke: {
+          width: [0, 0, 0]
+        },
+        dataLabels: {
+          enabled: true,
+          formatter: function (val) {
+            return val
+          }
+        },
+        xaxis: {
+          categories: [],
+          labels: {
+            style: {
+              fontSize: '12px'
+            }
+          }
+        },
+        yaxis: {
+          title: {
+            text: 'Cantidad'
+          }
+        },
+        tooltip: {
+          shared: true,
+          intersect: false,
+          y: {
+            formatter: function (val) {
+              return val
+            }
+          }
+        },
+        legend: {
+          position: 'top',
+          horizontalAlign: 'center'
+        },
+        colors: ['#2196F3', '#4CAF50', '#FFC107'] // Azul, Verde, Amarillo
       },
       areaSeries: [],
       pieOptions: {
-        chart: { type: 'pie', height: 350 },
+        chart: {
+          type: 'pie',
+          height: 350
+        },
         labels: [],
+        legend: {
+          position: 'right',
+          offsetY: 0,
+          height: 230,
+        },
+        dataLabels: {
+          enabled: true,
+          formatter: function (val) {
+            return val.toFixed(1) + '%'
+          }
+        },
+        tooltip: {
+          y: {
+            formatter: function (val) {
+              return val
+            }
+          }
+        },
+        colors: ['#F44336', '#4CAF50'], // Rojo para Dañado, Verde para Buen estado
       },
       pieSeries: [],
     }
@@ -328,13 +397,29 @@ export default {
     async fetchAreaData() {
       try {
         const res = await this.$axios.get('/tablero/crecimiento-equipos-estado')
+
         this.areaSeries = [
           {
-            name: 'Crecimiento',
-            data: res.data.map(item => ({ x: item.fecha, y: item.cantidad })),
+            name: 'Equipos',
+            data: res.data.map(item => item.cantidad_equipos)
           },
+          {
+            name: 'Comercios',
+            data: res.data.map(item => item.cantidad_comercios)
+          },
+          {
+            name: 'Total Registros',
+            data: res.data.map(item => item.total_registros)
+          }
         ]
-        this.areaOptions.xaxis.categories = res.data.map(item => item.fecha)
+
+        this.areaOptions = {
+          ...this.areaOptions,
+          xaxis: {
+            ...this.areaOptions.xaxis,
+            categories: res.data.map(item => item.estado)
+          }
+        }
       } catch (error) {
         console.error(error)
       }
@@ -343,7 +428,10 @@ export default {
       try {
         const res = await this.$axios.get('/tablero/cantidad-estado')
         this.pieSeries = res.data.map(item => item.cantidad)
-        this.pieOptions.labels = res.data.map(item => item.estado)
+        this.pieOptions = {
+          ...this.pieOptions,
+          labels: res.data.map(item => item.estado)
+        }
       } catch (error) {
         console.error(error)
       }
