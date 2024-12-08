@@ -81,7 +81,7 @@
                         <v-toolbar flat>
                           <v-spacer></v-spacer>
                           <v-col cols="12" align="right">
-                            <v-btn color="primary" @click="generarReporte">
+                            <v-btn color="primary" @click="activarReporte">
                               <v-icon left>mdi-file-outline</v-icon>
                               Generar Reporte
                             </v-btn>
@@ -252,6 +252,44 @@
       </v-card>
     </v-dialog>
 
+    <!-- Reporte -->
+
+    <v-dialog v-model="dialogReporte" max-width="450" persistent>
+      <v-card>
+        <v-card-title class="text-h6">Generar Reporte de Equipos</v-card-title>
+        <v-card-text>
+          <v-row>
+            <v-col cols="12" sm="6">
+              <v-menu v-model="menuFechaInicial" :close-on-content-click="false" transition="scale-transition" offset-y>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-text-field v-model="fechaInicial" label="Fecha Inicial" prepend-icon="mdi-calendar" readonly
+                    v-bind="attrs" v-on="on"></v-text-field>
+                </template>
+                <v-date-picker v-model="fechaInicial" @input="menuFechaInicial = false"></v-date-picker>
+              </v-menu>
+            </v-col>
+            <v-col cols="12" sm="6">
+              <v-menu v-model="menuFechaFinal" :close-on-content-click="false" transition="scale-transition" offset-y>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-text-field v-model="fechaFinal" label="Fecha Final" prepend-icon="mdi-calendar" readonly
+                    v-bind="attrs" v-on="on"></v-text-field>
+                </template>
+                <v-date-picker v-model="fechaFinal" @input="menuFechaFinal = false"></v-date-picker>
+              </v-menu>
+            </v-col>
+          </v-row>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="red darken-1" text @click="dialogReporte = false">Cancelar</v-btn>
+          <v-btn color="green darken-1" text @click="generarReporte(fechaInicial, fechaFinal)"
+            :disabled="!fechaInicial || !fechaFinal">
+            Generar
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
     <v-snackbar v-model="snackbar" :color="snackbarColor" timeout="3000" top>
       {{ snackbarMessage }}
     </v-snackbar>
@@ -265,6 +303,9 @@ import NuevoEquipo from "~/pages/equipos/crearEquipo.vue"
 import DetalleEquipo from "~/pages/equipos/detalleEquipo.vue"
 import EditarEquipo from '~/pages/equipos/editarEquipo.vue'
 import EditarEquipoMalo from '~/pages/equipos/editarEquipoMalo.vue'
+
+import jsPDF from 'jspdf'
+import 'jspdf-autotable'
 
 export default {
   async asyncData({ $axios }) {
@@ -321,6 +362,12 @@ export default {
       dialogCambioMalo: false,
       dialogConfimacionBueno: false,
       dialogConfimacionMalo: false,
+      //dialog de reportes
+      dialogReporte: false,
+      fechaInicial: '',
+      fechaFinal: '',
+      menuFechaInicial: false,
+      menuFechaFinal: false,
       // Añadimos estos campos para el snackbar
       snackbar: false,
       snackbarMessage: '',
@@ -404,6 +451,161 @@ export default {
             this.dialogCambioBueno = false;  // Cerrar el modal de carga después de 2 segundos
           }, 2000);
         });
+    },
+    activarReporte() {
+      this.dialogReporte = true
+    },
+    async generarReporte(fechaInicial, fechaFinal) {
+      try {
+        const { data } = await this.$axios.get(`reporte/equipo-mal-estado/${fechaInicial}/${fechaFinal}`)
+
+        this.showSnackbar("Generando reporte completo.", 'success');
+
+        const doc = new jsPDF({ orientation: 'landscape' })
+
+        // Añadir el logo en tamaño grande
+        const logo = new Image()
+        logo.src = '/Logo.jpg'
+        const logoWidth = 100 // Ancho ajustado del logo
+        const logoHeight = 40 // Alto ajustado del logo
+        const logoX = 14 // Posición X del logo
+        const logoY = 10 // Posición Y del logo
+        doc.addImage(logo, 'JPEG', logoX, logoY, logoWidth, logoHeight)
+
+        // Posicionar la información de la empresa a la derecha del logo
+        const textStartX = logoX + logoWidth + 20 // Posición X de los textos después del logo
+        const textStartY = logoY + 12 // Posición Y inicial de los textos
+
+        doc.setFontSize(13)
+        doc.setFont('helvetica', 'bold')
+        doc.text('TECNOLOGÍA Y SERVICIOS DIVERSOS - TECNOSERD', textStartX, textStartY)
+
+        doc.setFontSize(12)
+        doc.setFont('helvetica', 'bold')
+        doc.text('Oficina:', textStartX, textStartY + 8)
+        doc.setFont('helvetica', 'normal')
+        doc.text('OFICINA PRINCIPAL', textStartX + 25, textStartY + 8)
+
+        doc.setFont('helvetica', 'bold')
+        doc.text('Teléfono:', textStartX, textStartY + 16)
+        doc.setFont('helvetica', 'normal')
+        doc.text('+504 9976-3205', textStartX + 25, textStartY + 16)
+
+        doc.setFont('helvetica', 'bold')
+        doc.text('Email:', textStartX, textStartY + 24)
+        doc.setFont('helvetica', 'normal')
+        doc.text('jorcer27@gmail.com', textStartX + 25, textStartY + 24)
+
+        doc.setFont('helvetica', 'bold')
+        doc.text('Dirección:', textStartX, textStartY + 32)
+        doc.setFont('helvetica', 'normal')
+        doc.text('COL. PALMIRA 3RA AVE ENTRE 4TA Y 5TA CALLE CASA #415', textStartX + 25, textStartY + 32,)
+
+        // Añadir el título del reporte debajo del logo y la información
+        doc.setFontSize(14)
+        doc.setFont('helvetica', 'bold')
+        doc.text('Reporte sobre Equipos en Mal Estado', 14, textStartY + 38)
+
+        let startY = textStartY + 50
+
+        // Headers
+        const comercioHeaders = [
+          'N°', 'Nombre de Comercio', 'Nombre de Contacto', 'N° Tienda',
+          'N° Usuario', 'Dirección', 'Ciudad', 'Tipo Comercio', 'Fecha'
+        ]
+        const equipoHeaders = ['Estado', 'Equipos']
+
+        // Iterar sobre cada comercio
+        data.forEach((item, index) => {
+          // Verificar si necesitamos una nueva página
+          if (startY > doc.internal.pageSize.height - 60) {
+            doc.addPage()
+            startY = 20
+          }
+
+          // Información del comercio
+          doc.autoTable({
+            head: [comercioHeaders],
+            body: [[
+              index + 1,
+              item.nombreComercio,
+              item.nombreContacto,
+              item.numTienda || 'N/A',
+              item.numUsuario || 'N/A',
+              item.direccion,
+              item.ciudad,
+              item.tipoComercio,
+              item.fecha_actualizacion
+            ]],
+            startY: startY,
+            styles: {
+              fontSize: 10,
+              cellPadding: 2
+            },
+            headStyles: {
+              fillColor: [240, 240, 240],
+              fontSize: 10
+            },
+            theme: 'plain'
+          })
+
+          startY = doc.autoTable.previous.finalY + 5
+
+          // Tabla de equipos
+          const equiposRows = []
+          if (item.equipos_buen_estado) {
+            equiposRows.push(['Buen Estado', item.equipos_buen_estado])
+          }
+          if (item.equipos_danados) {
+            equiposRows.push(['Dañado', item.equipos_danados])
+          }
+
+          if (equiposRows.length > 0) {
+            doc.autoTable({
+              head: [equipoHeaders],
+              body: equiposRows,
+              startY: startY,
+              styles: {
+                fontSize: 10,
+                cellPadding: 2
+              },
+              headStyles: {
+                fillColor: [220, 220, 220],
+                fontSize: 10
+              },
+              theme: 'plain'
+            })
+
+            startY = doc.autoTable.previous.finalY + 15
+          }
+        })
+
+        // Numeración de páginas
+        const pageCount = doc.internal.getNumberOfPages()
+        for (let i = 1; i <= pageCount; i++) {
+          doc.setPage(i)
+          doc.setFontSize(10)
+          doc.text(`Página ${i} de ${pageCount}`, doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 10, { align: 'center' })
+        }
+
+        // Guardar el PDF con fecha y hora
+        const fechaActual = new Date().toLocaleDateString().replace(/\//g, '-')
+        const now = new Date()
+        let horas = now.getHours() % 12 || 12
+        const minutos = now.getMinutes().toString().padStart(2, '0')
+        const ampm = now.getHours() >= 12 ? 'PM' : 'AM'
+        const horaActual = `${horas}.${minutos}${ampm}`
+
+        doc.save(`reporte_equipos_estado-${fechaActual}-${horaActual}.pdf`)
+
+        this.dialogReporte = false
+        this.menuFechaInicial = false
+        this.menuFechaFinal = false
+
+      } catch (error) {
+        console.error('Error generating report:', error)
+        this.showSnackbar('Error generando el reporte', 'error')
+      }
     },
     showSnackbar(message, color) {
       this.snackbarMessage = message;
