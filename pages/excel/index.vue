@@ -27,7 +27,12 @@
           <v-card-text>
             <v-divider></v-divider>
             <div class="table-scroll">
-              <v-data-table :headers="headers" :items="items"></v-data-table>
+              <v-data-table :headers="headers" :items="items" item-key="Numero">
+                <template v-slot:item.Interpretacion="{ item }">
+                  <v-text-field v-model="item.Interpretacion" dense outlined hide-details
+                    class="mt-1 mb-1"></v-text-field>
+                </template>
+              </v-data-table>
             </div>
           </v-card-text>
           <v-card-actions>
@@ -58,7 +63,7 @@
 
     <!-- Loading dialog -->
     <v-dialog v-model="loadingDialog" max-width="320" persistent>
-     <v-card>
+      <v-card>
         <v-card-title class="text-h6">Procesando datos...</v-card-title>
         <v-card-subtitle>
           <v-row align="center" class="ma-0 pa-0">
@@ -88,12 +93,12 @@ export default {
     headers: [],
     items: [],
     messageDuplicates: '',
-    selectedColumns: ["Tipo de Comercio", "Nombre de Comercio", "Tipo de Gestion"], // Valores por defecto
+    selectedColumns: ["Tipo de Comercio", "Nombre de Comercio", "Tipo de Gestion", "Interpretacion"], // Valores por defecto
     availableColumns: [
       "CANAL", "Tipo de Comercio", "Nombre de Comercio", "ID TIENDA", "DIRECCIÓN", "CIUDAD", "DEPARTAMENTO",
       "NOMBRE DE CONTACTO", "TELÉFONO", "USUARIO", "TOKEN", "RTN", "TIPO DE TERMINAL", "Tipo de Gestion",
       "IMEI", "SN", "Latitud", "Lonjitud", "Compañía", "PIN", "PUK", "Power Bank SN", "Lectora S/N",
-      "SCANNER", "QPOS", "Tipo de Problema"
+      "SCANNER", "QPOS", "Tipo de Problema", "Interpretacion"
     ],
     dialog: false,
     duplicates: false,
@@ -147,12 +152,24 @@ export default {
       const allHeaders = data[0];
       this.headers = [
         { text: 'N°', value: 'Numero' },
-        ...this.selectedColumns.map(header => ({ text: header, value: header })),
-        { text: 'Equipos', value: 'Equipos' } // Mover "Equipos" al final
+        ...this.selectedColumns.map(header => {
+          if (header === 'Interpretacion') {
+            return {
+              text: header,
+              value: header,
+              editable: true // Hace esta columna editable
+            }
+          }
+          return { text: header, value: header }
+        }),
+        { text: 'Equipos', value: 'Equipos' }
       ];
 
       this.items = data.slice(1).filter(row => row.some(cell => cell)).map((row, index) => {
-        const item = { Numero: index + 1 }; // Asegúrate de incluir el número aquí
+        const item = {
+          Numero: index + 1,
+          Interpretacion: '' // Inicializar campo editable
+        };
         const equipos = [];
 
         row.forEach((cell, index) => {
@@ -190,8 +207,17 @@ export default {
     updateTable() {
       this.headers = [
         { text: 'N°', value: 'Numero' },
-        ...this.selectedColumns.map(column => ({ text: column, value: column })),
-        { text: 'Equipos', value: 'Equipos' } // Mover "Equipos" al final
+        ...this.selectedColumns.map(column => {
+          if (column === 'Interpretacion') {
+            return {
+              text: column,
+              value: column,
+              editable: true
+            }
+          }
+          return { text: column, value: column }
+        }),
+        { text: 'Equipos', value: 'Equipos' }
       ];
     },
     checkForDuplicates() {
@@ -250,6 +276,13 @@ export default {
       this.loadingDialog = true;  // Show loading dialog
       const formData = new FormData();
       formData.append('file', this.file);
+
+      // Añadir las interpretaciones al FormData
+      const interpretaciones = this.items.map(item => ({
+        rowIndex: item.Numero,
+        interpretacion: item.Interpretacion
+      }));
+      formData.append('interpretaciones', JSON.stringify(interpretaciones));
 
       try {
         const response = await this.$axios.post('/excel/importar', formData);
