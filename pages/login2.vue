@@ -100,6 +100,8 @@ export default {
               Cookies.set('id', userData.id)
               if (userData.idrol == 2) {
                 this.$router.push('regaliaComercio')
+              } else if (userData.idrol == 3) {
+                this.$router.push('asignacion')
               } else {
                 this.$router.push('tablero')
               }
